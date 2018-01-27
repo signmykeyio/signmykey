@@ -1,10 +1,6 @@
 package helper
 
 import (
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
-	"encoding/pem"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -40,40 +36,15 @@ func UserPubKeyExists(key string) error {
 
 	if _, err := os.Stat(pubKeyPath); os.IsNotExist(err) {
 		keyPath := strings.Replace(pubKeyPath, ".pub", "", 1)
-		err := generateSSHKeyPair(keyPath)
-		if err != nil {
-			return err
-		}
+
+		return fmt.Errorf(`user SSH key at %s doesn't exist.
+Please generate one with this command :
+
+    ssh-keygen -f %s`,
+			pubKeyPath, keyPath)
 	}
 
 	return nil
-}
-
-func generateSSHKeyPair(path string) error {
-	// Generate RSA private key
-	private, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		return err
-	}
-
-	// Generate SSH public key from RSA private key
-	public, err := ssh.NewPublicKey(&private.PublicKey)
-	if err != nil {
-		return err
-	}
-
-	// Convert RSA private key to ssh format and write it
-	privateBlock := &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(private)}
-	privatePEM := pem.EncodeToMemory(privateBlock)
-	err = ioutil.WriteFile(path, privatePEM, 0600)
-	if err != nil {
-		return err
-	}
-
-	// Convert and write SSH public key
-	serializedPublicKey := ssh.MarshalAuthorizedKey(public)
-	err = ioutil.WriteFile(fmt.Sprintf("%s.pub", path), serializedPublicKey, 0644)
-	return err
 }
 
 // CertStillValid checks if the certificate is not expired.
