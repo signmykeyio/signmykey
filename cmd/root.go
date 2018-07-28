@@ -6,26 +6,26 @@ import (
 	"os"
 	"os/user"
 
-	"gitlab.com/signmykey/signmykey/helper"
-
 	"github.com/fatih/color"
 	"github.com/howeyc/gopass"
+	homedir "github.com/mitchellh/go-homedir"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"gitlab.com/signmykey/signmykey/helper"
 )
 
-var rootCmd = &cobra.Command{
-	SilenceUsage:  true,
-	SilenceErrors: true,
-	Use:           "signmykey",
-	Short:         "A light command to sign ssh keys with SMK server",
-	Long: `A light command to sign ssh keys with SMK server
+var clientCfgFile string
 
-Config file is in "/etc/signmykey/config.yaml"`,
-	Example: `  Sign key in non default path
-	
-	> signmykey -a https://smkserver -k ~/myrsapubkey.pub`,
+var rootCmd = &cobra.Command{
+	Use:   "signmykey",
+	Short: "A client-server to sign ssh keys",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
+		// load config
+		if err := initConfig(clientCfgFile); err != nil {
+			return err
+		}
+
 		addr := viper.GetString("addr")
 		if addr[len(addr)-1] != '/' {
 			return errors.New("SMK Server address must end with a slash")
@@ -78,8 +78,7 @@ Config file is in "/etc/signmykey/config.yaml"`,
 	},
 }
 
-// Execute adds all child commands to the root command sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
+// Execute root command
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		color.Red(fmt.Sprintf("Error: %s", err))
@@ -88,7 +87,9 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	logrus.SetLevel(logrus.DebugLevel)
+
+	rootCmd.Flags().StringVarP(&clientCfgFile, "cfg", "c", "~/.signmykey.yml", "config file")
 
 	rootCmd.Flags().StringP("addr", "a", "http://127.0.0.1:8080/", "SMK server address")
 	if err := viper.BindPFlag("addr", rootCmd.Flags().Lookup("addr")); err != nil {
@@ -115,13 +116,20 @@ func init() {
 	}
 }
 
-// initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	viper.AddConfigPath("/etc/signmykey")
-	viper.SetConfigName("config")
+func initConfig(cfgFile string) error {
+	// expand ~ in file path
+	expandedCfgFile, err := homedir.Expand(cfgFile)
+	if err != nil {
+		return err
+	}
 
-	viper.AutomaticEnv() // read in environment variables that match
+	if _, err := os.Stat(expandedCfgFile); os.IsNotExist(err) {
+		logrus.Debugf("Config file not found at %s", expandedCfgFile)
+		return nil
+	}
 
-	// If a config file is found, read it in.
-	viper.ReadInConfig() // nolint: errcheck,gas
+	viper.SetConfigFile(expandedCfgFile)
+	viper.AutomaticEnv()
+
+	return viper.ReadInConfig()
 }

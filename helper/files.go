@@ -24,6 +24,8 @@ func GetUserPubKey(key string) (string, error) {
 		return "", err
 	}
 
+	// Todo: check openssh pubkey validity
+
 	return strings.TrimSpace(string(pubKey)), nil
 }
 
