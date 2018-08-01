@@ -25,14 +25,14 @@ type Authenticator struct {
 // Init method is used to ingest config of Authenticator
 func (a *Authenticator) Init(config map[string]string) error {
 	neededEntries := []string{
-		"ldap-addr",
-		"ldap-port",
-		"ldap-tls",
-		"ldap-tls-verify",
-		"ldap-bind-user",
-		"ldap-bind-password",
-		"ldap-base",
-		"ldap-search",
+		"ldapAddr",
+		"ldapPort",
+		"ldapTLS",
+		"ldapTLSVerify",
+		"ldapBindUser",
+		"ldapBindPassword",
+		"ldapBase",
+		"ldapSearch",
 	}
 
 	var missingEntriesLst []string
@@ -52,26 +52,26 @@ func (a *Authenticator) Init(config map[string]string) error {
 	}
 
 	// Conversions
-	port, err := strconv.Atoi(config["ldap-port"])
+	port, err := strconv.Atoi(config["ldapPort"])
 	if err != nil {
 		return err
 	}
-	useTLS, err := strconv.ParseBool(config["ldap-tls"])
+	useTLS, err := strconv.ParseBool(config["ldapTLS"])
 	if err != nil {
 		return err
 	}
-	tlsVerify, err := strconv.ParseBool(config["ldap-tls-verify"])
+	tlsVerify, err := strconv.ParseBool(config["ldapTLSVerify"])
 	if err != nil {
 		return err
 	}
 
-	a.Address = config["ldap-addr"]
+	a.Address = config["ldapAddr"]
 	a.Port = port
 	a.UseTLS = useTLS
-	a.BindUser = config["ldap-bind-user"]
-	a.BindPassword = config["ldap-bind-password"]
-	a.SearchBase = config["ldap-base"]
-	a.SearchStr = config["ldap-search"]
+	a.BindUser = config["ldapBindUser"]
+	a.BindPassword = config["ldapBindPassword"]
+	a.SearchBase = config["ldapBase"]
+	a.SearchStr = config["ldapSearch"]
 	a.TLSVerify = tlsVerify
 
 	return nil
