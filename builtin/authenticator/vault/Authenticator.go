@@ -20,10 +20,10 @@ type Authenticator struct {
 // Init method is used to ingest config of Authenticator
 func (v *Authenticator) Init(config map[string]string) error {
 	neededEntries := []string{
-		"vault-addr",
-		"vault-port",
-		"vault-tls",
-		"vault-path",
+		"vaultAddr",
+		"vaultPort",
+		"vaultTLS",
+		"vaultPath",
 	}
 
 	for _, entry := range neededEntries {
@@ -33,19 +33,19 @@ func (v *Authenticator) Init(config map[string]string) error {
 	}
 
 	// Conversions
-	port, err := strconv.Atoi(config["vault-port"])
+	port, err := strconv.Atoi(config["vaultPort"])
 	if err != nil {
 		return err
 	}
-	useTLS, err := strconv.ParseBool(config["vault-tls"])
+	useTLS, err := strconv.ParseBool(config["vaultTLS"])
 	if err != nil {
 		return err
 	}
 
-	v.Address = config["vault-addr"]
+	v.Address = config["vaultAddr"]
 	v.Port = port
 	v.UseTLS = useTLS
-	v.Path = config["vault-path"]
+	v.Path = config["vaultPath"]
 
 	var scheme string
 	if v.UseTLS {

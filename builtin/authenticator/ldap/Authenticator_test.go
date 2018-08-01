@@ -38,28 +38,28 @@ func TestAuthenticatorInit(t *testing.T) {
 		{
 			map[string]string{},
 			Authenticator{},
-			"Missing config entries (ldap-addr, ldap-port, ldap-tls, ldap-tls-verify, ldap-bind-user, ldap-bind-password, ldap-base, ldap-search) for Authenticator",
+			"Missing config entries (ldapAddr, ldapPort, ldapTLS, ldapTLSVerify, ldapBindUser, ldapBindPassword, ldapBase, ldapSearch) for Authenticator",
 		},
 		{
-			map[string]string{"ldap-addr": "127.0.0.1"},
+			map[string]string{"ldapAddr": "127.0.0.1"},
 			Authenticator{},
-			"Missing config entries (ldap-port, ldap-tls, ldap-tls-verify, ldap-bind-user, ldap-bind-password, ldap-base, ldap-search) for Authenticator",
+			"Missing config entries (ldapPort, ldapTLS, ldapTLSVerify, ldapBindUser, ldapBindPassword, ldapBase, ldapSearch) for Authenticator",
 		},
 		{
-			map[string]string{"ldap-addr": "127.0.0.1", "ldap-search": "(&(objectClass=organizationalPerson)(sAMAccountName=%s))"},
+			map[string]string{"ldapAddr": "127.0.0.1", "ldapSearch": "(&(objectClass=organizationalPerson)(sAMAccountName=%s))"},
 			Authenticator{},
-			"Missing config entries (ldap-port, ldap-tls, ldap-tls-verify, ldap-bind-user, ldap-bind-password, ldap-base) for Authenticator",
+			"Missing config entries (ldapPort, ldapTLS, ldapTLSVerify, ldapBindUser, ldapBindPassword, ldapBase) for Authenticator",
 		},
 		{
 			map[string]string{
-				"ldap-addr":          "127.0.0.1",
-				"ldap-port":          "636",
-				"ldap-tls":           "True",
-				"ldap-tls-verify":    "True",
-				"ldap-bind-user":     "binduser",
-				"ldap-bind-password": "bindpassword",
-				"ldap-base":          "DC=fake,DC=org",
-				"ldap-search":        "(&(objectClass=organizationalPerson)(sAMAccountName=%s))",
+				"ldapAddr":         "127.0.0.1",
+				"ldapPort":         "636",
+				"ldapTLS":          "True",
+				"ldapTLSVerify":    "True",
+				"ldapBindUser":     "binduser",
+				"ldapBindPassword": "bindpassword",
+				"ldapBase":         "DC=fake,DC=org",
+				"ldapSearch":       "(&(objectClass=organizationalPerson)(sAMAccountName=%s))",
 			},
 			Authenticator{
 				Address:      "127.0.0.1",
@@ -75,14 +75,14 @@ func TestAuthenticatorInit(t *testing.T) {
 		},
 		{
 			map[string]string{
-				"ldap-addr":          "myldapserver.local",
-				"ldap-port":          "389",
-				"ldap-tls":           "False",
-				"ldap-tls-verify":    "False",
-				"ldap-bind-user":     "binduser",
-				"ldap-bind-password": "bindpassword",
-				"ldap-base":          "DC=fake,DC=org",
-				"ldap-search":        "(&(objectClass=organizationalPerson)(sAMAccountName=%s))",
+				"ldapAddr":         "myldapserver.local",
+				"ldapPort":         "389",
+				"ldapTLS":          "False",
+				"ldapTLSVerify":    "False",
+				"ldapBindUser":     "binduser",
+				"ldapBindPassword": "bindpassword",
+				"ldapBase":         "DC=fake,DC=org",
+				"ldapSearch":       "(&(objectClass=organizationalPerson)(sAMAccountName=%s))",
 			},
 			Authenticator{
 				Address:      "myldapserver.local",
@@ -98,17 +98,17 @@ func TestAuthenticatorInit(t *testing.T) {
 		},
 		{
 			map[string]string{
-				"ldap-addr":          "myldapserver.local",
-				"ldap-port":          "",
-				"ldap-tls":           "False",
-				"ldap-tls-verify":    "False",
-				"ldap-bind-user":     "binduser",
-				"ldap-bind-password": "",
-				"ldap-base":          "DC=fake,DC=org",
-				"ldap-search":        "(&(objectClass=organizationalPerson)(sAMAccountName=%s))",
+				"ldapAddr":         "myldapserver.local",
+				"ldapPort":         "",
+				"ldapTLS":          "False",
+				"ldapTLSVerify":    "False",
+				"ldapBindUser":     "binduser",
+				"ldapBindPassword": "",
+				"ldapBase":         "DC=fake,DC=org",
+				"ldapSearch":       "(&(objectClass=organizationalPerson)(sAMAccountName=%s))",
 			},
 			Authenticator{},
-			"Missing config entries (ldap-port, ldap-bind-password) for Authenticator",
+			"Missing config entries (ldapPort, ldapBindPassword) for Authenticator",
 		},
 	}
 
@@ -123,5 +123,4 @@ func TestAuthenticatorInit(t *testing.T) {
 			assert.EqualError(t, err, c.err)
 		}
 	}
-
 }
