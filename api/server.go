@@ -1,7 +1,9 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -14,12 +16,10 @@ import (
 
 // Config represents the config of the API webserver.
 type Config struct {
-	VaultAddress string
-	VaultToken   string
-	VaultPath    string
-	VaultRole    string
-
-	TTL string
+	Addr       string
+	TLSDisable bool
+	TLSCert    string
+	TLSKey     string
 
 	Auth   authenticator.Authenticator
 	Princs principals.Principals
@@ -40,8 +40,21 @@ func Serve(startconfig Config) error {
 	}
 	log.SetFormatter(formatter)
 
-	log.Printf("signmykey server listen on 0.0.0.0:8080")
-	return http.ListenAndServe(":8080", Router())
+	if config.TLSDisable {
+		log.Printf("signmykey server listen on http://%s", config.Addr)
+		return http.ListenAndServe(config.Addr, Router())
+	}
+
+	if _, err := os.Stat(config.TLSCert); os.IsNotExist(err) {
+		return fmt.Errorf("Cert file %s doesn't exist", err)
+	}
+
+	if _, err := os.Stat(config.TLSKey); os.IsNotExist(err) {
+		return fmt.Errorf("Key file %s doesn't exist", err)
+	}
+
+	log.Printf("signmykey server listen on https://%s", config.Addr)
+	return http.ListenAndServeTLS(config.Addr, config.TLSCert, config.TLSKey, Router())
 }
 
 // Router returns *chi.Mux config
