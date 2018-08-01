@@ -100,11 +100,24 @@ var serverCmd = &cobra.Command{
 			return err
 		}
 
+		viper.SetDefault("address", "0.0.0.0:8080")
+		viper.SetDefault("tlsDisable", false)
+
+		if !viper.GetBool("tlsDisable") {
+			if viper.GetString("tlsCert") == "" || viper.GetString("tlsKey") == "" {
+				return fmt.Errorf("tlsCert and tlsKey must be defined if tlsDisable is False")
+			}
+		}
+
 		config := api.Config{
-			TTL:    viper.GetString("ttl"),
 			Auth:   auth,
 			Princs: princs,
 			Signer: signer,
+
+			Addr:       viper.GetString("address"),
+			TLSDisable: viper.GetBool("tlsDisable"),
+			TLSCert:    viper.GetString("tlsCert"),
+			TLSKey:     viper.GetString("tlsKey"),
 		}
 
 		err = api.Serve(config)
