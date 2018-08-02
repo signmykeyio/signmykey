@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/go-chi/render"
+	"github.com/pablo-ruth/signmykey/builtin/signer"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/signmykey/signmykey/builtin/signer"
 )
 
 func signHandler(w http.ResponseWriter, r *http.Request) {

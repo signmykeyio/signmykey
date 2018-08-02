@@ -1,0 +1,36 @@
+language: go
+go:
+- '1.10'
+go_import_path: github.com/pablo-ruth/signmykey
+jobs:
+  include:
+  - stage: test
+    name: lint
+    script:
+    - make lint_install
+    - make lint
+  - script:
+    - make test
+    name: unit testing
+  - stage: build and package master
+    if: branch = master && fork = false && tag = false
+    sudo: required
+    script:
+    - make build VERSION=${TRAVIS_BUILD_NUMBER}
+    - make fpm_install
+    - make fpm VERSION=${TRAVIS_BUILD_NUMBER}
+    - make fpm_upload_dev VERSION=${TRAVIS_BUILD_NUMBER}
+    env:
+    - APTLY_USER=signmykey
+    - secure: aEvvDzuQf+/T5xjQ58TG6/31hvcy0dTyj+u2G8Zdhhdea/r4tbwuliImXYQ+lFfWIixzn1SxOl88A+bRoiCCpWZVd/+aIqVwB6spROUpH/xBt5yaL3npWSmuG+hcrEvTOY6Rra5Up+6CTGkfvqKEqsLIxjy3jkItjNxDPs3+7d0fhUnZPrIMgXWXGzLTyTKmUi1EgWNITqQ0j69zhuDhj71OfQ7lgINYgqwBsGoQa4dlGSX0s/TkxXDYmXP4SlwIgp4WutZEVtntUIlZaLs+9wd17GmwYWGn9qhkyPQGweoBNGC8nQDu37BQbK9Sc2RhrvnvX/q4UoWa66RvQOuOvzsvgpmfs0soD+FOaQ8yUpRZ5fkf5bIxh+ELoVvPM/ZBYmHXI8LFC8xPIqjM+3PJwhPLzmVNyFVK4uYcV0veCwxZ2z29mrE3oHK5OA2mJnWIGO7JTijmvgdzvtf+FdPuFban5GmlKghWDWb5VL+1nRTTpYAxGLsoOAH4LM47BIYM4eW0NmUPQuAf0lT0KqW7FCcYfus2SpInvPLkCkVlgl4unZDmXY0Q9ggbs2tJeAsP46ClGqMvrYlyV/FXdTEdtVtH/NymHkg+6KepV0bLeIo2GbbysfSvYkcpt4DQImWDLsQSnTxOiXu0+UOOzrbze/AopmpR9JFSnUA1nfquRsE=
+  - stage: build and package tag
+    if: branch = master && fork = false && tag = true
+    sudo: required
+    script:
+    - make build VERSION=${TRAVIS_TAG}
+    - make fpm_install
+    - make fpm VERSION=${TRAVIS_TAG}
+    - make fpm_upload_tag VERSION=${TRAVIS_TAG}
+    env:
+    - APTLY_USER=signmykey
+    - secure: aEvvDzuQf+/T5xjQ58TG6/31hvcy0dTyj+u2G8Zdhhdea/r4tbwuliImXYQ+lFfWIixzn1SxOl88A+bRoiCCpWZVd/+aIqVwB6spROUpH/xBt5yaL3npWSmuG+hcrEvTOY6Rra5Up+6CTGkfvqKEqsLIxjy3jkItjNxDPs3+7d0fhUnZPrIMgXWXGzLTyTKmUi1EgWNITqQ0j69zhuDhj71OfQ7lgINYgqwBsGoQa4dlGSX0s/TkxXDYmXP4SlwIgp4WutZEVtntUIlZaLs+9wd17GmwYWGn9qhkyPQGweoBNGC8nQDu37BQbK9Sc2RhrvnvX/q4UoWa66RvQOuOvzsvgpmfs0soD+FOaQ8yUpRZ5fkf5bIxh+ELoVvPM/ZBYmHXI8LFC8xPIqjM+3PJwhPLzmVNyFVK4uYcV0veCwxZ2z29mrE3oHK5OA2mJnWIGO7JTijmvgdzvtf+FdPuFban5GmlKghWDWb5VL+1nRTTpYAxGLsoOAH4LM47BIYM4eW0NmUPQuAf0lT0KqW7FCcYfus2SpInvPLkCkVlgl4unZDmXY0Q9ggbs2tJeAsP46ClGqMvrYlyV/FXdTEdtVtH/NymHkg+6KepV0bLeIo2GbbysfSvYkcpt4DQImWDLsQSnTxOiXu0+UOOzrbze/AopmpR9JFSnUA1nfquRsE=

@@ -1,6 +1,6 @@
 package main
 
-import "gitlab.com/signmykey/signmykey/cmd"
+import "github.com/pablo-ruth/signmykey/cmd"
 
 func main() {
 	cmd.Execute()

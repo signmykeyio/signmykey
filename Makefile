@@ -7,11 +7,9 @@ VERSION := ${VERSION}
 all: build
 
 lint_install:
-	apt-get update -y
-	apt-get install -y curl
 	curl -LO https://github.com/alecthomas/gometalinter/releases/download/v2.0.5/gometalinter-2.0.5-linux-amd64.tar.gz
 	tar xf gometalinter-2.0.5-linux-amd64.tar.gz
-	mv gometalinter-2.0.5-linux-amd64/* /usr/local/go/bin/
+	mv gometalinter-2.0.5-linux-amd64/* /home/travis/bin/
 
 lint: ## Lint the files
 	gometalinter --vendor --exclude=.*_test.go --concurrency=1 --deadline=1000s --line-length=100 --enable=goimports --enable=lll --enable=misspell --enable=nakedret --enable=unparam ./...
@@ -20,14 +18,14 @@ test: ## Run unittests
 	go test -short ${PKG_LIST}
 
 build: ## Build the binary file
-	go build -ldflags "-w -s -extldflags '-static' -X gitlab.com/signmykey/signmykey/cmd.versionString=$(VERSION)"
+	go build -ldflags "-w -s -extldflags '-static' -X github.com/pablo-ruth/signmykey/cmd.versionString=$(VERSION)"
 
 fpm_install:
-	apt-get update -y && apt-get install ruby ruby-dev rubygems build-essential -y
+	sudo apt update && sudo apt install ruby-dev build-essential -y
 	gem install --no-ri --no-rdoc fpm
 
 fpm:
-	fpm -s dir -t deb -n signmykey -m "contact@pablo-ruth.fr" --url "https://gitlab.com/signmykey/signmykey" --description "A light command to sign ssh keys with signmykey-server" --category "admin" -v $(VERSION) --prefix /usr/bin signmykey
+	fpm -s dir -t deb -n signmykey -m "contact@pablo-ruth.fr" --url "https://github.com/pablo-ruth/signmykey" --description "A light command to sign ssh keys with signmykey-server" --category "admin" -v $(VERSION) --prefix /usr/bin signmykey
 
 fpm_upload_dev:
 	@curl -u $(APTLY_USER):$(APTLY_PASSWORD) -X POST -F file=@signmykey_$(VERSION)_amd64.deb https://apt.signmykey.io/api/files/signmykey_$(VERSION)

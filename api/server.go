@@ -8,10 +8,10 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/pablo-ruth/signmykey/builtin/authenticator"
+	"github.com/pablo-ruth/signmykey/builtin/principals"
+	"github.com/pablo-ruth/signmykey/builtin/signer"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/signmykey/signmykey/builtin/authenticator"
-	"gitlab.com/signmykey/signmykey/builtin/principals"
-	"gitlab.com/signmykey/signmykey/builtin/signer"
 )
 
 // Config represents the config of the API webserver.

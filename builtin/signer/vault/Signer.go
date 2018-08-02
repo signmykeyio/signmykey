@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pablo-ruth/signmykey/builtin/signer"
 	"github.com/pkg/errors"
-	"gitlab.com/signmykey/signmykey/builtin/signer"
 )
 
 // Signer struct represents Hashicorp Vault options for signing SSH Key.

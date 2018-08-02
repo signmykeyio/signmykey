@@ -9,10 +9,10 @@ import (
 	"github.com/fatih/color"
 	"github.com/howeyc/gopass"
 	homedir "github.com/mitchellh/go-homedir"
+	"github.com/pablo-ruth/signmykey/helper"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gitlab.com/signmykey/signmykey/helper"
 )
 
 var clientCfgFile string

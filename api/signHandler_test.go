@@ -8,8 +8,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/pablo-ruth/signmykey/builtin/signer"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/signmykey/signmykey/builtin/signer"
 )
 
 func TestSignHandler(t *testing.T) {

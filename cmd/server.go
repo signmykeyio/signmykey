@@ -5,18 +5,18 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/pablo-ruth/signmykey/api"
+	"github.com/pablo-ruth/signmykey/builtin/authenticator"
+	ldapAuth "github.com/pablo-ruth/signmykey/builtin/authenticator/ldap"
+	vaultAuth "github.com/pablo-ruth/signmykey/builtin/authenticator/vault"
+	"github.com/pablo-ruth/signmykey/builtin/principals"
+	ldapPrinc "github.com/pablo-ruth/signmykey/builtin/principals/ldap"
+	localPrinc "github.com/pablo-ruth/signmykey/builtin/principals/local"
+	"github.com/pablo-ruth/signmykey/builtin/signer"
+	vaultSign "github.com/pablo-ruth/signmykey/builtin/signer/vault"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gitlab.com/signmykey/signmykey/api"
-	"gitlab.com/signmykey/signmykey/builtin/authenticator"
-	ldapAuth "gitlab.com/signmykey/signmykey/builtin/authenticator/ldap"
-	vaultAuth "gitlab.com/signmykey/signmykey/builtin/authenticator/vault"
-	"gitlab.com/signmykey/signmykey/builtin/principals"
-	ldapPrinc "gitlab.com/signmykey/signmykey/builtin/principals/ldap"
-	localPrinc "gitlab.com/signmykey/signmykey/builtin/principals/local"
-	"gitlab.com/signmykey/signmykey/builtin/signer"
-	vaultSign "gitlab.com/signmykey/signmykey/builtin/signer/vault"
 )
 
 var serverCfgFile string
