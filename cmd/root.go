@@ -117,19 +117,25 @@ func init() {
 }
 
 func initConfig(cfgFile string) error {
+	viper.AutomaticEnv()
+
 	// expand ~ in file path
 	expandedCfgFile, err := homedir.Expand(cfgFile)
 	if err != nil {
 		return err
 	}
 
-	if _, err := os.Stat(expandedCfgFile); os.IsNotExist(err) {
-		logrus.Debugf("Config file not found at %s", expandedCfgFile)
-		return nil
+	// Use config file defined by flag if exists
+	if _, err := os.Stat(expandedCfgFile); err == nil {
+		viper.SetConfigFile(expandedCfgFile)
+		return viper.ReadInConfig()
 	}
 
-	viper.SetConfigFile(expandedCfgFile)
-	viper.AutomaticEnv()
+	// Use default config file if exists
+	if _, err := os.Stat("/etc/signmykey/client.yml"); err == nil {
+		viper.SetConfigFile("/etc/signmykey/client.yml")
+		return viper.ReadInConfig()
+	}
 
-	return viper.ReadInConfig()
+	return nil
 }
