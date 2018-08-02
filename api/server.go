@@ -65,7 +65,8 @@ func Router() *chi.Mux {
 		middleware.RealIP,
 		middleware.Logger,
 		middleware.Recoverer,
-		middleware.Timeout(30*time.Second),
+		middleware.CloseNotify,
+		middleware.Timeout(15*time.Second),
 	)
 
 	router.Route("/v1", func(r chi.Router) {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"gopkg.in/ldap.v2"
 )
@@ -79,7 +80,9 @@ func (a *Authenticator) Init(config map[string]string) error {
 
 // Login method is used to check if a couple of user/password is valid in LDAP.
 func (a *Authenticator) Login(user, password string) (valid bool, err error) {
-	var l *ldap.Conn
+	l := &ldap.Conn{}
+	l.SetTimeout(time.Second * 10)
+
 	uri := fmt.Sprintf("%s:%d", a.Address, a.Port)
 
 	if a.UseTLS {

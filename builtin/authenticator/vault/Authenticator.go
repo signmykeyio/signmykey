@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 // Authenticator struct represents Vault options for SMK Authentication.
@@ -72,7 +73,9 @@ func (v Authenticator) Login(user, password string) (valid bool, err error) {
 		return false, err
 	}
 
-	resp, err := http.Post(
+	client := http.Client{Timeout: time.Second * 10}
+
+	resp, err := client.Post(
 		fmt.Sprintf("%s/auth/%s/login/%s", v.fullAddr, v.Path, user),
 		"application/json",
 		bytes.NewBuffer(data))
