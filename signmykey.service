@@ -1,0 +1,10 @@
+[Unit]
+Description=Signmykey server
+After=syslog.target network.target
+
+[Service]
+User=signmykey
+ExecStart=/usr/bin/signmykey
+
+[Install]
+WantedBy=multi-user.target
