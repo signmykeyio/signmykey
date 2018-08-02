@@ -125,7 +125,7 @@ func (p Principals) Get(user string) (principals []string, err error) {
 }
 
 func getCN(list []string) []string {
-	var groupRegex = regexp.MustCompile(`^CN=(.+?),.*$`)
+	var groupRegex = regexp.MustCompile(`^[cC][nN]=(.+?),.*$`)
 	cnList := []string{}
 
 	for _, str := range list {
