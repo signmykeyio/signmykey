@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"gopkg.in/ldap.v2"
 )
@@ -81,7 +82,9 @@ func (p *Principals) Init(config map[string]string) error {
 
 // Get method is used to get the list of principals associated to a specific user.
 func (p Principals) Get(user string) (principals []string, err error) {
-	var l *ldap.Conn
+	l := &ldap.Conn{}
+	l.SetTimeout(time.Second * 10)
+
 	uri := fmt.Sprintf("%s:%d", p.Address, p.Port)
 
 	if p.UseTLS {

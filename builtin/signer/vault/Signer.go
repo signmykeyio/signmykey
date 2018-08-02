@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 	"gitlab.com/signmykey/signmykey/builtin/signer"
@@ -82,7 +83,7 @@ func (v Signer) ReadCA() (string, error) {
 		return "", errors.Wrap(err, "error getting auth token")
 	}
 
-	client := &http.Client{}
+	client := http.Client{Timeout: time.Second * 10}
 	req, err := http.NewRequest(
 		"GET",
 		fmt.Sprintf("%s/%s/config/ca", v.fullAddr, v.Path),
@@ -151,7 +152,7 @@ func (v Signer) Sign(certreq signer.CertReq) (string, error) {
 		return "", errors.Wrap(err, "marshaling of sign request payload failed")
 	}
 
-	client := &http.Client{}
+	client := http.Client{Timeout: time.Second * 10}
 	req, err := http.NewRequest(
 		"POST",
 		fmt.Sprintf("%s/%s/sign/%s", v.fullAddr, v.Path, v.Role),
@@ -224,7 +225,8 @@ func (v Signer) getToken() (string, error) {
 		return "", err
 	}
 
-	resp, err := http.Post(
+	client := http.Client{Timeout: time.Second * 10}
+	resp, err := client.Post(
 		fmt.Sprintf("%s/auth/approle/login", v.fullAddr),
 		"application/json",
 		bytes.NewBuffer(data))
