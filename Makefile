@@ -8,13 +8,13 @@ all: build
 
 lint_install:
 	apt-get update -y
-	apt-get install -y curl lbzip2
-	curl -LO https://github.com/alecthomas/gometalinter/releases/download/v2.0.2/gometalinter-v2.0.2-linux-amd64.tar.bz2
-	tar xf gometalinter-v2.0.2-linux-amd64.tar.bz2
-	mv gometalinter-v2.0.2-linux-amd64/gometalinter gometalinter-v2.0.2-linux-amd64/linters/* /usr/local/go/bin/
+	apt-get install -y curl
+	curl -LO https://github.com/alecthomas/gometalinter/releases/download/v2.0.5/gometalinter-2.0.5-linux-amd64.tar.gz
+	tar xf gometalinter-2.0.5-linux-amd64.tar.gz
+	mv gometalinter-2.0.5-linux-amd64/* /usr/local/go/bin/
 
 lint: ## Lint the files
-	gometalinter --vendor --exclude=.*_test.go --concurrency=4 --deadline=120s --line-length=100 --enable=goimports --enable=lll --enable=misspell --enable=nakedret --enable=unparam ./...
+	gometalinter --vendor --exclude=.*_test.go --concurrency=1 --deadline=1000s --line-length=100 --enable=goimports --enable=lll --enable=misspell --enable=nakedret --enable=unparam ./...
 
 test: ## Run unittests
 	go test -short ${PKG_LIST}
