@@ -8,7 +8,7 @@ Before you can use Signmykey, you must configure Vault.
 
 First, enable the ssh secret engine to sign keys.
 
-```
+```sh
 vault secrets enable ssh
 ```
 
@@ -16,7 +16,7 @@ vault secrets enable ssh
 
 Generate CA for ssh.
 
-```
+```sh
 vault write -f ssh/config/ca
 Key           Value
 ---           -----
@@ -24,7 +24,7 @@ public_key    ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCwjLDgrISTB9no8Y4KE+1A7nvue1
 ```
 ## Export CA public key
 
-```
+```sh
 vault read -field=public_key ssh/config/ca > /tmp/ssh-ca.pem
 ```
 
@@ -34,7 +34,7 @@ This certificate will be used on ssh servers.
 
 ### Vault sign user role
 
-```
+```sh
 echo '{                                            "allow_user_certificates": true,
   "allowed_users": "*",
   "allow_user_key_ids": true,
@@ -52,13 +52,13 @@ echo '{                                            "allow_user_certificates": tr
 
 Then
 
-```
+```sh
 vault write ssh/roles/sign-user-role @sign-user-role.json
 ```
 
 ### Vault policy
 
-```
+```sh
 vault write sys/policy/signmykey-server policy=-<<"EOH"
 path "ssh/config/ca" {
   capabilities = ["read"]
@@ -71,11 +71,11 @@ EOH
 
 ### Vault AppRole
 
-```
+```sh
 vault auth enable approle
 ```
 
-```
+```sh
 vault write auth/approle/role/signmykey-server \
   token_num_uses=0 \
   token_ttl=1m \
@@ -85,14 +85,14 @@ vault write auth/approle/role/signmykey-server \
 
 ### Vault AppRole creds
 
-```
+```sh
 vault read auth/approle/role/signmykey-server/role-id
 Key        Value
 ---        -----
 role_id    140f639f-3c86-4bce-6019-8a9cfd4e47e8
 ```
 
-``` 
+```sh
 vault write -f auth/approle/role/signmykey-server/secret-id
 Key                   Value
 ---                   -----

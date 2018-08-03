@@ -1,6 +1,5 @@
 ---
 title: Authenticator
-weight: 20
 ---
 
 ## LDAP

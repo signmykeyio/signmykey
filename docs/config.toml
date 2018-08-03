@@ -42,57 +42,56 @@ canonifyurls = true
 	github  = ""
 	email   = ""
 
-
 [[menu.main]]
-	name   = "Getting started"
-	url    = "getting-started/"
+	name       = "Getting started"
+	url        = "getting-started/"
 	identifier = "getting-started"
-	weight = 10
+	weight     = 1
 
 [[menu.main]]
     parent = "getting-started"
 	name   = "Vault"
 	url    = "getting-started/vault/"
-	weight = 10
+    weight = 2
 
 [[menu.main]]
     parent = "getting-started"
 	name   = "Signmykey"
 	url    = "getting-started/signmykey/"
-	weight = 20
+	weight = 3
 
 [[menu.main]]
     parent = "getting-started"
 	name   = "SSH Server"
 	url    = "getting-started/sshserver/"
-	weight = 30
-
+	weight = 4
+	
 [[menu.main]]
-	name   = "Backends"
-	url    = "backends/"
+	name       = "Backends"
+	url        = "backends/"
     identifier = "backends"
-	weight = 20
+	weight     = 5
 
 [[menu.main]]
     parent = "backends"
 	name   = "Authenticator"
 	url    = "backends/authenticator/"
-	weight = 10
+    weight = 6
 
 [[menu.main]]
     parent = "backends"
 	name   = "Principals"
 	url    = "backends/principals/"
-	weight = 20
+    weight = 7
 
 [[menu.main]]
     parent = "backends"
 	name   = "Signer"
 	url    = "backends/signer/"
-	weight = 40
+    weight = 8
 
 [blackfriday]
-	smartypants	= true
-	fractions = true
-	smartDashes = true
+	smartypants	   = true
+	fractions      = true
+	smartDashes    = true
 	plainIDAnchors = true
