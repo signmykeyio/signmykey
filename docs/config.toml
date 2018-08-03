@@ -1,0 +1,98 @@
+baseurl = "https://signmykey.io/"
+languageCode = "en-us"
+title = "Signmykey"
+theme = "hugo-material-docs"
+metadataformat = "yaml"
+canonifyurls = true
+
+[params]
+	# General information
+	author = "Pablo RUTH"
+	description = "Signmykey is a server and a client to sign ssh keys with Hashicorp Vault."
+	copyright = "Released under the MIT license"
+
+	# Repository
+	provider = "Github"
+	repo_url = "https://github.com/signmykeyio/signmykey"
+
+	#version = "0.0.3"
+	logo = "images/logo.png"
+	favicon = ""
+
+	permalink = "#"
+
+	# Custom assets
+	custom_css = []
+	custom_js  = []
+
+	# Syntax highlighting theme
+	highlight_css  = ""
+
+	[params.palette]
+    	primary = "red"
+    	accent  = "teal"
+
+    [params.font]
+    	text = "Ubuntu"
+    	code = "Ubuntu Mono"
+
+
+[social]
+	twitter = ""
+	github  = ""
+	email   = ""
+
+
+[[menu.main]]
+	name   = "Getting started"
+	url    = "getting-started/"
+	identifier = "getting-started"
+	weight = 10
+
+[[menu.main]]
+    parent = "getting-started"
+	name   = "Vault"
+	url    = "getting-started/vault/"
+	weight = 10
+
+[[menu.main]]
+    parent = "getting-started"
+	name   = "Signmykey"
+	url    = "getting-started/signmykey/"
+	weight = 20
+
+[[menu.main]]
+    parent = "getting-started"
+	name   = "SSH Server"
+	url    = "getting-started/sshserver/"
+	weight = 30
+
+[[menu.main]]
+	name   = "Backends"
+	url    = "backends/"
+    identifier = "backends"
+	weight = 20
+
+[[menu.main]]
+    parent = "backends"
+	name   = "Authenticator"
+	url    = "backends/authenticator/"
+	weight = 10
+
+[[menu.main]]
+    parent = "backends"
+	name   = "Principals"
+	url    = "backends/principals/"
+	weight = 20
+
+[[menu.main]]
+    parent = "backends"
+	name   = "Signer"
+	url    = "backends/signer/"
+	weight = 40
+
+[blackfriday]
+	smartypants	= true
+	fractions = true
+	smartDashes = true
+	plainIDAnchors = true
