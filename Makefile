@@ -2,9 +2,17 @@ PKG_LIST := $(shell go list ./... | grep -v /vendor/)
 GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
 VERSION := ${VERSION}
 
-.PHONY: all build test lint
+.PHONY: all build test lint site
 
 all: build
+
+site_install:
+	curl -LO https://github.com/gohugoio/hugo/releases/download/v0.46/hugo_0.46_Linux-64bit.tar.gz
+	tar -xvzf hugo_0.46_Linux-64bit.tar.gz
+	mv hugo /home/travis/bin/
+
+site:
+	cd docs && hugo
 
 lint_install:
 	curl -LO https://github.com/alecthomas/gometalinter/releases/download/v2.0.5/gometalinter-2.0.5-linux-amd64.tar.gz
