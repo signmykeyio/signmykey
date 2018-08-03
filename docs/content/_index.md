@@ -24,5 +24,20 @@ You need :
 
 ### How does it work ?
 
-TODO
+![Signmykey workflow](images/signmykey.png)
 
+#### Signmykey workflow (blue)
+
+1. The user enters `signmykey` command then inserts its LDAP credentials, Signmykey client push to Signmykey server the credentials and SSH public key
+2. The LDAP server verifies the credentials and gives user groups to Signmykey server
+3. Signmykey server asks Vault to sign the public key with groups as principals
+4. Vault gives back the signed key to Signmykey server
+5. Signmykey server gives back the signed key to the user
+
+#### SSH workflow (green)
+
+1. The user enters `ssh root@server1` from his terminal
+2. The SSH server verifies that the certificate 
+    - is signed with the CA
+    - is valid
+    - has the correct principals in /etc/ssh/authorized_principals/root
