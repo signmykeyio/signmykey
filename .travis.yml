@@ -4,6 +4,7 @@ go:
 go_import_path: github.com/signmykeyio/signmykey
 stages:
   - name: test
+    if: tag IS blank
   - name: build and package master
     if: branch = master
   - name: build and release tag
