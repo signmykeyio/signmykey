@@ -5,7 +5,7 @@ go_import_path: github.com/signmykeyio/signmykey
 jobs:
   include:
   - stage: test
-    if: tag = false
+  if: tag = false
     name: lint
     script:
     - make lint_install
