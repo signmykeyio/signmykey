@@ -8,9 +8,9 @@ stages:
   - name: build and package master
     if: branch = master
   - name: build and release tag
-    if: tag = true
+    if: tag IS present
   - name: site
-    if: tag = true
+    if: tag IS present
 jobs:
   include:
   - stage: test
