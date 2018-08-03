@@ -5,6 +5,7 @@ go_import_path: github.com/signmykeyio/signmykey
 jobs:
   include:
   - stage: test
+    if: tag = false
     name: lint
     script:
     - make lint_install
@@ -12,6 +13,10 @@ jobs:
   - script:
     - make test
     name: unit testing
+  - script:
+    - make site_install
+    - make site
+    name: site build
   - stage: build and package master
     if: branch = master
     sudo: required
