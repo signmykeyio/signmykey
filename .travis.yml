@@ -2,10 +2,18 @@ language: go
 go:
 - '1.10'
 go_import_path: github.com/signmykeyio/signmykey
+stages:
+  - name: test
+    if: tag = false
+  - name: build and package master
+    if: branch = master
+  - name: build and release tag
+    if: tag = true
+  - name: site
+    if: tag = true
 jobs:
   include:
   - stage: test
-  if: tag IS NOT present
     name: lint
     script:
     - make lint_install
@@ -18,7 +26,6 @@ jobs:
     - make site
     name: site build
   - stage: build and package master
-    if: branch = master
     sudo: required
     script:
     - make build VERSION=${TRAVIS_BUILD_NUMBER}
@@ -29,7 +36,6 @@ jobs:
     - APTLY_USER=signmykey
     - secure: zEZzkGQ0Mf2e049Htn4sMDOZENClUnt699X3j7XrcAzACozrSNt8BMPnpG5YgSSCBHcNOTWqo0y/qfkgAI9IWBCz3j5H6ur4wIdHO2yBZ927nRCPiRkpzuW1eWchDD97drFV6KC/CQwgjrFh8ayjUUKugap/FbgrExUmMDCF4WXyyDmIrlCUNgFDwzZ1RukpC1h0yNlbk1aUg1pO2zVJaa2SmIYuebg70vqkz/lj/5C53BFWF1ClVEqg7TjmCcxS23r/6U5dGDylju6hvBlyNsVqOFJVa0MQWPnt25UYeiDeqK4D+3pig0aMPJpGbmYylxAQ0VI7LzVx8EI90SFLjhhRXtCckM61BxJz6Bs4b7YbMZyf3a61E3pvTCTTLDsGPGk3Q+m2wukyB3oyJy+DdmvznHzlanPJyRdVIrnAFxSuMBw8lWVa3NPezBCMZ+Qh6IOv+LqrjevGilUTpT2QACQDF354k5HGRAkd9tT/zdrrBMXC6GrUoIvUGv+9zo8UIiK4//Ui7YQlCghKrOAebIBzIswYgk/cUpkp1VFHiBTgaPAIgcbAoGXqYUjyk6EBeXOFaixbmkAYKFQTyMSEpuSnGsJMHrB26FP0L3rYIjNTnL3w3oOGYH1HXp/TF5r6J3/rNHVECJEVI2F1i5ntvcSRXmp8nImkZNib441pUCM=
   - stage: build and release tag
-    if: tag = true
     sudo: required
     script:
     - make build VERSION=${TRAVIS_TAG}
@@ -47,7 +53,6 @@ jobs:
       on:
         tags: true
   - stage: site
-    if: tag = true
     script:
     - make site_install
     - make site
