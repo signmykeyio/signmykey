@@ -1,6 +1,6 @@
 package main
 
-import "github.com/pablo-ruth/signmykey/cmd"
+import "github.com/signmykeyio/signmykey/cmd"
 
 func main() {
 	cmd.Execute()

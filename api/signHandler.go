@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/render"
-	"github.com/pablo-ruth/signmykey/builtin/signer"
+	"github.com/signmykeyio/signmykey/builtin/signer"
 	log "github.com/sirupsen/logrus"
 )
 

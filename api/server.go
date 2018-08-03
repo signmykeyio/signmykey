@@ -8,9 +8,9 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/pablo-ruth/signmykey/builtin/authenticator"
-	"github.com/pablo-ruth/signmykey/builtin/principals"
-	"github.com/pablo-ruth/signmykey/builtin/signer"
+	"github.com/signmykeyio/signmykey/builtin/authenticator"
+	"github.com/signmykeyio/signmykey/builtin/principals"
+	"github.com/signmykeyio/signmykey/builtin/signer"
 	log "github.com/sirupsen/logrus"
 )
 

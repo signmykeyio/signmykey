@@ -18,14 +18,14 @@ test: ## Run unittests
 	go test -short ${PKG_LIST}
 
 build: ## Build the binary file
-	go build -ldflags "-w -s -extldflags '-static' -X github.com/pablo-ruth/signmykey/cmd.versionString=$(VERSION)"
+	go build -ldflags "-w -s -extldflags '-static' -X github.com/signmykeyio/signmykey/cmd.versionString=$(VERSION)"
 
 fpm_install:
 	sudo apt update && sudo apt install ruby-dev build-essential -y
 	gem install --no-ri --no-rdoc fpm
 
 fpm:
-	fpm -s dir -t deb -n signmykey -m "contact@pablo-ruth.fr" --url "https://github.com/pablo-ruth/signmykey" --description "A light command to sign ssh keys with signmykey-server" --category "admin" -v $(VERSION) --prefix /usr/bin signmykey
+	fpm -s dir -t deb -n signmykey -m "contact@pablo-ruth.fr" --url "https://github.com/signmykeyio/signmykey" --description "A light command to sign ssh keys with signmykey-server" --category "admin" -v $(VERSION) --prefix /usr/bin signmykey
 
 fpm_upload_dev:
 	@curl -u $(APTLY_USER):$(APTLY_PASSWORD) -X POST -F file=@signmykey_$(VERSION)_amd64.deb https://apt.signmykey.io/api/files/signmykey_$(VERSION)

@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/pablo-ruth/signmykey/builtin/signer"
+	"github.com/signmykeyio/signmykey/builtin/signer"
 	"github.com/stretchr/testify/assert"
 )
 

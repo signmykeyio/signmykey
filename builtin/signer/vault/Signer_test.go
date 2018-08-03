@@ -4,7 +4,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/pablo-ruth/signmykey/builtin/signer"
+	"github.com/signmykeyio/signmykey/builtin/signer"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/ssh"
 )
