@@ -13,6 +13,7 @@ import (
 	ldapPrinc "github.com/signmykeyio/signmykey/builtin/principals/ldap"
 	localPrinc "github.com/signmykeyio/signmykey/builtin/principals/local"
 	"github.com/signmykeyio/signmykey/builtin/signer"
+	localSign "github.com/signmykeyio/signmykey/builtin/signer/local"
 	vaultSign "github.com/signmykeyio/signmykey/builtin/signer/vault"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -90,6 +91,7 @@ var serverCmd = &cobra.Command{
 		}
 		signerType := map[string]signer.Signer{
 			"vault": &vaultSign.Signer{},
+			"local": &localSign.Signer{},
 		}
 		signer, ok := signerType[signerTypeConfig]
 		if !ok {
