@@ -1,13 +1,12 @@
 ---
 title: Signmykey
-weight: 0
 ---
 
 ## Installation
 
 On Ubuntu 16.04, add this to the file */etc/apt/sources.list.d/signmykey.list*
 ```
-deb https://apt.signmykey.io/signmykey/ ubuntu main
+echo "deb [trusted=yes] https://apt.signmykey.io/signmykey/ xenial main" > /etc/apt/sources.list.d/signmykey.list
 ``` 
 
 Then 
@@ -19,11 +18,28 @@ wget https://gitlab.com/signmykey/signmykey/raw/master/signmykey.service -O /etc
 systemctl enable signmykey.service
 ``` 
 
-## Server configuration
+```
+mkdir -m 700 /etc/signmykey
+```
 
+## Server certificate
+
+Generate a certificate for signmykey server using Vault PKI
+
+**Note**: you can use another certificate provider
+
+```sh
+vault write pki/issue/allow-all-domains common_name="signmykeyserver" alt_names="localhost" ip_sans="127.0.0.1"
 ```
-mkdir /etc/signmykey
+
+Copy the output from the previous command
+```sh
+vi /etc/signmykey/server.key # certificate key
+vi /etc/signmykey/server.pem # private_key key
+chmod 400 /etc/signmykey/server.key
 ```
+
+## Server configuration
 
 File */etc/signmykey/server.yml*
 
@@ -34,10 +50,10 @@ authenticatorType: ldap
 authenticatorOpts:
   ldapAddr: localhost
   ldapPort: 3893
-  ldapTls: False
-  ldapTlsVerify: False
+  ldapTLS: False
+  ldapTLSVerify: False
   ldapBindUser: "cn=serviceuser,ou=svcaccts,dc=glauth,dc=com"
-  ldapBindPassword: "mysecret" 
+  ldapBindPassword: "mysecret"
   ldapBase: "dc=glauth,dc=com"
   ldapSearch: "(cn=%s)"
 
@@ -45,8 +61,8 @@ principalsType: ldap
 principalsOpts:
   ldapAddr: localhost
   ldapPort: 3893
-  ldapTls: False
-  ldapTlsVerify: False
+  ldapTLS: False
+  ldapTLSVerify: False
   ldapBindUser: "cn=serviceuser,ou=svcaccts,dc=glauth,dc=com"
   ldapBindPassword: "mysecret"
   ldapBase: "ou=groups,dc=glauth,dc=com"
@@ -56,19 +72,24 @@ signerType: vault
 signerOpts:
   vaultAddr: "localhost"
   vaultPort: 8200
-  vaultTls: true
+  vaultTLS: true
   vaultPath: "ssh"
   vaultRole: "sign-user-role"
-  vaultRoleid: "140f639f-3c86-4bce-6019-8a9cfd4e47e8"
-  vaultSecretid: "959401d7-c66b-8988-0ab3-e56f9ba6a708"
-  vaultSignTtl: "24h"
+  vaultRoleID: "11940c2d-4639-9358-d750-cdb7cf409ff4"
+  vaultSecretID: "8b4c901f-1f84-5049-17ee-92de12b6b1e5"
+  vaultSignTTL: "24h"
+
+address: "0.0.0.0:443"
+tlsDisable: false
+tlsCert: "/etc/signmykey/server.pem" 
+tlsKey: "/etc/signmykey/server.key"
 ```
 
 Secure the config file
 
 ```sh
-chown signmykey: /etc/signmykey/config.yml
-chmod 600 /etc/signmykey/config.yml
+chmod 600 /etc/signmykey/server.yml
+chown -R signmykey: /etc/signmykey
 ```
 
 ### Server start
@@ -89,7 +110,7 @@ mkdir /etc/signmykey
 Content of the */etc/signmykey/client.yml* file:
 
 ```
-https://signmykeyserver/
+addr: "https://signmykeyserver/"
 ```
 
 ### User configuration
@@ -97,7 +118,7 @@ https://signmykeyserver/
 Content of the *~/.signmykey.yml* file:
 
 ```
-https://signmykeyserver/
+addr: "https://signmykeyserver/"
 ```
 
 ## Client usage
@@ -105,7 +126,7 @@ https://signmykeyserver/
 ### Sign your key
 
 ```sh
-signmykey
+signmykey -u johndoe
 ```
 
 ### Verify your key principals

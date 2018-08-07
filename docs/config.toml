@@ -90,6 +90,24 @@ canonifyurls = true
 	url    = "backends/signer/"
     weight = 8
 
+[[menu.main]]
+	name       = "Howtos"
+	url        = "howtos/"
+    identifier = "howtos"
+	weight     = 9
+
+[[menu.main]]
+    parent = "howtos"
+	name   = "Vault PKI"
+	url    = "howtos/vaultpki/"
+    weight = 10
+
+[[menu.main]]
+    parent = "howtos"
+	name   = "LDAP server"
+	url    = "howtos/ldapserver/"
+    weight = 11
+
 [blackfriday]
 	smartypants	   = true
 	fractions      = true

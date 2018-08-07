@@ -17,8 +17,8 @@ As an example, signmykey allows you to let your LDAP users to sign theirs ssh ke
 
 You need :
 
-- an LDAP server 
-- a Vault instance
+- an LDAP server, see [Howto](howtos/ldapserver/)
+- a Vault instance, see [Howto](howtos/vaultpki/)
 - a signmykey host
 
 
