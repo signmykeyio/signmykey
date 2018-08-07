@@ -100,7 +100,7 @@ var serverCmd = &cobra.Command{
 			return err
 		}
 
-		viper.SetDefault("address", "0.0.0.0:8080")
+		viper.SetDefault("address", "0.0.0.0:443")
 		viper.SetDefault("tlsDisable", false)
 
 		if !viper.GetBool("tlsDisable") {
