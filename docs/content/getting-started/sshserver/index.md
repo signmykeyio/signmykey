@@ -29,7 +29,15 @@ PasswordAuthentication no
 ...
 ``` 
 
-Also create the file */etc/ssh/authorized_principals/root* for the root user:
+## Principals
+
+
+Create the */etc/ssh/authorized_principals* directory
+```sh
+mkdir /etc/ssh/authorized_principals/
+```
+
+Also create the file */etc/ssh/authorized_principals/root* for the root user
 ```
 hackers
 superheros

@@ -2,7 +2,7 @@
 title: Vault
 ---
 
-Before you can use Signmykey, you must configure Vault.
+Before you can use Signmykey, you must configure your Vault server to allow its usage.
 
 ## Enable ssh
 
@@ -25,10 +25,10 @@ public_key    ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCwjLDgrISTB9no8Y4KE+1A7nvue1
 ## Export CA public key
 
 ```sh
-vault read -field=public_key ssh/config/ca > /tmp/ssh-ca.pem
+vault read -field=public_key ssh/config/ca > /etc/ssh/ca.pem
 ```
 
-This certificate will be used on ssh servers.
+This certificate will be used on ssh servers, so keep it to copy its content later.
 
 ## Signmykey configuration
 
@@ -89,15 +89,15 @@ vault write auth/approle/role/signmykey-server \
 vault read auth/approle/role/signmykey-server/role-id
 Key        Value
 ---        -----
-role_id    140f639f-3c86-4bce-6019-8a9cfd4e47e8
+role_id    11940c2d-4639-9358-d750-cdb7cf409ff4
 ```
 
 ```sh
 vault write -f auth/approle/role/signmykey-server/secret-id
 Key                   Value
 ---                   -----
-secret_id             3f69bdc0-f854-831e-dcf7-bd2de5b8141b
-secret_id_accessor    5ee59b8e-685b-f3f5-49d5-b86bf53d4424
+secret_id             8b4c901f-1f84-5049-17ee-92de12b6b1e5
+secret_id_accessor    0921e287-5383-0fbd-5061-aef29618b7a0
 ```
 
 The role_id and secret_id will be used in signmykey server configuration.
