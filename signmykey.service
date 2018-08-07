@@ -4,7 +4,8 @@ After=syslog.target network.target
 
 [Service]
 User=signmykey
-ExecStart=/usr/bin/signmykey
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+ExecStart=/usr/bin/signmykey server
 
 [Install]
 WantedBy=multi-user.target
