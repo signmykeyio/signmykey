@@ -30,14 +30,14 @@ type Signer struct {
 // Init method is used to ingest config of Signer
 func (v *Signer) Init(config map[string]string) error {
 	neededEntries := []string{
-		"vaultAddr",
-		"vaultPort",
-		"vaultTLS",
-		"vaultRoleID",
-		"vaultSecretID",
-		"vaultPath",
-		"vaultRole",
-		"vaultSignTTL",
+		"vaultaddr",
+		"vaultport",
+		"vaulttls",
+		"vaultroleid",
+		"vaultsecretid",
+		"vaultpath",
+		"vaultrole",
+		"vaultsignttl",
 	}
 
 	for _, entry := range neededEntries {
@@ -47,23 +47,23 @@ func (v *Signer) Init(config map[string]string) error {
 	}
 
 	// Conversions
-	port, err := strconv.Atoi(config["vaultPort"])
+	port, err := strconv.Atoi(config["vaultport"])
 	if err != nil {
 		return err
 	}
-	useTLS, err := strconv.ParseBool(config["vaultTLS"])
+	useTLS, err := strconv.ParseBool(config["vaulttls"])
 	if err != nil {
 		return err
 	}
 
-	v.Address = config["vaultAddr"]
+	v.Address = config["vaultaddr"]
 	v.Port = port
 	v.UseTLS = useTLS
-	v.RoleID = config["vaultRoleID"]
-	v.SecretID = config["vaultSecretID"]
-	v.Path = config["vaultPath"]
-	v.Role = config["vaultRole"]
-	v.SignTTL = config["vaultSignTTL"]
+	v.RoleID = config["vaultroleid"]
+	v.SecretID = config["vaultsecretid"]
+	v.Path = config["vaultpath"]
+	v.Role = config["vaultrole"]
+	v.SignTTL = config["vaultsignttl"]
 
 	var scheme string
 	if v.UseTLS {

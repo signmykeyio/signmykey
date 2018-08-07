@@ -28,14 +28,14 @@ type Principals struct {
 // Init method is used to ingest config of Principals
 func (p *Principals) Init(config map[string]string) error {
 	neededEntries := []string{
-		"ldapAddr",
-		"ldapPort",
-		"ldapTLS",
-		"ldapTLSVerify",
-		"ldapBindUser",
-		"ldapBindPassword",
-		"ldapBase",
-		"ldapSearch",
+		"ldapaddr",
+		"ldapport",
+		"ldaptls",
+		"ldaptlsverify",
+		"ldapbinduser",
+		"ldapbindpassword",
+		"ldapbase",
+		"ldapsearch",
 	}
 
 	var missingEntriesLst []string
@@ -55,26 +55,26 @@ func (p *Principals) Init(config map[string]string) error {
 	}
 
 	// Conversions
-	port, err := strconv.Atoi(config["ldapPort"])
+	port, err := strconv.Atoi(config["ldapport"])
 	if err != nil {
 		return err
 	}
-	useTLS, err := strconv.ParseBool(config["ldapTLS"])
+	useTLS, err := strconv.ParseBool(config["ldaptls"])
 	if err != nil {
 		return err
 	}
-	tlsVerify, err := strconv.ParseBool(config["ldapTLSVerify"])
+	tlsVerify, err := strconv.ParseBool(config["ldaptlsverify"])
 	if err != nil {
 		return err
 	}
 
-	p.Address = config["ldapAddr"]
+	p.Address = config["ldapaddr"]
 	p.Port = port
 	p.UseTLS = useTLS
-	p.BindUser = config["ldapBindUser"]
-	p.BindPassword = config["ldapBindPassword"]
-	p.SearchBase = config["ldapBase"]
-	p.SearchStr = config["ldapSearch"]
+	p.BindUser = config["ldapbinduser"]
+	p.BindPassword = config["ldapbindpassword"]
+	p.SearchBase = config["ldapbase"]
+	p.SearchStr = config["ldapsearch"]
 	p.TLSVerify = tlsVerify
 
 	return nil
