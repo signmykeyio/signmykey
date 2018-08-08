@@ -4,11 +4,11 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
-	"gopkg.in/ldap.v2"
+	"github.com/spf13/viper"
+	ldap "gopkg.in/ldap.v2"
 )
 
 // Authenticator struct represents LDAP options for SMK Authentication.
@@ -24,7 +24,7 @@ type Authenticator struct {
 }
 
 // Init method is used to ingest config of Authenticator
-func (a *Authenticator) Init(config map[string]string) error {
+func (a *Authenticator) Init(config *viper.Viper) error {
 	neededEntries := []string{
 		"ldapAddr",
 		"ldapPort",
@@ -38,13 +38,9 @@ func (a *Authenticator) Init(config map[string]string) error {
 
 	var missingEntriesLst []string
 	for _, entry := range neededEntries {
-		if _, ok := config[entry]; !ok {
+		if !config.IsSet(entry) {
 			missingEntriesLst = append(missingEntriesLst, entry)
 			continue
-		}
-
-		if len(config[entry]) == 0 {
-			missingEntriesLst = append(missingEntriesLst, entry)
 		}
 	}
 	if len(missingEntriesLst) > 0 {
@@ -52,28 +48,14 @@ func (a *Authenticator) Init(config map[string]string) error {
 		return fmt.Errorf("Missing config entries (%s) for Authenticator", missingEntries)
 	}
 
-	// Conversions
-	port, err := strconv.Atoi(config["ldapPort"])
-	if err != nil {
-		return err
-	}
-	useTLS, err := strconv.ParseBool(config["ldapTLS"])
-	if err != nil {
-		return err
-	}
-	tlsVerify, err := strconv.ParseBool(config["ldapTLSVerify"])
-	if err != nil {
-		return err
-	}
-
-	a.Address = config["ldapAddr"]
-	a.Port = port
-	a.UseTLS = useTLS
-	a.BindUser = config["ldapBindUser"]
-	a.BindPassword = config["ldapBindPassword"]
-	a.SearchBase = config["ldapBase"]
-	a.SearchStr = config["ldapSearch"]
-	a.TLSVerify = tlsVerify
+	a.Address = config.GetString("ldapAddr")
+	a.Port = config.GetInt("ldapPort")
+	a.UseTLS = config.GetBool("ldapTLS")
+	a.TLSVerify = config.GetBool("ldapTLSVerify")
+	a.BindUser = config.GetString("ldapBindUser")
+	a.BindPassword = config.GetString("ldapBindPassword")
+	a.SearchBase = config.GetString("ldapBase")
+	a.SearchStr = config.GetString("ldapSearch")
 
 	return nil
 }

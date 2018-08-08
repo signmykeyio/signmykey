@@ -3,6 +3,8 @@ package local
 import (
 	"fmt"
 	"strings"
+
+	"github.com/spf13/viper"
 )
 
 // Principals struct represents map of principals by user.
@@ -11,7 +13,7 @@ type Principals struct {
 }
 
 // Init method is used to ingest config of Principals
-func (p *Principals) Init(config map[string]string) error {
+func (p *Principals) Init(config *viper.Viper) error {
 	p.UserMap = config
 
 	return nil

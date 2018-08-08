@@ -30,7 +30,7 @@ var serverCmd = &cobra.Command{
 			return err
 		}
 
-		logrus.Info("start signmykey-server")
+		logrus.Info("start signmykey server")
 
 		// Log level
 		logLevelConfig := map[string]logrus.Level{
@@ -60,7 +60,7 @@ var serverCmd = &cobra.Command{
 		if !ok {
 			return fmt.Errorf("unknown authenticator type %s", authTypeConfig)
 		}
-		err := auth.Init(viper.GetStringMapString("authenticatorOpts"))
+		err := auth.Init(viper.Sub("authenticatorOpts"))
 		if err != nil {
 			return err
 		}
@@ -78,7 +78,7 @@ var serverCmd = &cobra.Command{
 		if !ok {
 			return fmt.Errorf("unknown principals type %s", princsTypeConfig)
 		}
-		err = princs.Init(viper.GetStringMapString("principalsOpts"))
+		err = princs.Init(viper.Sub("principalsOpts"))
 		if err != nil {
 			return err
 		}
@@ -95,7 +95,7 @@ var serverCmd = &cobra.Command{
 		if !ok {
 			return fmt.Errorf("unknown signer type %s", signerTypeConfig)
 		}
-		err = signer.Init(viper.GetStringMapString("SignerOpts"))
+		err = signer.Init(viper.Sub("SignerOpts"))
 		if err != nil {
 			return err
 		}
