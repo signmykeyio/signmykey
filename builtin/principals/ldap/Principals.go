@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
-	"gopkg.in/ldap.v2"
+	"github.com/spf13/viper"
+	ldap "gopkg.in/ldap.v2"
 )
 
 // Principals struct represents LDAP options for getting principals list from LDAP.
@@ -26,7 +26,7 @@ type Principals struct {
 }
 
 // Init method is used to ingest config of Principals
-func (p *Principals) Init(config map[string]string) error {
+func (p *Principals) Init(config *viper.Viper) error {
 	neededEntries := []string{
 		"ldapAddr",
 		"ldapPort",
@@ -40,13 +40,9 @@ func (p *Principals) Init(config map[string]string) error {
 
 	var missingEntriesLst []string
 	for _, entry := range neededEntries {
-		if _, ok := config[entry]; !ok {
+		if !config.IsSet(entry) {
 			missingEntriesLst = append(missingEntriesLst, entry)
 			continue
-		}
-
-		if len(config[entry]) == 0 {
-			missingEntriesLst = append(missingEntriesLst, entry)
 		}
 	}
 	if len(missingEntriesLst) > 0 {
@@ -54,28 +50,14 @@ func (p *Principals) Init(config map[string]string) error {
 		return fmt.Errorf("Missing config entries (%s) for Principals", missingEntries)
 	}
 
-	// Conversions
-	port, err := strconv.Atoi(config["ldapPort"])
-	if err != nil {
-		return err
-	}
-	useTLS, err := strconv.ParseBool(config["ldapTLS"])
-	if err != nil {
-		return err
-	}
-	tlsVerify, err := strconv.ParseBool(config["ldapTLSVerify"])
-	if err != nil {
-		return err
-	}
-
-	p.Address = config["ldapAddr"]
-	p.Port = port
-	p.UseTLS = useTLS
-	p.BindUser = config["ldapBindUser"]
-	p.BindPassword = config["ldapBindPassword"]
-	p.SearchBase = config["ldapBase"]
-	p.SearchStr = config["ldapSearch"]
-	p.TLSVerify = tlsVerify
+	p.Address = config.GetString("ldapAddr")
+	p.Port = config.GetInt("ldapPort")
+	p.UseTLS = config.GetBool("ldapTLS")
+	p.TLSVerify = config.GetBool("ldapTLSVerify")
+	p.BindUser = config.GetString("ldapBindUser")
+	p.BindPassword = config.GetString("ldapBindPassword")
+	p.SearchBase = config.GetString("ldapBase")
+	p.SearchStr = config.GetString("ldapSearch")
 
 	return nil
 }

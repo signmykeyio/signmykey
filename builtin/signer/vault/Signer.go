@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/pkg/errors"
 	"github.com/signmykeyio/signmykey/builtin/signer"
+	"github.com/spf13/viper"
 )
 
 // Signer struct represents Hashicorp Vault options for signing SSH Key.
@@ -28,7 +28,7 @@ type Signer struct {
 }
 
 // Init method is used to ingest config of Signer
-func (v *Signer) Init(config map[string]string) error {
+func (v *Signer) Init(config *viper.Viper) error {
 	neededEntries := []string{
 		"vaultAddr",
 		"vaultPort",
@@ -41,29 +41,19 @@ func (v *Signer) Init(config map[string]string) error {
 	}
 
 	for _, entry := range neededEntries {
-		if _, ok := config[entry]; !ok {
+		if !config.IsSet(entry) {
 			return fmt.Errorf("Config entry %s missing for Signer", entry)
 		}
 	}
 
-	// Conversions
-	port, err := strconv.Atoi(config["vaultPort"])
-	if err != nil {
-		return err
-	}
-	useTLS, err := strconv.ParseBool(config["vaultTLS"])
-	if err != nil {
-		return err
-	}
-
-	v.Address = config["vaultAddr"]
-	v.Port = port
-	v.UseTLS = useTLS
-	v.RoleID = config["vaultRoleID"]
-	v.SecretID = config["vaultSecretID"]
-	v.Path = config["vaultPath"]
-	v.Role = config["vaultRole"]
-	v.SignTTL = config["vaultSignTTL"]
+	v.Address = config.GetString("vaultAddr")
+	v.Port = config.GetInt("vaultPort")
+	v.UseTLS = config.GetBool("vaultTLS")
+	v.RoleID = config.GetString("vaultRoleID")
+	v.SecretID = config.GetString("vaultSecretID")
+	v.Path = config.GetString("vaultPath")
+	v.Role = config.GetString("vaultRole")
+	v.SignTTL = config.GetString("vaultSignTTL")
 
 	var scheme string
 	if v.UseTLS {

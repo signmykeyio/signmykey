@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
+
+	"github.com/spf13/viper"
 )
 
 // Authenticator struct represents Vault options for SMK Authentication.
@@ -19,7 +20,7 @@ type Authenticator struct {
 }
 
 // Init method is used to ingest config of Authenticator
-func (v *Authenticator) Init(config map[string]string) error {
+func (v *Authenticator) Init(config *viper.Viper) error {
 	neededEntries := []string{
 		"vaultAddr",
 		"vaultPort",
@@ -28,25 +29,15 @@ func (v *Authenticator) Init(config map[string]string) error {
 	}
 
 	for _, entry := range neededEntries {
-		if _, ok := config[entry]; !ok {
+		if !config.IsSet(entry) {
 			return fmt.Errorf("Config entry %s missing for Authenticator", entry)
 		}
 	}
 
-	// Conversions
-	port, err := strconv.Atoi(config["vaultPort"])
-	if err != nil {
-		return err
-	}
-	useTLS, err := strconv.ParseBool(config["vaultTLS"])
-	if err != nil {
-		return err
-	}
-
-	v.Address = config["vaultAddr"]
-	v.Port = port
-	v.UseTLS = useTLS
-	v.Path = config["vaultPath"]
+	v.Address = config.GetString("vaultAddr")
+	v.Port = config.GetInt("vaultPort")
+	v.UseTLS = config.GetBool("vaultTLS")
+	v.Path = config.GetString("vaultPath")
 
 	var scheme string
 	if v.UseTLS {

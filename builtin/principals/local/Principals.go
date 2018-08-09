@@ -3,15 +3,17 @@ package local
 import (
 	"fmt"
 	"strings"
+
+	"github.com/spf13/viper"
 )
 
 // Principals struct represents map of principals by user.
 type Principals struct {
-	UserMap map[string]string
+	UserMap *viper.Viper
 }
 
 // Init method is used to ingest config of Principals
-func (p *Principals) Init(config map[string]string) error {
+func (p *Principals) Init(config *viper.Viper) error {
 	p.UserMap = config
 
 	return nil
@@ -20,14 +22,12 @@ func (p *Principals) Init(config map[string]string) error {
 // Get method is used to get the list of principals associated to a specific user.
 func (p Principals) Get(user string) ([]string, error) {
 
-	principals := []string{}
-
-	list, ok := p.UserMap[user]
-	if !ok {
-		return principals, fmt.Errorf("No principals found for %s", user)
+	if !p.UserMap.IsSet(user) {
+		return []string{}, fmt.Errorf("No principals found for %s", user)
 	}
 
-	for _, str := range strings.Split(list, ",") {
+	principals := []string{}
+	for _, str := range strings.Split(p.UserMap.GetString(user), ",") {
 		trimmed := strings.Trim(str, " ")
 		if len(trimmed) > 0 {
 			principals = append(principals, trimmed)
