@@ -1,8 +1,10 @@
 package ldap
 
 import (
+	"bytes"
 	"testing"
 
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,36 +33,39 @@ func TestAuthenticator(t *testing.T) {
 
 func TestAuthenticatorInit(t *testing.T) {
 	cases := []struct {
-		config map[string]string
+		config []byte
 		auth   Authenticator
 		err    string
 	}{
 		{
-			map[string]string{},
+			[]byte(""),
 			Authenticator{},
 			"Missing config entries (ldapAddr, ldapPort, ldapTLS, ldapTLSVerify, ldapBindUser, ldapBindPassword, ldapBase, ldapSearch) for Authenticator",
 		},
 		{
-			map[string]string{"ldapAddr": "127.0.0.1"},
+			[]byte(`ldapAddr: 127.0.0.1`),
 			Authenticator{},
 			"Missing config entries (ldapPort, ldapTLS, ldapTLSVerify, ldapBindUser, ldapBindPassword, ldapBase, ldapSearch) for Authenticator",
 		},
 		{
-			map[string]string{"ldapAddr": "127.0.0.1", "ldapSearch": "(&(objectClass=organizationalPerson)(sAMAccountName=%s))"},
+			[]byte(`
+ldapAddr: 127.0.0.1
+ldapSearch: "(&(objectClass=organizationalPerson)(sAMAccountName=%s))"
+`),
 			Authenticator{},
 			"Missing config entries (ldapPort, ldapTLS, ldapTLSVerify, ldapBindUser, ldapBindPassword, ldapBase) for Authenticator",
 		},
 		{
-			map[string]string{
-				"ldapAddr":         "127.0.0.1",
-				"ldapPort":         "636",
-				"ldapTLS":          "True",
-				"ldapTLSVerify":    "True",
-				"ldapBindUser":     "binduser",
-				"ldapBindPassword": "bindpassword",
-				"ldapBase":         "DC=fake,DC=org",
-				"ldapSearch":       "(&(objectClass=organizationalPerson)(sAMAccountName=%s))",
-			},
+			[]byte(`
+ldapAddr: 127.0.0.1
+ldapPort: 636
+ldapTLS: True
+ldapTLSVerify: True
+ldapBindUser: binduser
+ldapBindPassword: bindpassword
+ldapBase: "DC=fake,DC=org"
+ldapSearch: "(&(objectClass=organizationalPerson)(sAMAccountName=%s))"
+`),
 			Authenticator{
 				Address:      "127.0.0.1",
 				Port:         636,
@@ -74,16 +79,16 @@ func TestAuthenticatorInit(t *testing.T) {
 			"",
 		},
 		{
-			map[string]string{
-				"ldapAddr":         "myldapserver.local",
-				"ldapPort":         "389",
-				"ldapTLS":          "False",
-				"ldapTLSVerify":    "False",
-				"ldapBindUser":     "binduser",
-				"ldapBindPassword": "bindpassword",
-				"ldapBase":         "DC=fake,DC=org",
-				"ldapSearch":       "(&(objectClass=organizationalPerson)(sAMAccountName=%s))",
-			},
+			[]byte(`
+ldapAddr: myldapserver.local
+ldapPort: 389
+ldapTLS: False
+ldapTLSVerify: False
+ldapBindUser: binduser
+ldapBindPassword: bindpassword
+ldapBase: "DC=fake,DC=org"
+ldapSearch: "(&(objectClass=organizationalPerson)(sAMAccountName=%s))"
+`),
 			Authenticator{
 				Address:      "myldapserver.local",
 				Port:         389,
@@ -97,24 +102,29 @@ func TestAuthenticatorInit(t *testing.T) {
 			"",
 		},
 		{
-			map[string]string{
-				"ldapAddr":         "myldapserver.local",
-				"ldapPort":         "",
-				"ldapTLS":          "False",
-				"ldapTLSVerify":    "False",
-				"ldapBindUser":     "binduser",
-				"ldapBindPassword": "",
-				"ldapBase":         "DC=fake,DC=org",
-				"ldapSearch":       "(&(objectClass=organizationalPerson)(sAMAccountName=%s))",
-			},
+			[]byte(`
+ldapAddr: myldapserver.local
+ldapTLS: False
+ldapTLSVerify: False
+ldapBindUser: binduser
+ldapBase: "DC=fake,DC=org"
+ldapSearch: "(&(objectClass=organizationalPerson)(sAMAccountName=%s))"
+`),
 			Authenticator{},
 			"Missing config entries (ldapPort, ldapBindPassword) for Authenticator",
 		},
 	}
 
 	for _, c := range cases {
+		testConfig := viper.New()
+		testConfig.SetConfigType("yaml")
+		err := testConfig.ReadConfig(bytes.NewBuffer(c.config))
+		if err != nil {
+			t.Error(err)
+		}
+
 		auth := Authenticator{}
-		err := auth.Init(c.config)
+		err = auth.Init(testConfig)
 
 		assert.EqualValues(t, c.auth, auth)
 		if c.err == "" {

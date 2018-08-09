@@ -40,7 +40,6 @@ func (a *Authenticator) Init(config *viper.Viper) error {
 	for _, entry := range neededEntries {
 		if !config.IsSet(entry) {
 			missingEntriesLst = append(missingEntriesLst, entry)
-			continue
 		}
 	}
 	if len(missingEntriesLst) > 0 {
