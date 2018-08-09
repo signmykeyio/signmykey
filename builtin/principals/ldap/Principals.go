@@ -47,7 +47,7 @@ func (p *Principals) Init(config *viper.Viper) error {
 	}
 	if len(missingEntriesLst) > 0 {
 		missingEntries := strings.Join(missingEntriesLst, ", ")
-		return fmt.Errorf("Missing config entries (%s) for Authenticator", missingEntries)
+		return fmt.Errorf("Missing config entries (%s) for Principals", missingEntries)
 	}
 
 	p.Address = config.GetString("ldapAddr")
