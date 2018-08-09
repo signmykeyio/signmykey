@@ -5,7 +5,7 @@ go_import_path: github.com/signmykeyio/signmykey
 stages:
   - name: test
     if: tag IS blank
-  - name: build PR
+  - name: build pull request
     if: type == pull_request
   - name: build and package master
     if: branch = master AND type != pull_request
@@ -27,7 +27,7 @@ jobs:
     - make site_install
     - make site
     name: site build
-  - stage: build PR
+  - stage: build pull request
     script:
     - make build
   - stage: build and package master
