@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/signmykeyio/signmykey/builtin/signer"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -101,13 +102,13 @@ func (a authMock) Login(user, password string) (bool, error) {
 	return true, nil
 }
 
-func (a authMock) Init(config map[string]string) error {
+func (a authMock) Init(config *viper.Viper) error {
 	return nil
 }
 
 type princsMock struct{}
 
-func (p princsMock) Init(config map[string]string) error {
+func (p princsMock) Init(config *viper.Viper) error {
 	return nil
 }
 
@@ -121,7 +122,7 @@ func (p princsMock) Get(user string) ([]string, error) {
 
 type signerMock struct{}
 
-func (s signerMock) Init(config map[string]string) error {
+func (s signerMock) Init(config *viper.Viper) error {
 	return nil
 }
 
