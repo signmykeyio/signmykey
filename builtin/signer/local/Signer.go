@@ -77,7 +77,10 @@ func (s Signer) Sign(certreq signer.CertReq) (string, error) {
 	}
 
 	buf := make([]byte, 8)
-	rand.Read(buf)
+	_, err = rand.Read(buf)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to read random bytes")
+	}
 	serial := binary.LittleEndian.Uint64(buf)
 
 	pubKey, _, _, _, err := ssh.ParseAuthorizedKey([]byte(certreq.Key))
