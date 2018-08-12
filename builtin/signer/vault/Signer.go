@@ -122,7 +122,7 @@ func (v Signer) ReadCA() (string, error) {
 // Sign method is used to sign passed SSH Key.
 func (v Signer) Sign(certreq signer.CertReq) (string, error) {
 
-	err := checkCertReqFields(certreq)
+	err := certreq.CheckCertReqFields()
 	if err != nil {
 		return "", errors.Wrap(err, "certificate request fields checking failed")
 	}
@@ -189,20 +189,6 @@ func extractSignedKey(resp *http.Response) (string, error) {
 	}
 
 	return signedKey, nil
-}
-
-func checkCertReqFields(certreq signer.CertReq) error {
-	if len(certreq.Principals) == 0 {
-		return fmt.Errorf("Empty list of principals")
-	}
-	if len(certreq.ID) == 0 {
-		return fmt.Errorf("Empty ID string")
-	}
-	if len(certreq.Key) == 0 {
-		return fmt.Errorf("Empty key string")
-	}
-
-	return nil
 }
 
 func (v Signer) getToken() (string, error) {
