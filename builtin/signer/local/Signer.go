@@ -5,25 +5,25 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io/ioutil"
-	"strconv"
 	"time"
 
 	"github.com/pkg/errors"
 	"github.com/signmykeyio/signmykey/builtin/signer"
+	"github.com/spf13/viper"
 	"golang.org/x/crypto/ssh"
 )
 
 // Signer struct represents Hashicorp Vault options for signing SSH Key.
 type Signer struct {
-	CACert          string
-	CAKey           string
+	CACert          ssh.PublicKey
+	CAKey           ssh.Signer
 	TTL             int
 	CriticalOptions map[string]string
 	Extensions      map[string]string
 }
 
 // Init method is used to ingest config of Signer
-func (s *Signer) Init(config map[string]string) error {
+func (s *Signer) Init(config *viper.Viper) error {
 	neededEntries := []string{
 		"caCert",
 		"caKey",
@@ -31,31 +31,41 @@ func (s *Signer) Init(config map[string]string) error {
 	}
 
 	for _, entry := range neededEntries {
-		if _, ok := config[entry]; !ok {
+		if !config.IsSet(entry) {
 			return fmt.Errorf("Config entry %s missing for Signer", entry)
 		}
 	}
 
-	// Conversions
-	ttl, err := strconv.Atoi(config["ttl"])
+	// Read and parse CA private key
+	key, err := ioutil.ReadFile(config.GetString("caKey"))
+	if err != nil {
+		return err
+	}
+	s.CAKey, err = ssh.ParsePrivateKey(key)
 	if err != nil {
 		return err
 	}
 
-	s.CACert = config["caCert"]
-	s.CAKey = config["caKey"]
-	s.TTL = ttl
-	s.CriticalOptions = map[string]string{}
-	s.Extensions = map[string]string{}
+	// Read and parse CA public key
+	pubKey, err := ioutil.ReadFile(config.GetString("caCert"))
+	if err != nil {
+		return err
+	}
+	s.CACert, err = ssh.ParsePublicKey(pubKey)
+	if err != nil {
+		return err
+	}
+
+	s.TTL = viper.GetInt("ttl")
+	s.CriticalOptions = config.GetStringMapString("criticalOptions")
+	s.Extensions = config.GetStringMapString("extensions")
 
 	return nil
 }
 
 // ReadCA method read CA public cert from local file
 func (s Signer) ReadCA() (string, error) {
-	publicKey, err := ioutil.ReadFile(s.CACert)
-
-	return string(publicKey), err
+	return string(s.CACert.Marshal()), nil
 }
 
 // Sign method is used to sign passed SSH Key.
@@ -70,9 +80,9 @@ func (s Signer) Sign(certreq signer.CertReq) (string, error) {
 	rand.Read(buf)
 	serial := binary.LittleEndian.Uint64(buf)
 
-	pubKey, err := ssh.ParsePublicKey([]byte(certreq.Key))
+	pubKey, _, _, _, err := ssh.ParseAuthorizedKey([]byte(certreq.Key))
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to parse user public key: %s", err)
 	}
 
 	certificate := ssh.Certificate{
@@ -84,24 +94,14 @@ func (s Signer) Sign(certreq signer.CertReq) (string, error) {
 		ValidBefore:     uint64(time.Now().Add(time.Duration(s.TTL) * time.Second).In(time.UTC).Unix()),
 		CertType:        ssh.UserCert,
 		Permissions: ssh.Permissions{
-			CriticalOptions: map[string]string{},
-			Extensions:      map[string]string{},
+			CriticalOptions: s.CriticalOptions,
+			Extensions:      s.Extensions,
 		},
 	}
 
-	ca, err := ioutil.ReadFile(s.CAKey)
+	err = certificate.SignCert(rand.Reader, s.CAKey)
 	if err != nil {
-		return "", err
-	}
-
-	signer, err := ssh.ParsePrivateKey(ca)
-	if err != nil {
-		return "", err
-	}
-
-	err = certificate.SignCert(rand.Reader, signer)
-	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to sign user public key: %s", err)
 	}
 
 	marshaledCertificate := ssh.MarshalAuthorizedKey(&certificate)
