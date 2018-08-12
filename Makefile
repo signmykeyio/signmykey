@@ -23,7 +23,7 @@ lint: ## Lint the files
 	gometalinter --vendor --exclude=.*_test.go --concurrency=1 --deadline=1000s --line-length=100 --enable=goimports --enable=lll --enable=misspell --enable=nakedret --enable=unparam ./...
 
 test: ## Run unittests
-	go test -short ${PKG_LIST}
+	go test -race ${PKG_LIST}
 
 build: ## Build the binary file
 	go build -ldflags "-w -s -extldflags '-static' -X github.com/signmykeyio/signmykey/cmd.versionString=$(VERSION)"
