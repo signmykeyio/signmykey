@@ -91,7 +91,7 @@ func init() {
 
 	rootCmd.Flags().StringVarP(&clientCfgFile, "cfg", "c", "~/.signmykey.yml", "config file")
 
-	rootCmd.Flags().StringP("addr", "a", "http://127.0.0.1:8080/", "SMK server address")
+	rootCmd.Flags().StringP("addr", "a", "http://127.0.0.1:9600/", "SMK server address")
 	if err := viper.BindPFlag("addr", rootCmd.Flags().Lookup("addr")); err != nil {
 		color.Red(fmt.Sprintf("%s", err))
 		os.Exit(1)
