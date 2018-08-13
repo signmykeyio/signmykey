@@ -1,8 +1,7 @@
-package vault
+package local
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
@@ -23,13 +22,18 @@ func (a *Authenticator) Init(config *viper.Viper) error {
 // Login method is used to check if a couple of user/password is valid in local config
 func (a Authenticator) Login(user, password string) (valid bool, err error) {
 	if len(user) == 0 {
-		return false, fmt.Errorf("empty username")
+		return false, errors.New("empty username")
 	}
 	if len(password) == 0 {
-		return false, fmt.Errorf("empty password")
+		return false, errors.New("empty password")
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte("myhashedpass"), []byte("mypass"))
+	hashedPass := a.UserMap.GetString(user)
+	if len(hashedPass) == 0 {
+		return false, errors.New("user not found")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(hashedPass), []byte(password))
 	if err != nil {
 		return false, errors.New("bad password")
 	}
