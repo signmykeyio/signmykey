@@ -32,31 +32,31 @@ func (s *Signer) Init(config *viper.Viper) error {
 
 	for _, entry := range neededEntries {
 		if !config.IsSet(entry) {
-			return fmt.Errorf("Config entry %s missing for Signer", entry)
+			return fmt.Errorf("config entry %s missing for Signer", entry)
 		}
 	}
 
 	// Read and parse CA private key
 	key, err := ioutil.ReadFile(config.GetString("caKey"))
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "error reading CA private key file %s", config.GetString("caKey"))
 	}
 	s.CAKey, err = ssh.ParsePrivateKey(key)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error parsing CA private key")
 	}
 
 	// Read and parse CA public key
 	pubKey, err := ioutil.ReadFile(config.GetString("caCert"))
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "error reading CA public key file %s", config.GetString("caCert"))
 	}
-	s.CACert, err = ssh.ParsePublicKey(pubKey)
+	s.CACert, _, _, _, err = ssh.ParseAuthorizedKey(pubKey)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error parsing CA public key")
 	}
 
-	s.TTL = viper.GetInt("ttl")
+	s.TTL = config.GetInt("ttl")
 	s.CriticalOptions = config.GetStringMapString("criticalOptions")
 	s.Extensions = config.GetStringMapString("extensions")
 
@@ -93,8 +93,8 @@ func (s Signer) Sign(certreq signer.CertReq) (string, error) {
 		Key:             pubKey,
 		KeyId:           certreq.ID,
 		ValidPrincipals: certreq.Principals,
-		ValidAfter:      uint64(time.Now().Add(-1 * time.Minute).In(time.UTC).Unix()),
-		ValidBefore:     uint64(time.Now().Add(time.Duration(s.TTL) * time.Second).In(time.UTC).Unix()),
+		ValidAfter:      uint64(time.Now().Unix() - 60),
+		ValidBefore:     uint64(time.Now().Unix() + int64(s.TTL)),
 		CertType:        ssh.UserCert,
 		Permissions: ssh.Permissions{
 			CriticalOptions: s.CriticalOptions,
