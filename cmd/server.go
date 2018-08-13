@@ -8,6 +8,7 @@ import (
 	"github.com/signmykeyio/signmykey/api"
 	"github.com/signmykeyio/signmykey/builtin/authenticator"
 	ldapAuth "github.com/signmykeyio/signmykey/builtin/authenticator/ldap"
+	localAuth "github.com/signmykeyio/signmykey/builtin/authenticator/local"
 	vaultAuth "github.com/signmykeyio/signmykey/builtin/authenticator/vault"
 	"github.com/signmykeyio/signmykey/builtin/principals"
 	ldapPrinc "github.com/signmykeyio/signmykey/builtin/principals/ldap"
@@ -56,6 +57,7 @@ var serverCmd = &cobra.Command{
 		authType := map[string]authenticator.Authenticator{
 			"ldap":  &ldapAuth.Authenticator{},
 			"vault": &vaultAuth.Authenticator{},
+			"local": &localAuth.Authenticator{},
 		}
 		auth, ok := authType[authTypeConfig]
 		if !ok {
