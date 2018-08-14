@@ -9,7 +9,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/howeyc/gopass"
 	homedir "github.com/mitchellh/go-homedir"
-	"github.com/signmykeyio/signmykey/helper"
+	"github.com/signmykeyio/signmykey/client"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -18,8 +18,10 @@ import (
 var clientCfgFile string
 
 var rootCmd = &cobra.Command{
-	Use:   "signmykey",
-	Short: "A client-server to sign ssh keys",
+	Use:           "signmykey",
+	Short:         "A client-server to sign ssh keys",
+	SilenceUsage:  true,
+	SilenceErrors: true,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		// load config
 		if err := initConfig(clientCfgFile); err != nil {
@@ -31,12 +33,12 @@ var rootCmd = &cobra.Command{
 			return errors.New("SMK Server address must end with a slash")
 		}
 
-		err := helper.UserPubKeyExists(viper.GetString("key"))
+		err := client.UserPubKeyExists(viper.GetString("key"))
 		return err
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if viper.GetBool("expired") {
-			if helper.CertStillValid(viper.GetString("key")) {
+			if client.CertStillValid(viper.GetString("key")) {
 				return nil
 			}
 		}
@@ -56,18 +58,18 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		pubKey, err := helper.GetUserPubKey(viper.GetString("key"))
+		pubKey, err := client.GetUserPubKey(viper.GetString("key"))
 		if err != nil {
 			return err
 		}
 
 		smkAddr := viper.GetString("addr")
-		signedKey, err := helper.Sign(smkAddr, username, string(password), pubKey)
+		signedKey, err := client.Sign(smkAddr, username, string(password), pubKey)
 		if err != nil {
 			return err
 		}
 
-		err = helper.WriteUserSignedKey(signedKey, viper.GetString("key"))
+		err = client.WriteUserSignedKey(signedKey, viper.GetString("key"))
 		if err != nil {
 			return err
 		}
