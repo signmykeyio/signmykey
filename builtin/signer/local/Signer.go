@@ -56,6 +56,14 @@ func (s *Signer) Init(config *viper.Viper) error {
 		return errors.Wrap(err, "error parsing CA public key")
 	}
 
+	config.SetDefault("extensions", map[string]string{
+		"permit-X11-forwarding":   "",
+		"permit-agent-forwarding": "",
+		"permit-port-forwarding":  "",
+		"permit-pty":              "",
+		"permit-user-rc":          "",
+	})
+
 	s.TTL = config.GetInt("ttl")
 	s.CriticalOptions = config.GetStringMapString("criticalOptions")
 	s.Extensions = config.GetStringMapString("extensions")
