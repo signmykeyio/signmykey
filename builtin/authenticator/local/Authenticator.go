@@ -14,7 +14,12 @@ type Authenticator struct {
 
 // Init method is used to ingest config of Authenticator
 func (a *Authenticator) Init(config *viper.Viper) error {
-	a.UserMap = config
+
+	if !config.IsSet("users") {
+		return errors.New("Missing config entry \"users\" for Authenticator")
+	}
+
+	a.UserMap = config.Sub("users")
 
 	return nil
 }
