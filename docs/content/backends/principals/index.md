@@ -2,6 +2,22 @@
 title: Principals
 ---
 
+## Local
+
+### Example Usage
+
+```
+principalsType: local
+principalsOpts:
+  users:
+    foouser: fooprincpal,anotherprincipal,thirdprincipal
+    baruser: anotherprincipal
+```
+
+### Options
+
+  * **users** - Map of users and associated principals (required)
+
 ## LDAP
 
 ### Example Usage
@@ -29,18 +45,3 @@ principalsOpts:
   * **ldapBindPassword** - LDAP bind password
   * **ldapBase** - LDAP search base
   * **ldapSearch** - LDAP search string to find user
-
-## Local
-
-### Example Usage
-
-```
-principalsType: local
-principalsOpts:
-  myfirstuser: oneprincpal,anotherprincipal,thirdprincipal
-  myseconduser: anotherprincipal
-```
-
-### Options
-
-  * map of users and associated principals

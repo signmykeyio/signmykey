@@ -7,16 +7,16 @@ canonifyurls = true
 
 [params]
 	# General information
-	author = "Pablo RUTH"
-	description = "Signmykey is a server and a client to sign ssh keys with Hashicorp Vault."
+  author = "Pablo RUTH"
+	description = "Signmykey is an automated SSH Certificate Authority"
 	copyright = "Released under the MIT license"
 
 	# Repository
 	provider = "Github"
 	repo_url = "https://github.com/signmykeyio/signmykey"
 
-	#version = "0.0.3"
-	logo = "images/logo.png"
+	#version = "0.1.0"
+	logo = "images/square-logo.png"
 	favicon = ""
 
 	permalink = "#"
@@ -29,8 +29,8 @@ canonifyurls = true
 	highlight_css  = ""
 
 	[params.palette]
-    	primary = "red"
-    	accent  = "teal"
+    	primary = "grey"
+    	accent  = "green"
 
     [params.font]
     	text = "Ubuntu"
@@ -43,70 +43,76 @@ canonifyurls = true
 	email   = ""
 
 [[menu.main]]
-	name       = "Getting started"
-	url        = "getting-started/"
-	identifier = "getting-started"
+	name       = "Home"
+	url        = "/"
+	identifier = "home"
 	weight     = 1
 
 [[menu.main]]
-    parent = "getting-started"
+	name       = "Getting started"
+	url        = "getting-started/"
+	identifier = "getting-started"
+	weight     = 2
+
+[[menu.main]]
+  parent = "getting-started"
 	name   = "Vault"
 	url    = "getting-started/vault/"
-    weight = 2
+  weight = 1
 
 [[menu.main]]
-    parent = "getting-started"
+  parent = "getting-started"
 	name   = "Signmykey"
 	url    = "getting-started/signmykey/"
-	weight = 3
+	weight = 2
 
 [[menu.main]]
-    parent = "getting-started"
+  parent = "getting-started"
 	name   = "SSH Server"
 	url    = "getting-started/sshserver/"
-	weight = 4
+	weight = 3
 	
 [[menu.main]]
 	name       = "Backends"
 	url        = "backends/"
-    identifier = "backends"
-	weight     = 5
+  identifier = "backends"
+	weight     = 3
 
 [[menu.main]]
-    parent = "backends"
+  parent = "backends"
 	name   = "Authenticator"
 	url    = "backends/authenticator/"
-    weight = 6
+  weight = 1
 
 [[menu.main]]
-    parent = "backends"
+  parent = "backends"
 	name   = "Principals"
 	url    = "backends/principals/"
-    weight = 7
+  weight = 2
 
 [[menu.main]]
-    parent = "backends"
+  parent = "backends"
 	name   = "Signer"
 	url    = "backends/signer/"
-    weight = 8
+  weight = 3
 
 [[menu.main]]
 	name       = "Howtos"
 	url        = "howtos/"
-    identifier = "howtos"
-	weight     = 9
+  identifier = "howtos"
+	weight     = 4
 
 [[menu.main]]
-    parent = "howtos"
+  parent = "howtos"
 	name   = "Vault PKI"
 	url    = "howtos/vaultpki/"
-    weight = 10
+  weight = 1
 
 [[menu.main]]
-    parent = "howtos"
+  parent = "howtos"
 	name   = "LDAP server"
 	url    = "howtos/ldapserver/"
-    weight = 11
+  weight = 2
 
 [blackfriday]
 	smartypants	   = true

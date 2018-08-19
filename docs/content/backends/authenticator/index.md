@@ -2,6 +2,22 @@
 title: Authenticator
 ---
 
+## Local
+
+### Example Usage
+
+```
+authenticatorType: local
+authenticatorOpts:
+  users:
+    foouser: $2a$10$zsvMZ7nEYo4jJJxgb5FpH.izPH37LsuLBXPbuKH4MPF4sihFSG6bW
+    baruser: $2a$10$srGqC9g46xaRXbueLk5kDuSuDM6h2EpC.MTRiVaij6s/jcsKQ6LHu
+```
+
+### Options
+
+  * **users** - Map of users and bcrypt hashed passwords (you can hash passwords via "signmykey hash" command) (required)
+
 ## LDAP
 
 ### Example Usage
