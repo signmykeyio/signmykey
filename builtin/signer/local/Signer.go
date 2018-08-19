@@ -13,7 +13,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// Signer struct represents Hashicorp Vault options for signing SSH Key.
+// Signer struct represents local options for signing SSH Key.
 type Signer struct {
 	CACert          ssh.PublicKey
 	CAKey           ssh.Signer
