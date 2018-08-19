@@ -29,7 +29,7 @@ build: ## Build the binary file
 	go build -ldflags "-w -s -extldflags '-static' -X github.com/signmykeyio/signmykey/cmd.versionString=$(VERSION)"
 
 fpm_install:
-	sudo apt update && sudo apt install ruby-dev build-essential -y
+	sudo apt update && sudo apt install ruby-dev build-essential rpm -y
 	gem install --no-ri --no-rdoc fpm
 
 fpm:
