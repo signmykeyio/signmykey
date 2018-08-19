@@ -1,6 +1,7 @@
 package local
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -14,7 +15,11 @@ type Principals struct {
 
 // Init method is used to ingest config of Principals
 func (p *Principals) Init(config *viper.Viper) error {
-	p.UserMap = config
+	if !config.IsSet("users") {
+		return errors.New("Missing config entry \"users\" for Principals")
+	}
+
+	p.UserMap = config.Sub("users")
 
 	return nil
 }
