@@ -33,7 +33,8 @@ fpm_install:
 	gem install --no-ri --no-rdoc fpm
 
 fpm:
-	fpm -s dir -t deb -n signmykey -m "contact@pablo-ruth.fr" --url "https://github.com/signmykeyio/signmykey" --description "A light command to sign ssh keys with signmykey-server" --category "admin" -v $(VERSION) --prefix /usr/bin signmykey
+	fpm -s dir -t deb -n signmykey -m "contact@pablo-ruth.fr" --url "https://github.com/signmykeyio/signmykey" --description "An automated SSH Certificate Authority" --category "admin" -v $(VERSION) --prefix /usr/bin signmykey
+	fpm -s dir -t rpm -n signmykey -m "contact@pablo-ruth.fr" --url "https://github.com/signmykeyio/signmykey" --description "An automated SSH Certificate Authority" --category "admin" -v $(VERSION) --prefix /usr/bin signmykey
 
 fpm_upload_dev:
 	@curl -u $(APTLY_USER):$(APTLY_PASSWORD) -X POST -F file=@signmykey_$(VERSION)_amd64.deb https://apt.signmykey.io/api/files/signmykey_$(VERSION)
