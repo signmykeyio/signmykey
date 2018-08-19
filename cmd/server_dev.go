@@ -51,7 +51,9 @@ var serverDevCmd = &cobra.Command{
 		princs := &localPrinc.Principals{}
 		princsConfig := viper.New()
 		princsConfig.SetConfigType("yaml")
-		err = princsConfig.ReadConfig(bytes.NewBuffer([]byte(fmt.Sprintf("%s: %s", devUser, devUser))))
+		err = princsConfig.ReadConfig(bytes.NewBuffer([]byte(fmt.Sprintf(`
+users:
+  %s: %s`, devUser, devUser))))
 		if err != nil {
 			return errors.Wrap(err, "error reading local principals config")
 		}
