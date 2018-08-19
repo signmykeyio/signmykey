@@ -22,6 +22,8 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+var devUser string
+
 var serverDevCmd = &cobra.Command{
 	Use:   "dev",
 	Short: "Start signmykey server in DEV mode",
@@ -39,20 +41,17 @@ var serverDevCmd = &cobra.Command{
 		auth := &localAuth.Authenticator{}
 		authConfig := viper.New()
 		authConfig.SetConfigType("yaml")
-		err = authConfig.ReadConfig(bytes.NewBuffer([]byte(fmt.Sprintf("admin: %s", hash))))
+		err = authConfig.ReadConfig(bytes.NewBuffer([]byte(fmt.Sprintf("%s: %s", devUser, hash))))
 		if err != nil {
 			return errors.Wrap(err, "error reading local authenticator config")
 		}
-		err = auth.Init(authConfig)
-		if err != nil {
-			return errors.Wrap(err, "error initializing local authenticator")
-		}
+		auth.UserMap = authConfig
 
 		// Principals init
 		princs := &localPrinc.Principals{}
 		princsConfig := viper.New()
 		princsConfig.SetConfigType("yaml")
-		err = princsConfig.ReadConfig(bytes.NewBuffer([]byte("admin: admin")))
+		err = princsConfig.ReadConfig(bytes.NewBuffer([]byte(fmt.Sprintf("%s: %s", devUser, devUser))))
 		if err != nil {
 			return errors.Wrap(err, "error reading local principals config")
 		}
@@ -165,18 +164,21 @@ You then have to add this line to "/etc/ssh/sshd_config" and restart OpenSSH ser
 	color.Yellow(`
 A temporary user is created with this parameters:
 
-	user: admin
+	user: %s
 	password: %s
-	principals: admin
+	principals: %s
 
 You can sign your key with this command:
 
-	$ signmykey -a http://127.0.0.1:9600/ -u admin
+	$ signmykey -a http://127.0.0.1:9600/ -u %s
 
 
-`, password)
+`, devUser, password, devUser, devUser)
 }
 
 func init() {
+	serverDevCmd.Flags().StringVarP(
+		&devUser, "user", "u", "admin", "ephemeral user to use with Dev mode")
+
 	serverCmd.AddCommand(serverDevCmd)
 }
