@@ -18,35 +18,44 @@ func TestPrincipals(t *testing.T) {
 		expList []string
 	}{
 		{
-			[]byte(`user1: princ2,princ1`),
+			[]byte(`
+users:
+  user1: princ2,princ1`),
 			"user1", false, []string{"princ1", "princ2"},
 		},
 		{
-			[]byte(`user: princ1,princ2`),
+			[]byte(`
+users:
+  user: princ1,princ2`),
 			"user", false, []string{"princ1", "princ2"},
 		},
 		{
-			[]byte(`user2: princ1,princ2`),
+			[]byte(`
+users:
+  user2: princ1,princ2`),
 			"user1", true, []string{},
 		},
 		{
 			[]byte(`
-user1: princ1
-user2: princ3,princ4
+users:
+  user1: princ1
+  user2: princ3,princ4
 `),
 			"user2", false, []string{"princ3", "princ4"},
 		},
 		{
 			[]byte(`
-user1: princ1, princ2,princ3
-user2: princ3,princ4
+users:
+  user1: princ1, princ2,princ3
+  user2: princ3,princ4
 `),
 			"user1", false, []string{"princ1", "princ2", "princ3"},
 		},
 		{
 			[]byte(`
-user1: princ1, princ2,princ3 , ,princ4
-user2: princ3,princ4
+users:
+  user1: princ1, princ2,princ3 , ,princ4
+  user2: princ3,princ4
 `),
 			"user1", false, []string{"princ1", "princ2", "princ3", "princ4"},
 		},
