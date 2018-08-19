@@ -18,7 +18,7 @@ Three types of backends are supported by Signmykey:
 
 * Download Signmykey binary:
 ```
-curl -LO https://github.com/signmykeyio/signmykey/releases/download/0.1.0/signmykey && chmod +x signmykey
+curl -LO https://github.com/signmykeyio/signmykey/releases/download/0.1.1/signmykey && chmod +x signmykey
 ```
 
 * Start server in dev mode (replace *myremoteuser* by the name of the user you want to connect on remote server):
