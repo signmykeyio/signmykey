@@ -6,6 +6,57 @@
 
 ----
 
-A tool for signing SSH keys
+Signmykey is an automated SSH Certificate Authority. It allows you to securly and centraly manage SSH accesses to your infrastructure.
+
+Three types of backends are supported by Signmykey:
+
+* **Authorization**: users can be authentified through different systems like LDAP, Local map or Hashicorp Vault.
+* **Principals**: list of principals applied to SSH certificates can be created dynamically from LDAP groups or setted staticaly in local config.
+* **Signer**: cryptographic signing operations of SSH certificates can be done directly by Signmykey or via Hashicorp Vault.
+
+## Quickstart
+
+* Download Signmykey binary:
+```
+curl -LO http://github.io/releases/binary && chmod +x signmykey
+```
+
+* Start server in dev mode (replace *myremoteuser* by the name of the user you want to connect on remote server):
+```
+./signmykey server dev -u myremoteuser
+```
+
+* Follow "Server side" instructions displayed by previous command, ex:
+```
+### Server side                                                                                                                                                                        
+                                                                                                                                                                                       
+An ephemeral certificate authority is created for this instance and will die with it.                                                                                                  
+To deploy this CA on destination servers, you can launch this command:                                                                                                                 
+                                                                                                                                                                                       
+        $ echo "ssh-rsa fakeCApubKey" > /etc/ssh/ca.pub
+
+You then have to add this line to "/etc/ssh/sshd_config" and restart OpenSSH server:
+
+        TrustedUserCAKeys /etc/ssh/ca.pub
+```
+
+* Follow "Client side" instructions, ex:
+```
+### Client side
+
+A temporary user is created with this parameters:
+
+        user: myremoteuser
+        password: fakepassword
+        principals: myremoteuser
+
+You can sign your key with this command:
+
+        $ signmykey -a http://127.0.0.1:9600/ -u myremoteuser
+```
+
+* Congrats \o/
+
+## Documentation
 
 Documentation is available at https://signmykey.io/
