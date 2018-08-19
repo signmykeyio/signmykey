@@ -29,17 +29,3 @@ authenticatorOpts:
   * **ldapBindPassword** - LDAP bind password
   * **ldapBase** - LDAP search base
   * **ldapSearch** - LDAP search string to find user
-
-## Vault
-
-### Example Usage
-
-```
-```
-
-### Options
-
-  * **vaultAddr** - Address of Vault server
-  * **vaultPort** - Port of Vault server
-  * **vaultTLS** - Enable/disable SSL/TLS connection to Vault server
-  * **vaultPath** - Authentication path on Vault server of userpass auth backend
