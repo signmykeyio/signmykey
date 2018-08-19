@@ -10,7 +10,8 @@ import (
 
 func TestAuthenticator(t *testing.T) {
 	configBytes := []byte(`
-gooduser: "$2a$10$h8bTe02uZIkAa5j1NiuVVOXdUONmch.y151qyK004Hb8EF7rTRq0u"
+users:
+	gooduser: "$2a$10$h8bTe02uZIkAa5j1NiuVVOXdUONmch.y151qyK004Hb8EF7rTRq0u"
 `)
 
 	testConfig := viper.New()
