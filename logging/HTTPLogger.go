@@ -43,7 +43,7 @@ func (l *StructuredLogger) NewLogEntry(r *http.Request) middleware.LogEntry {
 
 	entry.Logger = entry.Logger.WithFields(logFields)
 
-	entry.Logger.Debugf("REQ %s %s %s %s from %s", logFields["req_id"], r.Method, r.RequestURI, r.Proto, r.RemoteAddr)
+	entry.Logger.Infof("[%s] REQ %s %s %s from %s", logFields["req_id"], r.Method, r.RequestURI, r.Proto, r.RemoteAddr)
 
 	return entry
 }
@@ -61,9 +61,9 @@ func (l *StructuredLoggerEntry) Write(status, bytes int, elapsed time.Duration) 
 	})
 
 	if status >= 200 && status < 300 {
-		l.Logger.Infof("RES %s %s %s %s from %s - %d %dB %v", l.ReqID, l.Request.Method, l.Request.RequestURI, l.Request.Proto, l.Request.RemoteAddr, status, bytes, elapsed)
+		l.Logger.Infof("[%s] RES %s %s %s from %s - %d %dB %v", l.ReqID, l.Request.Method, l.Request.RequestURI, l.Request.Proto, l.Request.RemoteAddr, status, bytes, elapsed)
 	} else {
-		l.Logger.Warnf("RES %s %s %s %s from %s - %d %dB %v", l.ReqID, l.Request.Method, l.Request.RequestURI, l.Request.Proto, l.Request.RemoteAddr, status, bytes, elapsed)
+		l.Logger.Warnf("[%s] RES %s %s %s from %s - %d %dB %v", l.ReqID, l.Request.Method, l.Request.RequestURI, l.Request.Proto, l.Request.RemoteAddr, status, bytes, elapsed)
 	}
 }
 

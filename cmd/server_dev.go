@@ -49,7 +49,7 @@ var serverDevCmd = &cobra.Command{
 		if err != nil {
 			return errors.Wrap(err, "error reading local authenticator config")
 		}
-		auth.UserMap = authConfig
+		auth.Init(authConfig, logger)
 
 		// Principals init
 		princs := &localPrinc.Principals{}

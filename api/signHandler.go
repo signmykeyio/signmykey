@@ -5,17 +5,22 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/render"
 	"github.com/signmykeyio/signmykey/builtin/signer"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 func signHandler(w http.ResponseWriter, r *http.Request) {
 	var login Login
 
+	log := r.Context().Value("logger").(*logrus.Logger)
+	logger := log.WithField("app", "http")
+	reqID := middleware.GetReqID(r.Context())
+
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		log.Errorf("failed to read body: %s", err)
+		logger.Warnf("[%s] failed to read body: %s", reqID, err)
 		render.Status(r, 400)
 		render.JSON(w, r, map[string]string{"error": "failed to read body"})
 		return
@@ -23,7 +28,7 @@ func signHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = json.Unmarshal(body, &login)
 	if err != nil {
-		log.Errorf("json unmarshaling failed: %s", err)
+		logger.Warnf("[%s] json unmarshaling failed: %s", reqID, err)
 		render.Status(r, 400)
 		render.JSON(w, r, map[string]string{"error": "JSON unmarshaling failed"})
 		return
@@ -31,7 +36,7 @@ func signHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = login.Validate()
 	if err != nil {
-		log.Errorf("missing field(s) in signing request: %s", err)
+		logger.Warnf("[%s] missing field(s) in signing request: %s", reqID, err)
 		render.Status(r, 400)
 		render.JSON(w, r, map[string]string{"error": "missing field(s) in signing request"})
 		return
@@ -39,7 +44,7 @@ func signHandler(w http.ResponseWriter, r *http.Request) {
 
 	valid, err := config.Auth.Login(login.User, login.Password)
 	if !valid {
-		log.Errorf("login failed: %s", err)
+		logger.Warnf("[%s] login failed: %s", reqID, err)
 		render.Status(r, 401)
 		render.JSON(w, r, map[string]string{"error": "login failed"})
 		return
@@ -47,7 +52,7 @@ func signHandler(w http.ResponseWriter, r *http.Request) {
 
 	principals, err := config.Princs.Get(login.User)
 	if err != nil {
-		log.Errorf("error getting list of principals: %s", err)
+		logger.Warnf("[%s] error getting list of principals: %s", reqID, err)
 		render.Status(r, 401)
 		render.JSON(w, r, map[string]string{"error": "error getting list of principals"})
 		return
@@ -60,7 +65,7 @@ func signHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	cert, err := config.Signer.Sign(req)
 	if err != nil {
-		log.Errorf("server error during key signing: %s", err)
+		logger.Warnf("[%s] server error during key signing: %s", reqID, err)
 		render.Status(r, 400)
 		render.JSON(w, r, map[string]string{"error": "unknown server error during key signing"})
 		return

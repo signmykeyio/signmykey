@@ -86,6 +86,7 @@ func Router(logger *logrus.Logger) *chi.Mux {
 		middleware.Recoverer,
 		middleware.CloseNotify,
 		middleware.Timeout(15*time.Second),
+		middleware.WithValue("logger", logger),
 		logging.NewStructuredLogger(logger),
 	)
 
