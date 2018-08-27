@@ -42,6 +42,7 @@ func Serve(startconfig Config) error {
 	log.SetFormatter(formatter)
 
 	if config.TLSDisable {
+		log.Warnf("!!!running signmykey server with TLS disabled is strongly discouraged!!!")
 		log.Printf("signmykey server listen on http://%s", config.Addr)
 		return http.ListenAndServe(config.Addr, Router())
 	}
