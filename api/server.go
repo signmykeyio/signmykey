@@ -1,6 +1,7 @@
 package api
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/http"
 	"os"
@@ -41,6 +42,7 @@ func Serve(startconfig Config) error {
 	log.SetFormatter(formatter)
 
 	if config.TLSDisable {
+		log.Warnf("!!!running signmykey server with TLS disabled is strongly discouraged!!!")
 		log.Printf("signmykey server listen on http://%s", config.Addr)
 		return http.ListenAndServe(config.Addr, Router())
 	}
@@ -53,8 +55,26 @@ func Serve(startconfig Config) error {
 		return fmt.Errorf("Key file %s doesn't exist", err)
 	}
 
+	tlsCfg := &tls.Config{
+		MinVersion:               tls.VersionTLS12,
+		CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
+		PreferServerCipherSuites: true,
+		CipherSuites: []uint16{
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+			tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+		},
+	}
+	srv := &http.Server{
+		Addr:         config.Addr,
+		Handler:      Router(),
+		TLSConfig:    tlsCfg,
+		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler)),
+	}
+
 	log.Printf("signmykey server listen on https://%s", config.Addr)
-	return http.ListenAndServeTLS(config.Addr, config.TLSCert, config.TLSKey, Router())
+	return srv.ListenAndServeTLS(config.TLSCert, config.TLSKey)
 }
 
 // Router returns *chi.Mux config
