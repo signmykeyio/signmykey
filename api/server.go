@@ -70,7 +70,7 @@ func Serve(startconfig Config) error {
 		Addr:         config.Addr,
 		Handler:      Router(),
 		TLSConfig:    tlsCfg,
-		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
+		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler)),
 	}
 
 	log.Printf("signmykey server listen on https://%s", config.Addr)
