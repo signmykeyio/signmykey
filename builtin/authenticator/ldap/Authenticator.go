@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	ldap "gopkg.in/ldap.v2"
 )
@@ -21,10 +22,13 @@ type Authenticator struct {
 	SearchStr    string
 	UseTLS       bool
 	TLSVerify    bool
+	Logger       logrus.FieldLogger
 }
 
 // Init method is used to ingest config of Authenticator
-func (a *Authenticator) Init(config *viper.Viper) error {
+func (a *Authenticator) Init(config *viper.Viper, logger logrus.FieldLogger) error {
+	a.Logger = logger.WithField("app", "auth")
+
 	neededEntries := []string{
 		"ldapAddr",
 		"ldapPort",

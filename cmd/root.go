@@ -89,7 +89,7 @@ func Execute() {
 }
 
 func init() {
-	logrus.SetLevel(logrus.DebugLevel)
+	logrus.SetLevel(logrus.InfoLevel)
 
 	rootCmd.Flags().StringVarP(&clientCfgFile, "cfg", "c", "~/.signmykey.yml", "config file")
 

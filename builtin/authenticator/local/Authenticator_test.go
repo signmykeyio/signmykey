@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestAuthenticator(t *testing.T) {
 	configBytes := []byte(`
-users:
-  gooduser: "$2a$10$h8bTe02uZIkAa5j1NiuVVOXdUONmch.y151qyK004Hb8EF7rTRq0u"
+gooduser: "$2a$10$h8bTe02uZIkAa5j1NiuVVOXdUONmch.y151qyK004Hb8EF7rTRq0u"
 `)
 
 	testConfig := viper.New()
@@ -22,7 +22,7 @@ users:
 	}
 
 	local := &Authenticator{}
-	local.Init(testConfig)
+	local.Init(testConfig, logrus.New())
 
 	cases := []struct {
 		user     string

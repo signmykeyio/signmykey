@@ -15,6 +15,7 @@ import (
 	localAuth "github.com/signmykeyio/signmykey/builtin/authenticator/local"
 	localPrinc "github.com/signmykeyio/signmykey/builtin/principals/local"
 	localSign "github.com/signmykeyio/signmykey/builtin/signer/local"
+	"github.com/signmykeyio/signmykey/logging"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -29,9 +30,11 @@ var serverDevCmd = &cobra.Command{
 	Short: "Start signmykey server in DEV mode",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		// Log level
-		logrus.SetLevel(logrus.InfoLevel)
-		logrus.Info("start signmykey server in DEV mode")
+		logger := logrus.New()
+		logger.Level = logrus.InfoLevel
+		logger.Formatter = &logging.TextFormatter{}
+
+		logger.Info("start signmykey server in DEV mode")
 
 		// Authenticator init
 		password, hash, err := generateAndHashPassword()
@@ -39,6 +42,7 @@ var serverDevCmd = &cobra.Command{
 			return errors.Wrap(err, "error getting new password and hash")
 		}
 		auth := &localAuth.Authenticator{}
+		auth.Logger = logger
 		authConfig := viper.New()
 		authConfig.SetConfigType("yaml")
 		err = authConfig.ReadConfig(bytes.NewBuffer([]byte(fmt.Sprintf("%s: %s", devUser, hash))))

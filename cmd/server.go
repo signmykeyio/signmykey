@@ -15,6 +15,7 @@ import (
 	"github.com/signmykeyio/signmykey/builtin/signer"
 	localSign "github.com/signmykeyio/signmykey/builtin/signer/local"
 	vaultSign "github.com/signmykeyio/signmykey/builtin/signer/vault"
+	"github.com/signmykeyio/signmykey/logging"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -31,7 +32,10 @@ var serverCmd = &cobra.Command{
 			return err
 		}
 
-		logrus.Info("start signmykey server")
+		logger := logrus.New()
+		logger.Formatter = &logging.TextFormatter{}
+
+		logger.Info("start signmykey server")
 
 		// Log level
 		logLevelConfig := map[string]logrus.Level{
@@ -46,7 +50,7 @@ var serverCmd = &cobra.Command{
 		if !ok {
 			logrus.Fatalf("invalid logLevel %s (debug,info,warn,fatal,panic)", viper.GetString("logLevel"))
 		}
-		logrus.SetLevel(logLevel)
+		logger.SetLevel(logLevel)
 
 		// Authenticator init
 		authTypeConfig := viper.GetString("authenticatorType")
@@ -61,7 +65,7 @@ var serverCmd = &cobra.Command{
 		if !ok {
 			return fmt.Errorf("unknown authenticator type %s", authTypeConfig)
 		}
-		err := auth.Init(viper.Sub("authenticatorOpts"))
+		err := auth.Init(viper.Sub("authenticatorOpts"), logger)
 		if err != nil {
 			return err
 		}

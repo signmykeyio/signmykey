@@ -3,23 +3,21 @@ package local
 import (
 	"errors"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 )
 
 // Authenticator struct represents local Authenticator options
 type Authenticator struct {
+	Logger  logrus.FieldLogger
 	UserMap *viper.Viper
 }
 
 // Init method is used to ingest config of Authenticator
-func (a *Authenticator) Init(config *viper.Viper) error {
-
-	if !config.IsSet("users") {
-		return errors.New("Missing config entry \"users\" for Authenticator")
-	}
-
-	a.UserMap = config.Sub("users")
+func (a *Authenticator) Init(config *viper.Viper, logger logrus.FieldLogger) error {
+	a.UserMap = config
+	a.Logger = logger.WithField("app", "auth")
 
 	return nil
 }

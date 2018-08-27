@@ -12,7 +12,8 @@ import (
 	"github.com/signmykeyio/signmykey/builtin/authenticator"
 	"github.com/signmykeyio/signmykey/builtin/principals"
 	"github.com/signmykeyio/signmykey/builtin/signer"
-	log "github.com/sirupsen/logrus"
+	"github.com/signmykeyio/signmykey/logging"
+	"github.com/sirupsen/logrus"
 )
 
 // Config represents the config of the API webserver.
@@ -36,14 +37,13 @@ func Serve(startconfig Config) error {
 	config = startconfig
 
 	// Config logging
-	formatter := &log.TextFormatter{
-	//FullTimestamp: true,
-	}
-	log.SetFormatter(formatter)
+	log := logrus.New()
+	log.Formatter = &logging.TextFormatter{}
+	logger := log.WithField("app", "http")
 
 	if config.TLSDisable {
-		log.Warnf("!!!running signmykey server with TLS disabled is strongly discouraged!!!")
-		log.Printf("signmykey server listen on http://%s", config.Addr)
+		logger.Warnf("!!!running signmykey server with TLS disabled is strongly discouraged!!!")
+		logger.Printf("signmykey server listen on http://%s", config.Addr)
 		return http.ListenAndServe(config.Addr, Router())
 	}
 
@@ -73,20 +73,20 @@ func Serve(startconfig Config) error {
 		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler)),
 	}
 
-	log.Printf("signmykey server listen on https://%s", config.Addr)
+	logger.Printf("signmykey server listen on https://%s", config.Addr)
 	return srv.ListenAndServeTLS(config.TLSCert, config.TLSKey)
 }
 
 // Router returns *chi.Mux config
-func Router() *chi.Mux {
+func Router(logger *logrus.Logger) *chi.Mux {
 	router := chi.NewRouter()
 	router.Use(
 		middleware.RequestID,
 		middleware.RealIP,
-		middleware.Logger,
 		middleware.Recoverer,
 		middleware.CloseNotify,
 		middleware.Timeout(15*time.Second),
+		logging.NewStructuredLogger(logger),
 	)
 
 	router.Route("/v1", func(r chi.Router) {

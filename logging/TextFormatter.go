@@ -6,11 +6,14 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
+// TextFormatter represents a formatter logging type
 type TextFormatter struct{}
 
+// Format log entry and return it as a slice of bytes
 func (f *TextFormatter) Format(entry *log.Entry) ([]byte, error) {
 
 	var buf *bytes.Buffer
@@ -37,19 +40,26 @@ func (f *TextFormatter) Format(entry *log.Entry) ([]byte, error) {
 		}
 	}
 
-	fmt.Fprintf(buf, "%s %s %s %s",
+	_, err := fmt.Fprintf(buf, "%s %s %s %s",
 		entry.Time.Format("2006-01-02 15:04:05"),
 		color.New(color.Bold).Sprint(app),
 		color.New(colorLevel[entry.Level]).Sprint(strings.ToUpper(entry.Level.String()[0:4])),
 		entry.Message,
 	)
+	if err != nil {
+		return []byte(""), errors.Wrap(err, "error formating log entry")
+	}
 
 	for field, value := range entry.Data {
 		if field != "app" {
-			fmt.Fprintf(buf, " %s=%s", color.CyanString(field), value)
+			fmt.Fprintf(buf, " %v=%v", color.CyanString(field), value)
 		}
 	}
 
-	fmt.Fprintln(buf)
+	_, err = fmt.Fprintln(buf)
+	if err != nil {
+		return []byte(""), err
+	}
+
 	return buf.Bytes(), nil
 }

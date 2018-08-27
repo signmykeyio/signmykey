@@ -66,6 +66,5 @@ func signHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Debugf("certificate: %s", cert)
 	render.JSON(w, r, map[string]string{"certificate": cert})
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
@@ -124,7 +125,8 @@ ldapSearch: "(&(objectClass=organizationalPerson)(sAMAccountName=%s))"
 		}
 
 		auth := Authenticator{}
-		err = auth.Init(testConfig)
+		err = auth.Init(testConfig, logrus.New())
+		c.auth.Logger = auth.Logger
 
 		assert.EqualValues(t, c.auth, auth)
 		if c.err == "" {
