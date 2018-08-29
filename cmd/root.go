@@ -119,6 +119,7 @@ func init() {
 }
 
 func initConfig(cfgFile string) error {
+	viper.SetEnvPrefix("smk")
 	viper.AutomaticEnv()
 
 	// expand ~ in file path
