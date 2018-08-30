@@ -10,8 +10,8 @@ Signmykey is an automated SSH Certificate Authority. It allows you to securly an
 
 Three types of backends are supported by Signmykey:
 
-* **Authorization**: users can be authentified through different systems like LDAP, Local map or Hashicorp Vault.
-* **Principals**: list of principals applied to SSH certificates can be created dynamically from LDAP groups or setted staticaly in local config.
+* **Authorization**: users can be authentified through different systems like LDAP or Local map.
+* **Principals**: list of principals applied to SSH certificates can be created dynamically from LDAP groups or set staticaly in local config.
 * **Signer**: cryptographic signing operations of SSH certificates can be done directly by Signmykey or via Hashicorp Vault.
 
 ## Quickstart
