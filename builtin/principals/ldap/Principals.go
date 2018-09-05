@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -80,25 +79,11 @@ func (p *Principals) Init(config *viper.Viper) error {
 
 // Get method is used to get the list of principals associated to a specific user.
 func (p Principals) Get(user string) (principals []string, err error) {
-	l := &ldap.Conn{}
-	l.SetTimeout(time.Second * 10)
-
-	uri := fmt.Sprintf("%s:%d", p.Address, p.Port)
-
-	if p.UseTLS {
-		l, err = ldap.DialTLS("tcp", uri, &tls.Config{InsecureSkipVerify: !p.TLSVerify}) // nolint: gas
-	} else {
-		l, err = ldap.Dial("tcp", uri)
-	}
+	l, err := getLDAPConn(p)
 	if err != nil {
 		return principals, err
 	}
 	defer l.Close()
-
-	err = l.Bind(p.BindUser, p.BindPassword)
-	if err != nil {
-		return principals, err
-	}
 
 	userSearchReq := ldap.NewSearchRequest(
 		p.UserSearchBase, ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
@@ -128,7 +113,7 @@ func (p Principals) Get(user string) (principals []string, err error) {
 
 	gsr, err := l.Search(groupSearchRequest)
 	if err != nil {
-		log.Fatal(err)
+		return principals, err
 	}
 
 	if len(gsr.Entries) == 0 {
@@ -142,7 +127,6 @@ func (p Principals) Get(user string) (principals []string, err error) {
 	principals = getCN(principals)
 	principals = filterByPrefix(p.Prefix, principals)
 	principals = transformCase(p.TransformCase, principals)
-	log.Println(p.TransformCase)
 
 	return principals, nil
 }
@@ -192,4 +176,24 @@ func transformCase(transform string, list []string) []string {
 	}
 
 	return list
+}
+
+func getLDAPConn(p Principals) (l *ldap.Conn, err error) {
+	l = &ldap.Conn{}
+	l.SetTimeout(time.Second * 10)
+
+	uri := fmt.Sprintf("%s:%d", p.Address, p.Port)
+
+	if p.UseTLS {
+		l, err = ldap.DialTLS("tcp", uri, &tls.Config{InsecureSkipVerify: !p.TLSVerify}) // nolint: gas
+	} else {
+		l, err = ldap.Dial("tcp", uri)
+	}
+	if err != nil {
+		return l, err
+	}
+
+	err = l.Bind(p.BindUser, p.BindPassword)
+
+	return l, err
 }
