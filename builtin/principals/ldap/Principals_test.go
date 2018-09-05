@@ -13,15 +13,17 @@ func TestPrincipals(t *testing.T) {
 	t.Skip()
 
 	ldap := &Principals{
-		Address:      "127.0.0.1",
-		Port:         636,
-		BindUser:     "CN=fakebinduser,OU=Users,DC=test,DC=domain",
-		BindPassword: "fakebindpasswd",
-		SearchBase:   "OU=Users,DC=test,DC=domain",
-		SearchStr:    "(&(objectClass=organizationalPerson)(sAMAccountName=%s))",
-		UseTLS:       true,
-		TLSVerify:    true,
-		Prefix:       "smk-",
+		Address:         "127.0.0.1",
+		Port:            636,
+		BindUser:        "CN=fakebinduser,OU=Users,DC=test,DC=domain",
+		BindPassword:    "fakebindpasswd",
+		UserSearchBase:  "OU=Users,DC=test,DC=domain",
+		UserSearchStr:   "(&(objectClass=organizationalPerson)(sAMAccountName=%s))",
+		GroupSearchBase: "OU=Groups,DC=test,DC=domain",
+		GroupSearchStr:  "(&(objectClass=group)(member=%s))",
+		UseTLS:          true,
+		TLSVerify:       true,
+		Prefix:          "smk-",
 	}
 
 	principals, err := ldap.Get("fakeuser")
@@ -94,20 +96,20 @@ func TestPrincipalsInit(t *testing.T) {
 		{
 			[]byte(""),
 			Principals{},
-			"Missing config entries (ldapAddr, ldapPort, ldapTLS, ldapTLSVerify, ldapBindUser, ldapBindPassword, ldapBase, ldapSearch) for Principals",
+			"Missing config entries (ldapAddr, ldapPort, ldapTLS, ldapTLSVerify, ldapBindUser, ldapBindPassword, ldapUserBase, ldapUserSearch, ldapGroupBase, ldapGroupSearch) for Principals",
 		},
 		{
 			[]byte("ldapAddr: 127.0.0.1"),
 			Principals{},
-			"Missing config entries (ldapPort, ldapTLS, ldapTLSVerify, ldapBindUser, ldapBindPassword, ldapBase, ldapSearch) for Principals",
+			"Missing config entries (ldapPort, ldapTLS, ldapTLSVerify, ldapBindUser, ldapBindPassword, ldapUserBase, ldapUserSearch, ldapGroupBase, ldapGroupSearch) for Principals",
 		},
 		{
 			[]byte(`
 ldapAddr: 127.0.0.1
-ldapSearch: "(&(objectClass=organizationalPerson)(sAMAccountName=%s))"
+ldapUserSearch: "(&(objectClass=organizationalPerson)(sAMAccountName=%s))"
 `),
 			Principals{},
-			"Missing config entries (ldapPort, ldapTLS, ldapTLSVerify, ldapBindUser, ldapBindPassword, ldapBase) for Principals",
+			"Missing config entries (ldapPort, ldapTLS, ldapTLSVerify, ldapBindUser, ldapBindPassword, ldapUserBase, ldapGroupBase, ldapGroupSearch) for Principals",
 		},
 		{
 			[]byte(`
@@ -117,18 +119,23 @@ ldapTLS: True
 ldapTLSVerify: True
 ldapBindUser: binduser
 ldapBindPassword: bindpassword
-ldapBase: "DC=fake,DC=org"
-ldapSearch: "(&(objectClass=organizationalPerson)(sAMAccountName=%s))"
+ldapUserBase: "DC=fake,DC=org"
+ldapUserSearch: "(&(objectClass=organizationalPerson)(sAMAccountName=%s))"
+ldapGroupBase: "DC=fake,DC=org"
+ldapGroupSearch: "(&(objectClass=group)(member=%s))"
 `),
 			Principals{
-				Address:      "127.0.0.1",
-				Port:         636,
-				UseTLS:       true,
-				TLSVerify:    true,
-				BindUser:     "binduser",
-				BindPassword: "bindpassword",
-				SearchBase:   "DC=fake,DC=org",
-				SearchStr:    "(&(objectClass=organizationalPerson)(sAMAccountName=%s))",
+				Address:         "127.0.0.1",
+				Port:            636,
+				UseTLS:          true,
+				TLSVerify:       true,
+				BindUser:        "binduser",
+				BindPassword:    "bindpassword",
+				UserSearchBase:  "DC=fake,DC=org",
+				UserSearchStr:   "(&(objectClass=organizationalPerson)(sAMAccountName=%s))",
+				GroupSearchBase: "DC=fake,DC=org",
+				GroupSearchStr:  "(&(objectClass=group)(member=%s))",
+				TransformCase:   "none",
 			},
 			"",
 		},
@@ -140,18 +147,23 @@ ldapTLS: False
 ldapTLSVerify: False
 ldapBindUser: binduser
 ldapBindPassword: bindpassword
-ldapBase: "DC=fake,DC=org"
-ldapSearch: "(&(objectClass=organizationalPerson)(sAMAccountName=%s))"
+ldapUserBase: "DC=fake,DC=org"
+ldapUserSearch: "(&(objectClass=organizationalPerson)(sAMAccountName=%s))"
+ldapGroupBase: "DC=fake,DC=org"
+ldapGroupSearch: "(&(objectClass=group)(member=%s))"
 `),
 			Principals{
-				Address:      "myldapserver.local",
-				Port:         389,
-				UseTLS:       false,
-				TLSVerify:    false,
-				BindUser:     "binduser",
-				BindPassword: "bindpassword",
-				SearchBase:   "DC=fake,DC=org",
-				SearchStr:    "(&(objectClass=organizationalPerson)(sAMAccountName=%s))",
+				Address:         "myldapserver.local",
+				Port:            389,
+				UseTLS:          false,
+				TLSVerify:       false,
+				BindUser:        "binduser",
+				BindPassword:    "bindpassword",
+				UserSearchBase:  "DC=fake,DC=org",
+				UserSearchStr:   "(&(objectClass=organizationalPerson)(sAMAccountName=%s))",
+				GroupSearchBase: "DC=fake,DC=org",
+				GroupSearchStr:  "(&(objectClass=group)(member=%s))",
+				TransformCase:   "none",
 			},
 			"",
 		},
@@ -161,8 +173,10 @@ ldapAddr: myldapserver.local
 ldapTLS: False
 ldapTLSVerify: False
 ldapBindUser: binduser
-ldapBase: "DC=fake,DC=org"
-ldapSearch: "(&(objectClass=organizationalPerson)(sAMAccountName=%s))"
+ldapUserBase: "DC=fake,DC=org"
+ldapUserSearch: "(&(objectClass=organizationalPerson)(sAMAccountName=%s))"
+ldapGroupBase: "DC=fake,DC=org"
+ldapGroupSearch: "(&(objectClass=group)(member=%s))"
 `),
 			Principals{},
 			"Missing config entries (ldapPort, ldapBindPassword) for Principals",
