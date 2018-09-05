@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"os/user"
+	"strings"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/howeyc/gopass"
@@ -75,6 +77,13 @@ var rootCmd = &cobra.Command{
 		}
 
 		color.Green("\nYour SSH Key is successfully signed")
+
+		principals, before, err := client.CertInfo(signedKey)
+		if err != nil {
+			return err
+		}
+		color.Blue("\n  Principals: %s", strings.Join(principals, ","))
+		color.Blue("  Valid until: %s", time.Unix(int64(before), 0))
 
 		return nil
 	},
