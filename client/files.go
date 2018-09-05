@@ -73,6 +73,7 @@ func CertStillValid(path string) bool {
 	return parsedCert.ValidBefore > uint64(time.Now().Unix())
 }
 
+// CertInfo extract principals and expiration from SSH certificate
 func CertInfo(cert string) (principals []string, before uint64, err error) {
 	parsedKey, _, _, _, err := ssh.ParseAuthorizedKey([]byte(cert))
 	if err != nil {
