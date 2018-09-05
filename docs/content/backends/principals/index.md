@@ -31,8 +31,10 @@ principalsOpts:
   ldapTLSVerify: False
   ldapBindUser: "cn=serviceuser,ou=svcaccts,dc=glauth,dc=com"
   ldapBindPassword: "mysecret" 
-  ldapBase: "dc=glauth,dc=com"
-  ldapSearch: "(cn=%s)"
+  ldapUserBase: "dc=glauth,dc=com"
+  ldapUserSearch: "(cn=%s)"
+  ldapGroupBase: "dc=glauth,dc=com"
+  ldapGroupSearch: "(&(objectClass=group)((member=%s)))"
 ```
 
 ### Options
@@ -43,5 +45,9 @@ principalsOpts:
   * **ldapTLSVerify** - Enable/disable verification of SSL/TLS certificate
   * **ldapBindUser** - LDAP bind user
   * **ldapBindPassword** - LDAP bind password
-  * **ldapBase** - LDAP search base
-  * **ldapSearch** - LDAP search string to find user
+  * **ldapUserBase** - LDAP user search base
+  * **ldapUserSearch** - LDAP search string to find user
+  * **ldapGroupBase** - LDAP groups search base
+  * **ldapGroupSearch** - LDAP search string to find groups
+  * **ldapGroupPrefix** - Filter LDAP groups by prefix
+  * **transformCase** - Change case of returned principals (default: none) (must be "none", "lower" or "upper")

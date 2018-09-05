@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -14,15 +15,18 @@ import (
 
 // Principals struct represents LDAP options for getting principals list from LDAP.
 type Principals struct {
-	Address      string
-	Port         int
-	BindUser     string
-	BindPassword string
-	SearchBase   string
-	SearchStr    string
-	UseTLS       bool
-	TLSVerify    bool
-	Prefix       string
+	Address         string
+	Port            int
+	BindUser        string
+	BindPassword    string
+	UserSearchBase  string
+	UserSearchStr   string
+	GroupSearchBase string
+	GroupSearchStr  string
+	UseTLS          bool
+	TLSVerify       bool
+	Prefix          string
+	TransformCase   string
 }
 
 // Init method is used to ingest config of Principals
@@ -34,8 +38,10 @@ func (p *Principals) Init(config *viper.Viper) error {
 		"ldapTLSVerify",
 		"ldapBindUser",
 		"ldapBindPassword",
-		"ldapBase",
-		"ldapSearch",
+		"ldapUserBase",
+		"ldapUserSearch",
+		"ldapGroupBase",
+		"ldapGroupSearch",
 	}
 
 	var missingEntriesLst []string
@@ -50,14 +56,24 @@ func (p *Principals) Init(config *viper.Viper) error {
 		return fmt.Errorf("Missing config entries (%s) for Principals", missingEntries)
 	}
 
+	config.SetDefault("transformCase", "none")
+	tc := config.GetString("transformCase")
+	if tc != "none" && tc != "lower" && tc != "upper" {
+		return errors.New("transformCase config entry for Principals must be none, lower or upper")
+	}
+
 	p.Address = config.GetString("ldapAddr")
 	p.Port = config.GetInt("ldapPort")
 	p.UseTLS = config.GetBool("ldapTLS")
 	p.TLSVerify = config.GetBool("ldapTLSVerify")
 	p.BindUser = config.GetString("ldapBindUser")
 	p.BindPassword = config.GetString("ldapBindPassword")
-	p.SearchBase = config.GetString("ldapBase")
-	p.SearchStr = config.GetString("ldapSearch")
+	p.UserSearchBase = config.GetString("ldapUserBase")
+	p.UserSearchStr = config.GetString("ldapUserSearch")
+	p.GroupSearchBase = config.GetString("ldapGroupBase")
+	p.GroupSearchStr = config.GetString("ldapGroupSearch")
+	p.Prefix = config.GetString("ldapGroupPrefix")
+	p.TransformCase = tc
 
 	return nil
 }
@@ -84,27 +100,49 @@ func (p Principals) Get(user string) (principals []string, err error) {
 		return principals, err
 	}
 
-	searchReq := ldap.NewSearchRequest(
-		p.SearchBase, ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-		fmt.Sprintf(p.SearchStr, user),
-		[]string{"memberOf"},
+	userSearchReq := ldap.NewSearchRequest(
+		p.UserSearchBase, ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
+		fmt.Sprintf(p.UserSearchStr, user),
+		[]string{},
 		nil,
 	)
 
-	sr, err := l.Search(searchReq)
+	usr, err := l.Search(userSearchReq)
 	if err != nil {
 		return principals, err
 	}
 
-	if len(sr.Entries) > 1 {
+	if len(usr.Entries) > 1 {
 		return principals, errors.New("too many user entries returned")
-	} else if len(sr.Entries) == 0 {
+	} else if len(usr.Entries) == 0 {
 		return principals, errors.New("user not found")
 	}
 
-	principals = sr.Entries[0].GetAttributeValues("memberOf")
+	groupSearchRequest := ldap.NewSearchRequest(
+		p.GroupSearchBase,
+		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
+		fmt.Sprintf(p.GroupSearchStr, usr.Entries[0].DN),
+		[]string{},
+		nil,
+	)
+
+	gsr, err := l.Search(groupSearchRequest)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if len(gsr.Entries) == 0 {
+		return principals, errors.New("no group found for this user")
+	}
+
+	for _, group := range gsr.Entries {
+		principals = append(principals, group.DN)
+	}
+
 	principals = getCN(principals)
 	principals = filterByPrefix(p.Prefix, principals)
+	principals = transformCase(p.TransformCase, principals)
+	log.Println(p.TransformCase)
 
 	return principals, nil
 }
@@ -132,4 +170,26 @@ func filterByPrefix(prefix string, list []string) []string {
 		}
 	}
 	return principals
+}
+
+func transformCase(transform string, list []string) []string {
+	principals := []string{}
+
+	if transform == "lower" {
+		for _, str := range list {
+			principals = append(principals, strings.ToLower(str))
+		}
+
+		return principals
+	}
+
+	if transform == "upper" {
+		for _, str := range list {
+			principals = append(principals, strings.ToUpper(str))
+		}
+
+		return principals
+	}
+
+	return list
 }
