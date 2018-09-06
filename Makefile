@@ -15,9 +15,9 @@ site:
 	cd docs && hugo
 
 lint_install:
-	curl -LO https://github.com/alecthomas/gometalinter/releases/download/v2.0.5/gometalinter-2.0.5-linux-amd64.tar.gz
-	tar xf gometalinter-2.0.5-linux-amd64.tar.gz
-	mv gometalinter-2.0.5-linux-amd64/* /home/travis/bin/
+	curl -LO https://github.com/alecthomas/gometalinter/releases/download/v2.0.10/gometalinter-2.0.10-linux-amd64.tar.gz
+	tar xf gometalinter-2.0.10-linux-amd64.tar.gz
+	mv gometalinter-2.0.10-linux-amd64/* /home/travis/bin/
 
 lint: ## Lint the files
 	gometalinter --vendor --exclude=.*_test.go --concurrency=1 --deadline=1000s --line-length=100 --enable=goimports --enable=lll --enable=misspell --enable=nakedret --enable=unparam ./...
@@ -26,7 +26,7 @@ test: ## Run unittests
 	go test -race ${PKG_LIST}
 
 build: ## Build the binary file
-	go build -ldflags "-w -s -extldflags '-static' -X github.com/signmykeyio/signmykey/cmd.versionString=$(VERSION)"
+	go build -ldflags "-extldflags '-static' -X github.com/signmykeyio/signmykey/cmd.versionString=$(VERSION)"
 
 fpm_install:
 	sudo apt update && sudo apt install ruby-dev build-essential rpm -y

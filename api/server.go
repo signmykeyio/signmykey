@@ -36,9 +36,7 @@ func Serve(startconfig Config) error {
 	config = startconfig
 
 	// Config logging
-	formatter := &log.TextFormatter{
-	//FullTimestamp: true,
-	}
+	formatter := &log.TextFormatter{}
 	log.SetFormatter(formatter)
 
 	if config.TLSDisable {
