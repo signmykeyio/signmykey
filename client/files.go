@@ -19,7 +19,7 @@ func GetUserPubKey(key string) (string, error) {
 		return "", err
 	}
 
-	pubKey, err := ioutil.ReadFile(pubKeyPath)
+	pubKey, err := ioutil.ReadFile(pubKeyPath) // nolint: gosec
 	if err != nil {
 		return "", err
 	}
@@ -58,7 +58,7 @@ func CertStillValid(path string) bool {
 		return false
 	}
 
-	cert, err := ioutil.ReadFile(fullPath)
+	cert, err := ioutil.ReadFile(fullPath) // nolint: gosec
 	if err != nil {
 		return false
 	}

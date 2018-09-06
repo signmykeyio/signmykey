@@ -185,7 +185,7 @@ func getLDAPConn(p Principals) (l *ldap.Conn, err error) {
 	uri := fmt.Sprintf("%s:%d", p.Address, p.Port)
 
 	if p.UseTLS {
-		l, err = ldap.DialTLS("tcp", uri, &tls.Config{InsecureSkipVerify: !p.TLSVerify}) // nolint: gas
+		l, err = ldap.DialTLS("tcp", uri, &tls.Config{InsecureSkipVerify: !p.TLSVerify}) // nolint: gosec
 	} else {
 		l, err = ldap.Dial("tcp", uri)
 	}

@@ -67,7 +67,7 @@ func (a *Authenticator) Login(user, password string) (valid bool, err error) {
 	uri := fmt.Sprintf("%s:%d", a.Address, a.Port)
 
 	if a.UseTLS {
-		l, err = ldap.DialTLS("tcp", uri, &tls.Config{InsecureSkipVerify: !a.TLSVerify}) // nolint: gas
+		l, err = ldap.DialTLS("tcp", uri, &tls.Config{InsecureSkipVerify: !a.TLSVerify}) // nolint: gosec
 	} else {
 		l, err = ldap.Dial("tcp", uri)
 	}
