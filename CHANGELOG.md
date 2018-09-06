@@ -1,3 +1,21 @@
+## 0.2.0 (September 6th, 2018)
+
+DEPRECATIONS/CHANGES:
+  * upgrade from Go 1.10 to 1.11
+  * client:
+    * adding "SMK" prefix to env vars to avoid collision with existing OS vars #34
+  * server:
+    * LDAP Principals
+      * ldapBase and ldapSearch params are replaced by "ldapUserBase" and "ldapUserSearch" #36
+      * new "ldapGroupBase" and "ldapGroupSearch" params are required to search user groups #36
+
+FEATURES:
+  * server:
+    * force TLS to 1.2 with strong ciphers #32
+    * LDAP Principals: support custom group search filter and case modification #36
+  * client:
+    * display certificate principals and expiration on successful request #35
+
 ## 0.1.1 (August 19th, 2018)
 
 BUG FIXES:
