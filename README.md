@@ -14,16 +14,23 @@ Three types of backends are supported by Signmykey:
 * **Principals**: list of principals applied to SSH certificates can be created dynamically from LDAP groups or set staticaly in local config.
 * **Signer**: cryptographic signing operations of SSH certificates can be done directly by Signmykey or via Hashicorp Vault.
 
-## Quickstart
+## Install
 
-* Download Signmykey binary:
+* Download **signmykey** binary:
 ```
-curl -LO https://github.com/signmykeyio/signmykey/releases/download/0.1.1/signmykey && chmod +x signmykey
+curl -LO https://github.com/signmykeyio/signmykey/releases/download/0.2.0/signmykey && chmod +x signmykey
 ```
+
+* Install it in your PATH:
+```
+sudo mv signmykey /usr/bin/signmykey
+```
+
+## Quickstart
 
 * Start server in dev mode (replace *myremoteuser* by the name of the user you want to connect on remote server):
 ```
-./signmykey server dev -u myremoteuser
+signmykey server dev -u myremoteuser
 ```
 
 * Follow "Server side" instructions displayed by previous command, ex:
