@@ -1,3 +1,8 @@
+## 0.2.1 (September 7th, 2018)
+
+IMPROVEMENTS:
+  * Add cross-compile to Makefile and Travis
+
 ## 0.2.0 (September 6th, 2018)
 
 DEPRECATIONS/CHANGES:
