@@ -55,7 +55,8 @@ jobs:
       skip-cleanup: true
       api_key:
         secure: ZtPRK96VNHkJzwXMZ8BbYaU5JIkPvxJfeENjafaZ3PEx54oPwFcizypeiddr7S27ivvAavOvu9CJkhETiGINBkCxfwK5u4NXvR4l4fZiajUpb0zZ9GC9R79HeXhMZ9wGsJcfgF1xsxOISWdnXSBBRZpTbd2UiWgoYeSxGQ3THYOXturEZo110Zt9FKmOw37X0BK2Pa2A1kxsVVBKYhYsxhL6tQdhJZITakxmB/qCsYQ/O26IKb3NULLIS3SbI7K8J7rswUU3qtwSJyRoGNUlDei2PmONTCo9hNk/UEUE7N4D4qbdfHXtnOxTo3CI2KN3irzMRW6lHoCOfUeJjYxNdEgvzm4UAS5zP9uPynKMfWEV2zp35p3NWtrsjyYT7sCH7SmCimLIkTNw2S5Yfnk5uZHrhacTLsonfXzBLe2YpvP6ARYm+KctRVuzeRcEIKtjBmdPrLix9D3epoANyxK1BmiVOBotNEO1R1rOaPSdGNI9WhjbRNRun5GtIW0dRDKidH9UwOj0qeAU8FnJ5Pg3BXP8fRdvCo3QbQ/D7vIOqinvxRuiy7em4JCe2KF3TpkBqqbNwE4aoRDYzFBlMIFNwPTts6krSkuIcs0xBo+2plJB3ENlpLrC3lG4GoFu+N1gpATrHFwF/l/yLe46CSudZVJNq2DRsxEBqe159DH7B4s=
-      file: signmykey
+      file_glob: true
+      file: bin/*
       on:
         tags: true
   - stage: site

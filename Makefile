@@ -26,7 +26,9 @@ test: ## Run unittests
 	go test -race ${PKG_LIST}
 
 build: ## Build the binary file
-	go build -ldflags "-extldflags '-static' -X github.com/signmykeyio/signmykey/cmd.versionString=$(VERSION)"
+	go get github.com/mitchellh/gox
+	mkdir -p bin
+	gox -ldflags="-extldflags '-static' -X github.com/signmykeyio/signmykey/cmd.versionString=$(VERSION)" -output="bin/signmykey_{{.OS}}_{{.Arch}}"
 
 fpm_install:
 	sudo apt update && sudo apt install ruby-dev build-essential rpm -y
