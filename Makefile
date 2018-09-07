@@ -26,13 +26,16 @@ test: ## Run unittests
 	go test -race ${PKG_LIST}
 
 build: ## Build the binary file
-	go build -ldflags "-extldflags '-static' -X github.com/signmykeyio/signmykey/cmd.versionString=$(VERSION)"
+	go get github.com/mitchellh/gox
+	mkdir -p bin
+	gox -ldflags="-extldflags '-static' -X github.com/signmykeyio/signmykey/cmd.versionString=$(VERSION)" -output="bin/signmykey_{{.OS}}_{{.Arch}}"
 
 fpm_install:
 	sudo apt update && sudo apt install ruby-dev build-essential rpm -y
 	gem install --no-ri --no-rdoc fpm
 
 fpm:
+	cp bin/signmykey_linux_amd64 signmykey
 	fpm -s dir -t deb -n signmykey -m "contact@pablo-ruth.fr" --url "https://github.com/signmykeyio/signmykey" --description "An automated SSH Certificate Authority" --category "admin" -v $(VERSION) --prefix /usr/bin signmykey
 	fpm -s dir -t rpm -n signmykey -m "contact@pablo-ruth.fr" --url "https://github.com/signmykeyio/signmykey" --description "An automated SSH Certificate Authority" --category "admin" -v $(VERSION) --prefix /usr/bin signmykey
 
