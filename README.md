@@ -16,11 +16,14 @@ Three types of backends are supported by Signmykey:
 
 ## Install
 
-* Download **signmykey** binary:
+* Download **signmykey** binary (on 64bits linux):
 ```
-curl -LO https://github.com/signmykeyio/signmykey/releases/download/0.2.0/signmykey && chmod +x signmykey
+curl -Lo signmykey https://github.com/signmykeyio/signmykey/releases/download/0.2.1/signmykey_linux_amd64
 ```
-
+* Add execute permission:
+```
+chmod +x signmykey
+```
 * Install it in your PATH:
 ```
 sudo mv signmykey /usr/bin/signmykey
