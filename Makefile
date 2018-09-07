@@ -35,6 +35,7 @@ fpm_install:
 	gem install --no-ri --no-rdoc fpm
 
 fpm:
+	cp bin/signmykey_linux_amd64 signmykey
 	fpm -s dir -t deb -n signmykey -m "contact@pablo-ruth.fr" --url "https://github.com/signmykeyio/signmykey" --description "An automated SSH Certificate Authority" --category "admin" -v $(VERSION) --prefix /usr/bin signmykey
 	fpm -s dir -t rpm -n signmykey -m "contact@pablo-ruth.fr" --url "https://github.com/signmykeyio/signmykey" --description "An automated SSH Certificate Authority" --category "admin" -v $(VERSION) --prefix /usr/bin signmykey
 
