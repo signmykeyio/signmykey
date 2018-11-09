@@ -28,6 +28,7 @@ test: ## Run unittests
 build: ## Build the binary file
 	go get github.com/mitchellh/gox
 	mkdir -p bin
+	go mod download
 	gox -osarch="darwin/386 darwin/amd64 linux/386 linux/amd64 linux/arm" -ldflags="-extldflags '-static' -X github.com/signmykeyio/signmykey/cmd.versionString=$(VERSION)" -output="bin/signmykey_{{.OS}}_{{.Arch}}"
 	zip bin/signmykey_darwin_386.zip bin/signmykey_darwin_386
 	zip bin/signmykey_darwin_amd64.zip bin/signmykey_darwin_amd64
