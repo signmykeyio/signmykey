@@ -15,7 +15,7 @@ site:
 	cd docs && hugo
 
 lint_install:
-	curl -LO https://github.com/alecthomas/gometalinter/releases/download/v2.0.11/gometalinter-2.0.11-linux-amd64.tar.gz
+	curl -LO https://github.com/alecthomas/gometalinter/releases/download/v2.0.12/gometalinter-2.0.12-linux-amd64.tar.gz
 	tar xf gometalinter-2.0.11-linux-amd64.tar.gz
 	mv gometalinter-2.0.11-linux-amd64/* /home/travis/bin/
 
