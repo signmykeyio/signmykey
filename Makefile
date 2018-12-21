@@ -16,8 +16,8 @@ site:
 
 lint_install:
 	curl -LO https://github.com/alecthomas/gometalinter/releases/download/v2.0.12/gometalinter-2.0.12-linux-amd64.tar.gz
-	tar xf gometalinter-2.0.11-linux-amd64.tar.gz
-	mv gometalinter-2.0.11-linux-amd64/* /home/travis/bin/
+	tar xf gometalinter-2.0.12-linux-amd64.tar.gz
+	mv gometalinter-2.0.12-linux-amd64/* /home/travis/bin/
 
 lint: ## Lint the files
 	gometalinter --exclude=.*_test.go --concurrency=1 --deadline=1000s --line-length=100 --disable-all --enable=vet --enable=vetshadow --enable=deadcode --enable=gocyclo --enable=golint --enable=dupl --enable=ineffassign --enable=goconst --enable=gosec --enable=goimports --enable=lll --enable=misspell ./...
