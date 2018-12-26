@@ -1,12 +1,13 @@
 PKG_LIST := $(shell go list ./... | grep -v /vendor/)
 GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
-VERSION := ${VERSION}
-BINTRAY_USER := ${BINTRAY_USER}
-BINTRAY_TOKEN := ${BINTRAY_TOKEN}
+SHORT_VERSION := $(shell echo ${VERSION} | cut -d"v" -f2)
 
 .PHONY: all build test lint site
 
 all: build
+
+toto:
+	echo ${SHORT_VERSION}
 
 site_install:
 	curl -LO https://github.com/gohugoio/hugo/releases/download/v0.46/hugo_0.46_Linux-64bit.tar.gz
@@ -31,7 +32,7 @@ build: ## Build the binary file
 	go get github.com/mitchellh/gox
 	mkdir -p bin
 	go mod download
-	gox -osarch="darwin/386 darwin/amd64 linux/386 linux/amd64 linux/arm" -ldflags="-extldflags '-static' -X github.com/signmykeyio/signmykey/cmd.versionString=$(VERSION)" -output="bin/signmykey_{{.OS}}_{{.Arch}}"
+	gox -osarch="darwin/386 darwin/amd64 linux/386 linux/amd64 linux/arm" -ldflags="-extldflags '-static' -X github.com/signmykeyio/signmykey/cmd.versionString=${SHORT_VERSION}" -output="bin/signmykey_{{.OS}}_{{.Arch}}"
 	zip bin/signmykey_darwin_386.zip bin/signmykey_darwin_386
 	zip bin/signmykey_darwin_amd64.zip bin/signmykey_darwin_amd64
 	zip bin/signmykey_linux_386.zip bin/signmykey_linux_386
@@ -44,24 +45,24 @@ fpm_install:
 
 fpm:
 	cp bin/signmykey_linux_amd64 signmykey
-	fpm -s dir -t deb -n signmykey -m "contact@pablo-ruth.fr" --url "https://github.com/signmykeyio/signmykey" --description "An automated SSH Certificate Authority" --category "admin" -v $(VERSION) --prefix /usr/bin signmykey
-	fpm -s dir -t rpm -n signmykey -m "contact@pablo-ruth.fr" --url "https://github.com/signmykeyio/signmykey" --description "An automated SSH Certificate Authority" --category "admin" -v $(VERSION) --prefix /usr/bin signmykey
+	fpm -s dir -t deb -n signmykey -m "contact@pablo-ruth.fr" --url "https://github.com/signmykeyio/signmykey" --description "An automated SSH Certificate Authority" --category "admin" -v ${SHORT_VERSION} --prefix /usr/bin signmykey
+	fpm -s dir -t rpm -n signmykey -m "contact@pablo-ruth.fr" --url "https://github.com/signmykeyio/signmykey" --description "An automated SSH Certificate Authority" --category "admin" -v ${SHORT_VERSION} --prefix /usr/bin signmykey
 
 fpm_upload_dev:
-	curl -u$(BINTRAY_USER):$(BINTRAY_TOKEN) --data '{"name":"$(VERSION)","desc":"$(VERSION)"}' https://api.bintray.com//packages/signmykeyio/signmykey-dev-deb/signmykey/versions
-	curl -T signmykey_$(VERSION)_amd64.deb -u$(BINTRAY_USER):$(BINTRAY_TOKEN) "https://api.bintray.com/content/signmykeyio/signmykey-dev-deb/signmykey/$(VERSION)/pool/signmykey_$(VERSION)_amd64.deb;deb_distribution=stable;deb_component=main;deb_architecture=amd64"
-	curl -u$(BINTRAY_USER):$(BINTRAY_TOKEN) --data '{"discard":true,"publish_wait_for_secs":-1,"subject":"signmykey.io"}' "https://api.bintray.com/content/signmykeyio/signmykey-dev-deb/signmykey/$(VERSION)/publish"
-	curl -u$(BINTRAY_USER):$(BINTRAY_TOKEN) --data '{"name":"$(VERSION)","desc":"$(VERSION)"}' https://api.bintray.com//packages/signmykeyio/signmykey-dev-rpm/signmykey/versions
-	curl -T signmykey-$(VERSION)-1.x86_64.rpm -u$(BINTRAY_USER):$(BINTRAY_TOKEN) "https://api.bintray.com/content/signmykeyio/signmykey-dev-rpm/signmykey/$(VERSION)/pool/signmykey-$(VERSION)-1.x86_64.rpm"
-	curl -u$(BINTRAY_USER):$(BINTRAY_TOKEN) --data '{"discard":true,"publish_wait_for_secs":-1,"subject":"signmykey.io"}' "https://api.bintray.com/content/signmykeyio/signmykey-dev-rpm/signmykey/$(VERSION)/publish"
+	curl -u$(BINTRAY_USER):$(BINTRAY_TOKEN) --data '{"name":"${SHORT_VERSION}","desc":"${SHORT_VERSION}"}' https://api.bintray.com//packages/signmykeyio/signmykey-dev-deb/signmykey/versions
+	curl -T signmykey_${SHORT_VERSION}_amd64.deb -u$(BINTRAY_USER):$(BINTRAY_TOKEN) "https://api.bintray.com/content/signmykeyio/signmykey-dev-deb/signmykey/${SHORT_VERSION}/pool/signmykey_${SHORT_VERSION}_amd64.deb;deb_distribution=stable;deb_component=main;deb_architecture=amd64"
+	curl -u$(BINTRAY_USER):$(BINTRAY_TOKEN) --data '{"discard":true,"publish_wait_for_secs":-1,"subject":"signmykey.io"}' "https://api.bintray.com/content/signmykeyio/signmykey-dev-deb/signmykey/${SHORT_VERSION}/publish"
+	curl -u$(BINTRAY_USER):$(BINTRAY_TOKEN) --data '{"name":"${SHORT_VERSION}","desc":"${SHORT_VERSION}"}' https://api.bintray.com//packages/signmykeyio/signmykey-dev-rpm/signmykey/versions
+	curl -T signmykey-${SHORT_VERSION}-1.x86_64.rpm -u$(BINTRAY_USER):$(BINTRAY_TOKEN) "https://api.bintray.com/content/signmykeyio/signmykey-dev-rpm/signmykey/${SHORT_VERSION}/pool/signmykey-${SHORT_VERSION}-1.x86_64.rpm"
+	curl -u$(BINTRAY_USER):$(BINTRAY_TOKEN) --data '{"discard":true,"publish_wait_for_secs":-1,"subject":"signmykey.io"}' "https://api.bintray.com/content/signmykeyio/signmykey-dev-rpm/signmykey/${SHORT_VERSION}/publish"
 	
 fpm_upload_tag:
-	curl -u$(BINTRAY_USER):$(BINTRAY_TOKEN) --data '{"name":"$(VERSION)","desc":"$(VERSION)"}' https://api.bintray.com//packages/signmykeyio/signmykey-deb/signmykey/versions
-	curl -T signmykey_$(VERSION)_amd64.deb -u$(BINTRAY_USER):$(BINTRAY_TOKEN) "https://api.bintray.com/content/signmykeyio/signmykey-deb/signmykey/$(VERSION)/pool/signmykey_$(VERSION)_amd64.deb;deb_distribution=stable;deb_component=main;deb_architecture=amd64"
-	curl -u$(BINTRAY_USER):$(BINTRAY_TOKEN) --data '{"discard":true,"publish_wait_for_secs":-1,"subject":"signmykey.io"}' "https://api.bintray.com/content/signmykeyio/signmykey-deb/signmykey/$(VERSION)/publish"
-	curl -u$(BINTRAY_USER):$(BINTRAY_TOKEN) --data '{"name":"$(VERSION)","desc":"$(VERSION)"}' https://api.bintray.com//packages/signmykeyio/signmykey-rpm/signmykey/versions
-	curl -T signmykey-$(VERSION)-1.x86_64.rpm -u$(BINTRAY_USER):$(BINTRAY_TOKEN) "https://api.bintray.com/content/signmykeyio/signmykey-rpm/signmykey/$(VERSION)/pool/signmykey-$(VERSION)-1.x86_64.rpm"
-	curl -u$(BINTRAY_USER):$(BINTRAY_TOKEN) --data '{"discard":true,"publish_wait_for_secs":-1,"subject":"signmykey.io"}' "https://api.bintray.com/content/signmykeyio/signmykey-rpm/signmykey/$(VERSION)/publish"
+	curl -u$(BINTRAY_USER):$(BINTRAY_TOKEN) --data '{"name":"${SHORT_VERSION}","desc":"${SHORT_VERSION}"}' https://api.bintray.com//packages/signmykeyio/signmykey-deb/signmykey/versions
+	curl -T signmykey_${SHORT_VERSION}_amd64.deb -u$(BINTRAY_USER):$(BINTRAY_TOKEN) "https://api.bintray.com/content/signmykeyio/signmykey-deb/signmykey/${SHORT_VERSION}/pool/signmykey_${SHORT_VERSION}_amd64.deb;deb_distribution=stable;deb_component=main;deb_architecture=amd64"
+	curl -u$(BINTRAY_USER):$(BINTRAY_TOKEN) --data '{"discard":true,"publish_wait_for_secs":-1,"subject":"signmykey.io"}' "https://api.bintray.com/content/signmykeyio/signmykey-deb/signmykey/${SHORT_VERSION}/publish"
+	curl -u$(BINTRAY_USER):$(BINTRAY_TOKEN) --data '{"name":"${SHORT_VERSION}","desc":"${SHORT_VERSION}"}' https://api.bintray.com//packages/signmykeyio/signmykey-rpm/signmykey/versions
+	curl -T signmykey-${SHORT_VERSION}-1.x86_64.rpm -u$(BINTRAY_USER):$(BINTRAY_TOKEN) "https://api.bintray.com/content/signmykeyio/signmykey-rpm/signmykey/${SHORT_VERSION}/pool/signmykey-${SHORT_VERSION}-1.x86_64.rpm"
+	curl -u$(BINTRAY_USER):$(BINTRAY_TOKEN) --data '{"discard":true,"publish_wait_for_secs":-1,"subject":"signmykey.io"}' "https://api.bintray.com/content/signmykeyio/signmykey-rpm/signmykey/${SHORT_VERSION}/publish"
 
 help: ## Display this help screen
 	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
