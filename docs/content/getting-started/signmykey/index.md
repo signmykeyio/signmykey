@@ -4,9 +4,10 @@ title: Signmykey
 
 ## Installation
 
-On Ubuntu 16.04, add this to the file */etc/apt/sources.list.d/signmykey.list*
+On Ubuntu 16.04+, add signmykey repository and key:
 ```
-echo "deb [trusted=yes] https://apt.signmykey.io/signmykey/ xenial main" > /etc/apt/sources.list.d/signmykey.list
+echo "deb https://apt.signmykey.io/ stable main" > /etc/apt/sources.list.d/signmykey.list
+curl https://gpg.signmykey.io/signmykey.pub | apt-key add -
 ``` 
 
 Then 
