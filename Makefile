@@ -33,11 +33,11 @@ build: ## Build the binary file
 	mkdir -p bin
 	go mod download
 	gox -osarch="darwin/386 darwin/amd64 linux/386 linux/amd64 linux/arm" -ldflags="-extldflags '-static' -X github.com/signmykeyio/signmykey/cmd.versionString=${SHORT_VERSION}" -output="bin/signmykey_{{.OS}}_{{.Arch}}"
-	zip bin/signmykey_darwin_386.zip bin/signmykey_darwin_386
-	zip bin/signmykey_darwin_amd64.zip bin/signmykey_darwin_amd64
-	zip bin/signmykey_linux_386.zip bin/signmykey_linux_386
-	zip bin/signmykey_linux_amd64.zip bin/signmykey_linux_amd64
-	zip bin/signmykey_linux_arm.zip bin/signmykey_linux_arm
+	zip -j bin/signmykey_darwin_386.zip bin/signmykey_darwin_386
+	zip -j bin/signmykey_darwin_amd64.zip bin/signmykey_darwin_amd64
+	zip -j bin/signmykey_linux_386.zip bin/signmykey_linux_386
+	zip -j bin/signmykey_linux_amd64.zip bin/signmykey_linux_amd64
+	zip -j bin/signmykey_linux_arm.zip bin/signmykey_linux_arm
 
 fpm_install:
 	sudo apt update && sudo apt install ruby-dev build-essential rpm -y
@@ -50,7 +50,7 @@ fpm:
 
 fpm_upload_dev:
 	curl -u$(BINTRAY_USER):$(BINTRAY_TOKEN) --data '{"name":"${SHORT_VERSION}","desc":"${SHORT_VERSION}"}' https://api.bintray.com//packages/signmykeyio/signmykey-dev-deb/signmykey/versions
-	curl -T signmykey_${SHORT_VERSION}_amd64.deb -u$(BINTRAY_USER):$(BINTRAY_TOKEN) "https://api.bintray.com/content/signmykeyio/signmykey-dev-deb/signmykey/${SHORT_VERSION}/pool/signmykey_${SHORT_VERSION}_amd64.deb;deb_distribution=stable;deb_component=main;deb_architecture=amd64"
+	curl -T signmykey_${SHORT_VERSION}_amd64.https://gpg.signmykey.io/signmykey.pubdeb -u$(BINTRAY_USER):$(BINTRAY_TOKEN) "https://api.bintray.com/content/signmykeyio/signmykey-dev-deb/signmykey/${SHORT_VERSION}/pool/signmykey_${SHORT_VERSION}_amd64.deb;deb_distribution=stable;deb_component=main;deb_architecture=amd64"
 	curl -u$(BINTRAY_USER):$(BINTRAY_TOKEN) --data '{"discard":true,"publish_wait_for_secs":-1,"subject":"signmykey.io"}' "https://api.bintray.com/content/signmykeyio/signmykey-dev-deb/signmykey/${SHORT_VERSION}/publish"
 	curl -u$(BINTRAY_USER):$(BINTRAY_TOKEN) --data '{"name":"${SHORT_VERSION}","desc":"${SHORT_VERSION}"}' https://api.bintray.com//packages/signmykeyio/signmykey-dev-rpm/signmykey/versions
 	curl -T signmykey-${SHORT_VERSION}-1.x86_64.rpm -u$(BINTRAY_USER):$(BINTRAY_TOKEN) "https://api.bintray.com/content/signmykeyio/signmykey-dev-rpm/signmykey/${SHORT_VERSION}/pool/signmykey-${SHORT_VERSION}-1.x86_64.rpm"
