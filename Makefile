@@ -6,9 +6,6 @@ SHORT_VERSION := $(shell echo ${VERSION} | cut -d"v" -f2)
 
 all: build
 
-toto:
-	echo ${SHORT_VERSION}
-
 site_install:
 	curl -LO https://github.com/gohugoio/hugo/releases/download/v0.46/hugo_0.46_Linux-64bit.tar.gz
 	tar -xvzf hugo_0.46_Linux-64bit.tar.gz

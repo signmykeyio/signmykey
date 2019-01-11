@@ -83,7 +83,6 @@ func Router() *chi.Mux {
 		middleware.RealIP,
 		middleware.Logger,
 		middleware.Recoverer,
-		middleware.CloseNotify,
 		middleware.Timeout(15*time.Second),
 	)
 
