@@ -5,7 +5,7 @@ require (
 	github.com/dghubble/sling v1.1.0
 	github.com/fatih/color v1.7.0
 	github.com/fsnotify/fsnotify v1.4.7
-	github.com/go-chi/chi v3.3.2+incompatible
+	github.com/go-chi/chi v4.0.0+incompatible
 	github.com/go-chi/render v1.0.1
 	github.com/google/go-querystring v0.0.0-20170111101155-53e6ce116135
 	github.com/hashicorp/hcl v0.0.0-20180404174102-ef8a98b0bbce
