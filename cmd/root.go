@@ -118,7 +118,7 @@ func init() {
 		os.Exit(1)
 	}
 
-	rootCmd.Flags().StringP("password", "p", "", "Password used to login, prompted interactively if not defined with flag or config")
+	rootCmd.Flags().StringP("password", "p", "", "Password used to login")
 	if err := viper.BindPFlag("password", rootCmd.Flags().Lookup("password")); err != nil {
 		color.Red(fmt.Sprintf("%s", err))
 		os.Exit(1)
