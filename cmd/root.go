@@ -54,10 +54,14 @@ var rootCmd = &cobra.Command{
 			username = user.Username
 		}
 
-		fmt.Printf("Password (will be hidden): ")
-		password, err := gopass.GetPasswd()
-		if err != nil {
-			return err
+		password := viper.GetString("password")
+		if password == "" {
+			fmt.Printf("Password (will be hidden): ")
+			passwordBytes, err := gopass.GetPasswd()
+			if err != nil {
+				return err
+			}
+			password = string(passwordBytes)
 		}
 
 		pubKey, err := client.GetUserPubKey(viper.GetString("key"))
@@ -66,7 +70,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		smkAddr := viper.GetString("addr")
-		signedKey, err := client.Sign(smkAddr, username, string(password), pubKey)
+		signedKey, err := client.Sign(smkAddr, username, password, pubKey)
 		if err != nil {
 			return err
 		}
@@ -110,6 +114,12 @@ func init() {
 
 	rootCmd.Flags().StringP("user", "u", "", "User used to login instead of current")
 	if err := viper.BindPFlag("user", rootCmd.Flags().Lookup("user")); err != nil {
+		color.Red(fmt.Sprintf("%s", err))
+		os.Exit(1)
+	}
+
+	rootCmd.Flags().StringP("password", "p", "", "Password used to login")
+	if err := viper.BindPFlag("password", rootCmd.Flags().Lookup("password")); err != nil {
 		color.Red(fmt.Sprintf("%s", err))
 		os.Exit(1)
 	}
