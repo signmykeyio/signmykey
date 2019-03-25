@@ -86,6 +86,11 @@ func Router() *chi.Mux {
 		middleware.Timeout(15*time.Second),
 	)
 
+	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "<title>Signmykey</title>")
+		fmt.Fprintf(w, "Welcome to <a href=https://signmykey.io/>Signmykey</a> service !")
+	})
+
 	router.Route("/v1", func(r chi.Router) {
 		r.Get("/ping", pingHandler)
 		r.Post("/sign", signHandler)
