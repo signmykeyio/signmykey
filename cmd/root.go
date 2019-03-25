@@ -80,14 +80,14 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		color.Green("\nYour SSH Key is successfully signed")
+		color.Green("\nYour SSH Key is successfully signed !")
 
 		principals, before, err := client.CertInfo(signedKey)
 		if err != nil {
 			return err
 		}
-		color.Blue("\n  Principals: %s", strings.Join(principals, ","))
-		color.Blue("  Valid until: %s", time.Unix(int64(before), 0))
+		color.Green("\n  - Valid until: %s", time.Unix(int64(before), 0))
+		color.Green("  - Principals: %s", strings.Join(principals, ","))
 
 		return nil
 	},
