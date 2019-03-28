@@ -102,7 +102,7 @@ func WriteUserSignedKey(signedKey string, key string) (err error) {
 		}
 	}()
 
-	err = signedKeyFile.Chmod(0644)
+	err = os.Chmod(signedKeyPath, 0644)
 	if err != nil {
 		return err
 	}
