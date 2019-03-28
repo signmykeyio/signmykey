@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"runtime"
 	"strings"
 	"time"
 
@@ -103,11 +102,9 @@ func WriteUserSignedKey(signedKey string, key string) (err error) {
 		}
 	}()
 
-	if runtime.GOOS != "windows" {
-		err = signedKeyFile.Chmod(0644)
-		if err != nil {
-			return err
-		}
+	err = os.Chmod(signedKeyPath, 0644)
+	if err != nil {
+		return err
 	}
 
 	_, err = signedKeyFile.WriteString(signedKey)
