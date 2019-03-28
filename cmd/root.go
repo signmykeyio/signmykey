@@ -86,8 +86,8 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		color.Green("\n  - Valid until: %s", time.Unix(int64(before), 0))
-		color.Green("  - Principals: %s", strings.Join(principals, ","))
+		color.HiBlack("\n  - Valid until: %s", time.Unix(int64(before), 0))
+		color.HiBlack("  - Principals: %s", strings.Join(principals, ","))
 
 		return nil
 	},
