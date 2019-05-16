@@ -23,12 +23,12 @@ lint: ## Lint the files
 	gometalinter --exclude=.*_test.go --concurrency=1 --deadline=1000s --line-length=100 --disable-all --enable=vet --enable=vetshadow --enable=deadcode --enable=gocyclo --enable=golint --enable=dupl --enable=ineffassign --enable=goconst --enable=gosec --enable=goimports --enable=lll --enable=misspell ./...
 
 test: ## Run unittests
-	GOPROXY=https://proxy.golang.org go test -race ${PKG_LIST}
+	go test -race ${PKG_LIST}
 
 build: ## Build the binary file
 	go get github.com/mitchellh/gox
 	mkdir -p bin
-	GOPROXY=https://proxy.golang.org go mod download
+	go mod download
 	gox -osarch="darwin/386 darwin/amd64 linux/386 linux/amd64 linux/arm windows/amd64" -ldflags="-extldflags '-static' -X github.com/signmykeyio/signmykey/cmd.versionString=${SHORT_VERSION}" -output="bin/signmykey_{{.OS}}_{{.Arch}}"
 	zip -j bin/signmykey_darwin_386.zip bin/signmykey_darwin_386
 	zip -j bin/signmykey_darwin_amd64.zip bin/signmykey_darwin_amd64
