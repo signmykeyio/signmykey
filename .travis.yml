@@ -3,7 +3,7 @@ go:
 - '1.12.1'
 go_import_path: github.com/signmykeyio/signmykey
 env:
-  - GO111MODULE=on
+  - GO111MODULE=on GOPROXY=https://proxy.golang.org 
 stages:
   - name: test
     if: tag IS blank
@@ -40,7 +40,7 @@ jobs:
     - make fpm VERSION=${TRAVIS_BUILD_NUMBER}
     - make fpm_upload_dev VERSION=${TRAVIS_BUILD_NUMBER}
     env:
-    - GO111MODULE=on
+    - GO111MODULE=on GOPROXY=https://proxy.golang.org 
     - secure: "oLSz73l95wWZgaSJcbdEr7fnvb381PQfMIvCY+yZXOhm+qf8lBbNCpyCUs/r1pP1OmXp7+FEsgBi1ah1OGuMCM/2usyvmBDMqw8sc7XYht4CL+OWS2NEgkhUIHwqlfGtD5/Y8jilDWkGOXUeWqleAo+m593aMz2cRe6SvsLbnJ2c+s2sXbvF92nwzL2u/l/g7pQppGlUzYlwTL/LG/YYlEuLw0X6qBdESCw3m3lZ1JbjpASK2hSJTirNX72ofr2V5XWfCGGDubKSNMiqGk6eT6AY4pg0WZjGvjRGu4Zmx/YjqMLBjuTtftOW+owR/LkmcTfQVr3N/g/Ev8hi1ymGsyEcn/DVLi7DHd9aDIq+/8YW7/ocJyEAPjgGapwNM4n+DFk5sWKDXCOmvn/3MgZS5O7OqhMDdSsJlzHQoARpWMzv/ycjSjLAdGHMFltIa/vwhIYqlvqHye4mHcgHEnSot7BLWc39t9RymF9wLLp/5dIGyorsC003uFHPzv8ZggvNk/IeKs4NzJUTp7As9vB0Zcbo0gbiJMLWUqSxH6QeApBGgt6/mTVjc0vcDj2/5VUb6IzYBV3VWFQJs3c/Zv6sTHaJHa7I5T/5ErMWgU0903fqL5/ilf4f9CB8UTxwckQB7VH+vL33ITVvqTUWGw5UxZDusUNg+daL62IQJvJtopU="
     - secure: "YZkbk5obX341PCx6GZsp0a35uqIqkbX0Ld1MeDYUZSoz1kCpGhgXyGw+jumaDxnVAKnijT/hxVavcd0YW18X6bLiBvWKpHvjucaxcetveAvf8EvmNmSRnsGNMXZcF8AbkWTjTpWpyszmLeF4SGAj6V3bIovcl6BCu8SqsN9Hlccs0AQ8fDrfWx2z/FAyUk125NOr6jJjLVftGdDvUb4iFv6l5xEHQTPkbJ25Fz9wxaiWNmaEFSiNoxql0BoKBMiagZDMvmarsN4kH0V5ttrA50JShIv+5Tx5JNng8/6CAktJ1cHONY8c1uIRrbXUyVWjZnxKtlFlZUebgyMpAgtrXPqVt0PCyh5KgkowWXoZ/61dY/M3lgFO8MK7LSes/BPDtiVhiMEGEgUtMPm5ShgUOaKTslVU13UGNXQRaCSgln9zDEtq0NT+SH1+mJRB6UmHzi6gDWiszfux0ILssnf33YhyxUdjNirWD15J5ZKl2kQ+UhRt/2ZFJqw7SBka3xJNzuREW4/oRbk8hHjRTlAC5sfIRLhwpJF3xmmy2pZqE+4nmjdkHF8WKc9F5CXumHZKpqP5EiLvWguOQucC/et871jRNzirT7OCiQv/xG1+weXdUk1vLriNPGqa6ZoWy9+i5HDRuHSFHQ0ihTQjitqx5JSy1BLKtlWx6QVn28Exau4="
   - stage: build and release tag
@@ -51,7 +51,7 @@ jobs:
     - make fpm VERSION=${TRAVIS_TAG}
     - make fpm_upload_tag VERSION=${TRAVIS_TAG}
     env:
-    - GO111MODULE=on
+    - GO111MODULE=on GOPROXY=https://proxy.golang.org 
     - secure: "oLSz73l95wWZgaSJcbdEr7fnvb381PQfMIvCY+yZXOhm+qf8lBbNCpyCUs/r1pP1OmXp7+FEsgBi1ah1OGuMCM/2usyvmBDMqw8sc7XYht4CL+OWS2NEgkhUIHwqlfGtD5/Y8jilDWkGOXUeWqleAo+m593aMz2cRe6SvsLbnJ2c+s2sXbvF92nwzL2u/l/g7pQppGlUzYlwTL/LG/YYlEuLw0X6qBdESCw3m3lZ1JbjpASK2hSJTirNX72ofr2V5XWfCGGDubKSNMiqGk6eT6AY4pg0WZjGvjRGu4Zmx/YjqMLBjuTtftOW+owR/LkmcTfQVr3N/g/Ev8hi1ymGsyEcn/DVLi7DHd9aDIq+/8YW7/ocJyEAPjgGapwNM4n+DFk5sWKDXCOmvn/3MgZS5O7OqhMDdSsJlzHQoARpWMzv/ycjSjLAdGHMFltIa/vwhIYqlvqHye4mHcgHEnSot7BLWc39t9RymF9wLLp/5dIGyorsC003uFHPzv8ZggvNk/IeKs4NzJUTp7As9vB0Zcbo0gbiJMLWUqSxH6QeApBGgt6/mTVjc0vcDj2/5VUb6IzYBV3VWFQJs3c/Zv6sTHaJHa7I5T/5ErMWgU0903fqL5/ilf4f9CB8UTxwckQB7VH+vL33ITVvqTUWGw5UxZDusUNg+daL62IQJvJtopU="
     - secure: "YZkbk5obX341PCx6GZsp0a35uqIqkbX0Ld1MeDYUZSoz1kCpGhgXyGw+jumaDxnVAKnijT/hxVavcd0YW18X6bLiBvWKpHvjucaxcetveAvf8EvmNmSRnsGNMXZcF8AbkWTjTpWpyszmLeF4SGAj6V3bIovcl6BCu8SqsN9Hlccs0AQ8fDrfWx2z/FAyUk125NOr6jJjLVftGdDvUb4iFv6l5xEHQTPkbJ25Fz9wxaiWNmaEFSiNoxql0BoKBMiagZDMvmarsN4kH0V5ttrA50JShIv+5Tx5JNng8/6CAktJ1cHONY8c1uIRrbXUyVWjZnxKtlFlZUebgyMpAgtrXPqVt0PCyh5KgkowWXoZ/61dY/M3lgFO8MK7LSes/BPDtiVhiMEGEgUtMPm5ShgUOaKTslVU13UGNXQRaCSgln9zDEtq0NT+SH1+mJRB6UmHzi6gDWiszfux0ILssnf33YhyxUdjNirWD15J5ZKl2kQ+UhRt/2ZFJqw7SBka3xJNzuREW4/oRbk8hHjRTlAC5sfIRLhwpJF3xmmy2pZqE+4nmjdkHF8WKc9F5CXumHZKpqP5EiLvWguOQucC/et871jRNzirT7OCiQv/xG1+weXdUk1vLriNPGqa6ZoWy9+i5HDRuHSFHQ0ihTQjitqx5JSy1BLKtlWx6QVn28Exau4="
     deploy:
