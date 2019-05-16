@@ -87,7 +87,7 @@ func (p Principals) Get(user string) (principals []string, err error) {
 
 	userSearchReq := ldap.NewSearchRequest(
 		p.UserSearchBase, ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-		fmt.Sprintf(p.UserSearchStr, user),
+		fmt.Sprintf(p.UserSearchStr, ldap.EscapeFilter((user))),
 		[]string{},
 		nil,
 	)

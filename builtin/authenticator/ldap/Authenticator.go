@@ -83,7 +83,7 @@ func (a *Authenticator) Login(user, password string) (valid bool, err error) {
 
 	searchReq := ldap.NewSearchRequest(
 		a.SearchBase, ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-		fmt.Sprintf(a.SearchStr, user),
+		fmt.Sprintf(a.SearchStr, ldap.EscapeFilter(user)),
 		[]string{"dn"},
 		nil,
 	)
