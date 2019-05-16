@@ -4,6 +4,7 @@ go:
 go_import_path: github.com/signmykeyio/signmykey
 env:
   - GO111MODULE=on
+  - GOPROXY=https://proxy.golang.org 
 stages:
   - name: test
     if: tag IS blank
