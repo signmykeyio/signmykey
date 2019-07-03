@@ -23,7 +23,7 @@ func TestAuthenticator(t *testing.T) {
 		TLSVerify:    true,
 	}
 
-	valid, err := ldap.Login("fakeuser", "fakepassword")
+	valid, _, err := ldap.Login("fakeuser", "fakepassword")
 	if !valid || err != nil {
 		t.Logf("%s", err)
 		t.Fail()

@@ -37,12 +37,17 @@ func signHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	valid, err := config.Auth.Login(login.User, login.Password)
+	valid, swapuser, err := config.Auth.Login(login.User, login.Password)
 	if !valid {
 		log.Errorf("login failed: %s", err)
 		render.Status(r, 401)
 		render.JSON(w, r, map[string]string{"error": "login failed"})
 		return
+	}
+
+	// Swap login user with extra parameter such as OIDC Auth token for Principals search
+	if swapuser != "" {
+		login.User = swapuser
 	}
 
 	principals, err := config.Princs.Get(login.User)

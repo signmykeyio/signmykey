@@ -39,7 +39,7 @@ users:
 	}
 
 	for _, c := range cases {
-		valid, err := local.Login(c.user, c.password)
+		valid, _, err := local.Login(c.user, c.password)
 
 		if !c.valid {
 			assert.EqualError(t, err, c.err)

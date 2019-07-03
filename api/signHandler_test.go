@@ -90,16 +90,16 @@ func TestSignHandler(t *testing.T) {
 
 type authMock struct{}
 
-func (a authMock) Login(user, password string) (bool, error) {
+func (a authMock) Login(user, password string) (bool, string, error) {
 	if user != "testuser" && user != "emptyprincsuser" {
-		return false, fmt.Errorf("unknown username")
+		return false, "", fmt.Errorf("unknown username")
 	}
 
 	if password != "testpassword" {
-		return false, fmt.Errorf("invalid password")
+		return false, "", fmt.Errorf("invalid password")
 	}
 
-	return true, nil
+	return true, "", nil
 }
 
 func (a authMock) Init(config *viper.Viper) error {

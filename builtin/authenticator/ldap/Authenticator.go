@@ -60,7 +60,7 @@ func (a *Authenticator) Init(config *viper.Viper) error {
 }
 
 // Login method is used to check if a couple of user/password is valid in LDAP.
-func (a *Authenticator) Login(user, password string) (valid bool, err error) {
+func (a *Authenticator) Login(user, password string) (valid bool, swapuser string, err error) {
 	l := &ldap.Conn{}
 	l.SetTimeout(time.Second * 10)
 
@@ -72,13 +72,13 @@ func (a *Authenticator) Login(user, password string) (valid bool, err error) {
 		l, err = ldap.Dial("tcp", uri)
 	}
 	if err != nil {
-		return false, err
+		return false, "", err
 	}
 	defer l.Close()
 
 	err = l.Bind(a.BindUser, a.BindPassword)
 	if err != nil {
-		return false, err
+		return false, "", err
 	}
 
 	searchReq := ldap.NewSearchRequest(
@@ -90,13 +90,13 @@ func (a *Authenticator) Login(user, password string) (valid bool, err error) {
 
 	sr, err := l.Search(searchReq)
 	if err != nil {
-		return false, err
+		return false, "", err
 	}
 
 	if len(sr.Entries) > 1 {
-		return false, errors.New("too many user entries returned")
+		return false, "", errors.New("too many user entries returned")
 	} else if len(sr.Entries) == 0 {
-		return false, errors.New("user not found")
+		return false, "", errors.New("user not found")
 	}
 
 	userdn := sr.Entries[0].DN
@@ -104,8 +104,8 @@ func (a *Authenticator) Login(user, password string) (valid bool, err error) {
 	// Bind as the user to verify their password
 	err = l.Bind(userdn, password)
 	if err != nil {
-		return false, err
+		return false, "", err
 	}
 
-	return true, nil
+	return true, "", nil
 }
