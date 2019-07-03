@@ -56,9 +56,9 @@ var serverCmd = &cobra.Command{
 			logrus.Fatal("authenticator type not defined in config")
 		}
 		authType := map[string]authenticator.Authenticator{
-			"local": &localAuth.Authenticator{},
-			"ldap":  &ldapAuth.Authenticator{},
-			"oidcropc":  &oidcropcAuth.Authenticator{},
+			"local":    &localAuth.Authenticator{},
+			"ldap":     &ldapAuth.Authenticator{},
+			"oidcropc": &oidcropcAuth.Authenticator{},
 		}
 		auth, ok := authType[authTypeConfig]
 		if !ok {
@@ -75,9 +75,9 @@ var serverCmd = &cobra.Command{
 			return errors.New("principals type not defined in config")
 		}
 		princsType := map[string]principals.Principals{
-			"local": &localPrinc.Principals{},
-			"ldap":  &ldapPrinc.Principals{},
-			"oidcropc":  &oidcropcPrinc.Principals{},
+			"local":    &localPrinc.Principals{},
+			"ldap":     &ldapPrinc.Principals{},
+			"oidcropc": &oidcropcPrinc.Principals{},
 		}
 		princs, ok := princsType[princsTypeConfig]
 		if !ok {

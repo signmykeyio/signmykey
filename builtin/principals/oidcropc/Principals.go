@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/signmykeyio/signmykey/builtin/principals/common"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -89,29 +90,7 @@ func (p Principals) Get(user string) (principals []string, err error) {
 	principals = oidcUserinfo1.Oidcgroups
 	logrus.Debug("OIDC principals: ", principals)
 
-	principals = transformCase(p.TransformCase, principals)
+	principals = common.TransformCase(p.TransformCase, principals)
 
 	return principals, nil
-}
-
-func transformCase(transform string, list []string) []string {
-	principals := []string{}
-
-	if transform == "lower" {
-		for _, str := range list {
-			principals = append(principals, strings.ToLower(str))
-		}
-
-		return principals
-	}
-
-	if transform == "upper" {
-		for _, str := range list {
-			principals = append(principals, strings.ToUpper(str))
-		}
-
-		return principals
-	}
-
-	return list
 }
