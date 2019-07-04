@@ -19,7 +19,6 @@ type Authenticator struct {
 	OIDCClientID           string
 	OIDCClientSecret       string
 	OIDCAlternatePrincipal bool
-	SearchBase             string
 }
 
 // Init method is used to ingest config of Authenticator
