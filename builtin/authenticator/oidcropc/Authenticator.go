@@ -96,7 +96,7 @@ func (a *Authenticator) Login(user, password string) (valid bool, swapuser strin
 	}
 
 	// return OAuth 2.0 error response if any
-	if resToken.StatusCode == 400 {
+	if resToken.StatusCode != 200 {
 		return false, "", errors.New(oidcToken1.Error)
 	}
 

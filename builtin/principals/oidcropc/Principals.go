@@ -64,7 +64,7 @@ func (p Principals) Get(user string) (principals []string, err error) {
 
 	reqInfo, err := http.NewRequest("GET", p.OIDCUserinfoEndpoint, nil)
 	if err != nil {
-		log.Fatal(err)
+		return principals, err
 	}
 
 	// Add HTTP Authorization Header
@@ -74,14 +74,14 @@ func (p Principals) Get(user string) (principals []string, err error) {
 	client := http.Client{Timeout: time.Second * 10}
 	resInfo, err := client.Do(reqInfo)
 	if err != nil {
-		log.Fatal(err)
+		return principals, err
 	}
 
 	defer resInfo.Body.Close()
 
 	bodyInfo, err := ioutil.ReadAll(resInfo.Body)
 	if err != nil {
-		log.Fatal(err)
+		return principals, err
 	}
 
 	// Replace `json:"oidcgroups"` oidcUserinfo struct tag with OIDCUserGroupsEntry config entry
