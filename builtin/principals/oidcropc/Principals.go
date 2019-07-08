@@ -62,29 +62,35 @@ func (p *Principals) Init(config *viper.Viper) error {
 // Get method is used to get the list of principals associated to a specific user.
 func (p Principals) Get(user string) (principals []string, err error) {
 
-	reqInfo, _ := http.NewRequest("GET", p.OIDCUserinfoEndpoint, nil)
+	reqInfo, err := http.NewRequest("GET", p.OIDCUserinfoEndpoint, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Add HTTP Authorization Header
 	bearer := "Bearer " + user
 	reqInfo.Header.Add("Authorization", bearer)
 
 	client := http.Client{Timeout: time.Second * 10}
-	resInfo, errResInfo := client.Do(reqInfo)
-	if errResInfo != nil {
-		log.Fatal(errResInfo)
+	resInfo, err := client.Do(reqInfo)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	defer resInfo.Body.Close()
 
-	bodyInfo, _ := ioutil.ReadAll(resInfo.Body)
+	bodyInfo, err := ioutil.ReadAll(resInfo.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Replace `json:"oidcgroups"` oidcUserinfo struct tag with OIDCUserGroupsEntry config entry
 	bodyInfoChange := []byte(strings.Replace(string(bodyInfo), p.OIDCUserGroupsEntry, "oidcgroups", 1))
 
 	oidcUserinfo1 := oidcUserinfo{}
-	jsonInfoErr := json.Unmarshal(bodyInfoChange, &oidcUserinfo1)
-	if jsonInfoErr != nil {
-		log.Fatal(jsonInfoErr)
+	err = json.Unmarshal(bodyInfoChange, &oidcUserinfo1)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	principals = oidcUserinfo1.Oidcgroups

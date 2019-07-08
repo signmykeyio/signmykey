@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -19,6 +20,11 @@ type Authenticator struct {
 	OIDCClientID           string
 	OIDCClientSecret       string
 	OIDCAlternatePrincipal bool
+}
+
+type oidcToken struct {
+	Token string `json:"access_token"`
+	Error string `json:"error"`
 }
 
 // Init method is used to ingest config of Authenticator
@@ -48,44 +54,50 @@ func (a *Authenticator) Init(config *viper.Viper) error {
 	return nil
 }
 
-type oidcToken struct {
-	Token string `json:"access_token"`
-}
-
-// Login method is used to check if a couple of user/password is valid in LDAP.
+// Login method is used to check if a couple of user/password is valid in OIDC.
 func (a *Authenticator) Login(user, password string) (valid bool, swapuser string, err error) {
 
-	payload := strings.NewReader("grant_type=password&" +
-		"username=" +
-		user +
-		"&password=" +
-		password +
-		"&client_id=" +
-		a.OIDCClientID +
-		"&client_secret=" +
-		a.OIDCClientSecret)
+	v := url.Values{}
+	v.Set("grant_type", "password")
+	v.Add("username", user)
+	v.Add("password", password)
+	v.Add("client_id", a.OIDCClientID)
+	v.Add("client_secret", a.OIDCClientSecret)
 
-	reqToken, _ := http.NewRequest("POST", a.OIDCTokenEndpoint, payload)
+	payload := strings.NewReader(v.Encode())
+
+	reqToken, err := http.NewRequest("POST", a.OIDCTokenEndpoint, payload)
+	if err != nil {
+		return false, "", err
+	}
 
 	reqToken.Header.Add("content-type", "application/x-www-form-urlencoded")
 
 	client := http.Client{Timeout: time.Second * 10}
-	resToken, errResToken := client.Do(reqToken)
-	if errResToken != nil {
-		return false, "", errors.New("bad password")
+	resToken, err := client.Do(reqToken)
+	if err != nil {
+		return false, "", err
 	}
 
 	defer resToken.Body.Close()
 
-	bodyToken, _ := ioutil.ReadAll(resToken.Body)
+	bodyToken, err := ioutil.ReadAll(resToken.Body)
+	if err != nil {
+		return false, "", errors.New("can't read body")
+	}
 
 	oidcToken1 := oidcToken{}
-	jsonTokenErr := json.Unmarshal(bodyToken, &oidcToken1)
+	err = json.Unmarshal(bodyToken, &oidcToken1)
 
 	log.Debugf("OIDC Token: %s", oidcToken1.Token)
 
-	if jsonTokenErr != nil {
-		return false, "", jsonTokenErr
+	if err != nil {
+		return false, "", err
+	}
+
+	// return OAuth 2.0 error response if any
+	if resToken.StatusCode == 400 {
+		return false, "", errors.New(oidcToken1.Error)
 	}
 
 	// exit if OIDC Token is empty
