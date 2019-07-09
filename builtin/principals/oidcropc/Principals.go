@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -90,7 +89,7 @@ func (p Principals) Get(user string) (principals []string, err error) {
 	oidcUserinfo1 := oidcUserinfo{}
 	err = json.Unmarshal(bodyInfoChange, &oidcUserinfo1)
 	if err != nil {
-		log.Fatal(err)
+		return principals, err
 	}
 
 	principals = oidcUserinfo1.Oidcgroups
