@@ -2,6 +2,7 @@ package ldap
 
 import (
 	"bytes"
+	"context"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -23,7 +24,7 @@ func TestAuthenticator(t *testing.T) {
 		TLSVerify:    true,
 	}
 
-	valid, _, err := ldap.Login("fakeuser", "fakepassword")
+	_, valid, _, err := ldap.Login(context.Background(), []byte("jsonpayload"))
 	if !valid || err != nil {
 		t.Logf("%s", err)
 		t.Fail()

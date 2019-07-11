@@ -34,7 +34,10 @@ func TestPingHandler(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		var response JSONResponse
-		json.Unmarshal(w.Body.Bytes(), &response)
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		if err != nil {
+			assert.Fail(t, err.Error())
+		}
 
 		assert.Equal(t, c.code, w.Code)
 		assert.Equal(t, c.response, response)

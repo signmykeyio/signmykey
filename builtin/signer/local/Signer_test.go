@@ -1,10 +1,11 @@
 package local
 
 import (
+	"context"
+	"fmt"
 	"sort"
 	"testing"
 
-	"github.com/signmykeyio/signmykey/builtin/signer"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/ssh"
 )
@@ -61,19 +62,21 @@ i9Jm7L090D/cW6+hyuIzXBEyp+u1FXzaaEEMw9dsFyp9URYd1b03
 
 	cases := []struct {
 		description string
-		req         signer.CertReq
+		payload     []byte
+		id          string
+		principals  []string
 		expErr      bool
 	}{
-		{"test with an invalid key", signer.CertReq{"invalid key", "test", []string{"root", "admin"}}, true},
-		{"test with valid key and principals", signer.CertReq{testKey, "testid", []string{"admin", "root"}}, false},
-		{"test with valid key and reversed principals", signer.CertReq{testKey, "testid", []string{"root", "admin"}}, false},
-		{"test with an empty key", signer.CertReq{"", "testid", []string{"root", "admin"}}, true},
-		{"test with an empty id", signer.CertReq{testKey, "", []string{"root", "admin"}}, true},
-		{"test with no principals", signer.CertReq{testKey, "testid", []string{}}, true},
+		{"test with an invalid key", []byte("{\"public_key\": \"invalid key\"}"), "test", []string{"root", "admin"}, true},
+		{"test with valid key and principals", []byte(fmt.Sprintf("{\"public_key\": \"%s\"}", testKey)), "testid", []string{"admin", "root"}, false},
+		{"test with valid key and reversed principals", []byte(fmt.Sprintf("{\"public_key\": \"%s\"}", testKey)), "testid", []string{"root", "admin"}, false},
+		{"test with an empty key", []byte(""), "testid", []string{"root", "admin"}, true},
+		{"test with an empty id", []byte(fmt.Sprintf("{\"public_key\": \"%s\"}", testKey)), "", []string{"root", "admin"}, true},
+		{"test with no principals", []byte(fmt.Sprintf("{\"public_key\": \"%s\"}", testKey)), "testid", []string{}, true},
 	}
 
 	for _, c := range cases {
-		cert, err := s.Sign(c.req)
+		cert, err := s.Sign(context.Background(), c.payload, c.id, c.principals)
 		if c.expErr {
 			assert.Error(t, err, c.description)
 		} else {
@@ -87,10 +90,10 @@ i9Jm7L090D/cW6+hyuIzXBEyp+u1FXzaaEEMw9dsFyp9URYd1b03
 		parsedCert, _, _, _, _ := ssh.ParseAuthorizedKey([]byte(cert))
 		sshCert := parsedCert.(*ssh.Certificate)
 
-		sort.Strings(c.req.Principals)
+		sort.Strings(c.principals)
 		sort.Strings(sshCert.ValidPrincipals)
 
-		assert.Equal(t, c.req.ID, sshCert.KeyId, c.description)
-		assert.Equal(t, c.req.Principals, sshCert.ValidPrincipals, c.description)
+		assert.Equal(t, c.id, sshCert.KeyId, c.description)
+		assert.Equal(t, c.principals, sshCert.ValidPrincipals, c.description)
 	}
 }

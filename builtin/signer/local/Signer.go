@@ -1,14 +1,17 @@
 package local
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"time"
 
 	"github.com/pkg/errors"
 	"github.com/signmykeyio/signmykey/builtin/signer"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/ssh"
 )
@@ -20,6 +23,10 @@ type Signer struct {
 	TTL             int
 	CriticalOptions map[string]string
 	Extensions      map[string]string
+}
+
+type localSignReq struct {
+	PubKey string `json:"public_key" binding:"required"`
 }
 
 // Init method is used to ingest config of Signer
@@ -77,13 +84,28 @@ func (s Signer) ReadCA() (string, error) {
 }
 
 // Sign method is used to sign passed SSH Key.
-func (s Signer) Sign(certreq signer.CertReq) (string, error) {
+func (s Signer) Sign(ctx context.Context, payload []byte, id string, principals []string) (cert string, err error) {
 
-	err := certreq.CheckCertReqFields()
+	var signReq localSignReq
+	err = json.Unmarshal(payload, &signReq)
 	if err != nil {
-		return "", errors.Wrap(err, "certificate request fields checking failed")
+		log.Errorf("json unmarshaling failed: %s", err)
+		return "", fmt.Errorf("JSON unmarshaling failed: %s", err)
 	}
 
+	if id == "" {
+		return "", errors.New("empty id")
+	}
+
+	if len(principals) == 0 {
+		return "", errors.New("empty list of principals")
+	}
+
+	certreq := signer.CertReq{
+		Key:        signReq.PubKey,
+		ID:         id,
+		Principals: principals,
+	}
 	buf := make([]byte, 8)
 	_, err = rand.Read(buf)
 	if err != nil {

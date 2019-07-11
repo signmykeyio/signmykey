@@ -2,6 +2,7 @@ package local
 
 import (
 	"bytes"
+	"context"
 	"sort"
 	"testing"
 
@@ -13,7 +14,7 @@ func TestPrincipals(t *testing.T) {
 
 	cases := []struct {
 		userMap []byte
-		user    string
+		payload []byte
 		expErr  bool
 		expList []string
 	}{
@@ -21,19 +22,19 @@ func TestPrincipals(t *testing.T) {
 			[]byte(`
 users:
   user1: princ2,princ1`),
-			"user1", false, []string{"princ1", "princ2"},
+			[]byte("{\"user\": \"user1\"}"), false, []string{"princ1", "princ2"},
 		},
 		{
 			[]byte(`
 users:
   user: princ1,princ2`),
-			"user", false, []string{"princ1", "princ2"},
+			[]byte("{\"user\": \"user\"}"), false, []string{"princ1", "princ2"},
 		},
 		{
 			[]byte(`
 users:
   user2: princ1,princ2`),
-			"user1", true, []string{},
+			[]byte("{\"user\": \"user1\"}"), true, []string{},
 		},
 		{
 			[]byte(`
@@ -41,7 +42,7 @@ users:
   user1: princ1
   user2: princ3,princ4
 `),
-			"user2", false, []string{"princ3", "princ4"},
+			[]byte("{\"user\": \"user2\"}"), false, []string{"princ3", "princ4"},
 		},
 		{
 			[]byte(`
@@ -49,7 +50,7 @@ users:
   user1: princ1, princ2,princ3
   user2: princ3,princ4
 `),
-			"user1", false, []string{"princ1", "princ2", "princ3"},
+			[]byte("{\"user\": \"user1\"}"), false, []string{"princ1", "princ2", "princ3"},
 		},
 		{
 			[]byte(`
@@ -57,7 +58,7 @@ users:
   user1: princ1, princ2,princ3 , ,princ4
   user2: princ3,princ4
 `),
-			"user1", false, []string{"princ1", "princ2", "princ3", "princ4"},
+			[]byte("{\"user\": \"user1\"}"), false, []string{"princ1", "princ2", "princ3", "princ4"},
 		},
 	}
 
@@ -72,7 +73,7 @@ users:
 		local := &Principals{}
 		local.Init(testConfig)
 
-		principals, err := local.Get(c.user)
+		_, principals, err := local.Get(context.Background(), c.payload)
 		if c.expErr {
 			assert.Error(t, err)
 		} else {

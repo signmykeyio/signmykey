@@ -2,6 +2,7 @@ package oidcropc
 
 import (
 	"bytes"
+	"context"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -17,7 +18,7 @@ func TestPrincipals(t *testing.T) {
 		OIDCUserGroupsEntry:  "oidc-groups",
 	}
 
-	principals, err := oidc.Get("faketoken")
+	_, principals, err := oidc.Get(context.Background(), []byte("{\"user\": \"fakeuser\"}"))
 	if err != nil {
 		t.Logf("%s", err)
 		t.Fail()

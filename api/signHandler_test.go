@@ -2,13 +2,14 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/signmykeyio/signmykey/builtin/signer"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
@@ -20,47 +21,47 @@ func TestSignHandler(t *testing.T) {
 		method      string
 		url         string
 		code        int
-		payload     Login
+		payload     []byte
 		response    interface{}
 		contentType string
 	}{
-		{"GET", "/v1/sign", 405, Login{}, JSONResponse(nil), ""},
-		{"PUT", "/v1/sign", 405, Login{}, JSONResponse(nil), ""},
-		{"PATCH", "/v1/sign", 405, Login{}, JSONResponse(nil), ""},
-		{"DELETE", "/v1/sign", 405, Login{}, JSONResponse(nil), ""},
+		{"GET", "/v1/sign", 405, []byte(""), JSONResponse(nil), ""},
+		{"PUT", "/v1/sign", 405, []byte(""), JSONResponse(nil), ""},
+		{"PATCH", "/v1/sign", 405, []byte(""), JSONResponse(nil), ""},
+		{"DELETE", "/v1/sign", 405, []byte(""), JSONResponse(nil), ""},
 		{
 			"POST", "/v1/sign", 400,
-			Login{User: "test"},
+			[]byte("{\"user\":\"test\"}"),
 			JSONResponse{"error": "missing field(s) in signing request"},
 			"application/json",
 		},
 		{
 			"POST", "/v1/sign", 401,
-			Login{User: "baduser", Password: "badpassword", PubKey: "goodkey"},
+			[]byte("{\"user\":\"baduser\",\"password\":\"badpassword\",\"public_key\":\"goodkey\"}"),
 			JSONResponse{"error": "login failed"},
 			"application/json",
 		},
 		{
 			"POST", "/v1/sign", 401,
-			Login{User: "testuser", Password: "badpassword", PubKey: "goodkey"},
+			[]byte("{\"user\":\"testuser\",\"password\":\"badpassword\",\"public_key\":\"goodkey\"}"),
 			JSONResponse{"error": "login failed"},
 			"application/json",
 		},
 		{
 			"POST", "/v1/sign", 401,
-			Login{User: "emptyprincsuser", Password: "testpassword", PubKey: "goodkey"},
+			[]byte("{\"user\":\"emptyprincsuser\",\"password\":\"testpassword\",\"public_key\":\"goodkey\"}"),
 			JSONResponse{"error": "error getting list of principals"},
 			"application/json",
 		},
 		{
 			"POST", "/v1/sign", 400,
-			Login{User: "testuser", Password: "testpassword", PubKey: "badkey"},
+			[]byte("{\"user\":\"testuser\",\"password\":\"testpassword\",\"public_key\":\"badkey\"}"),
 			JSONResponse{"error": "unknown server error during key signing"},
 			"application/json",
 		},
 		{
 			"POST", "/v1/sign", 200,
-			Login{User: "testuser", Password: "testpassword", PubKey: "goodkey"},
+			[]byte("{\"user\":\"testuser\",\"password\":\"testpassword\",\"public_key\":\"goodkey\"}"),
 			JSONResponse{"certificate": "goodcert"},
 			"application/json",
 		},
@@ -80,7 +81,10 @@ func TestSignHandler(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		var response JSONResponse
-		json.Unmarshal(w.Body.Bytes(), &response)
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		if err != nil {
+			assert.Fail(t, err.Error())
+		}
 
 		assert.Equal(t, w.Code, c.code)
 		assert.Equal(t, c.response, response)
@@ -90,16 +94,26 @@ func TestSignHandler(t *testing.T) {
 
 type authMock struct{}
 
-func (a authMock) Login(user, password string) (bool, string, error) {
-	if user != "testuser" && user != "emptyprincsuser" {
-		return false, "", fmt.Errorf("unknown username")
+func (a authMock) Login(ctx context.Context, payload []byte) (context.Context, bool, string, error) {
+	var login struct {
+		User     string `json:"user" binding:"required"`
+		Password string `json:"password" binding:"required"`
+	}
+	err := json.Unmarshal(payload, &login)
+	if err != nil {
+		log.Errorf("json unmarshaling failed: %s", err)
+		return ctx, false, "", fmt.Errorf("JSON unmarshaling failed: %s", err)
 	}
 
-	if password != "testpassword" {
-		return false, "", fmt.Errorf("invalid password")
+	if login.User != "testuser" && login.User != "emptyprincsuser" {
+		return ctx, false, "", fmt.Errorf("unknown username")
 	}
 
-	return true, "", nil
+	if login.Password != "testpassword" {
+		return ctx, false, "", fmt.Errorf("invalid password")
+	}
+
+	return ctx, true, "", nil
 }
 
 func (a authMock) Init(config *viper.Viper) error {
@@ -112,12 +126,22 @@ func (p princsMock) Init(config *viper.Viper) error {
 	return nil
 }
 
-func (p princsMock) Get(user string) ([]string, error) {
-	if user == "emptyprincsuser" {
-		return []string{}, fmt.Errorf("empty list of principals")
+func (p princsMock) Get(ctx context.Context, payload []byte) (context.Context, []string, error) {
+	var login struct {
+		User     string `json:"user" binding:"required"`
+		Password string `json:"password" binding:"required"`
+	}
+	err := json.Unmarshal(payload, &login)
+	if err != nil {
+		log.Errorf("json unmarshaling failed: %s", err)
+		return ctx, []string{}, fmt.Errorf("JSON unmarshaling failed: %s", err)
 	}
 
-	return []string{"root", "user"}, nil
+	if login.User == "emptyprincsuser" {
+		return ctx, []string{}, fmt.Errorf("empty list of principals")
+	}
+
+	return ctx, []string{"root", "user"}, nil
 }
 
 type signerMock struct{}
@@ -130,12 +154,21 @@ func (s signerMock) ReadCA() (string, error) {
 	return "", nil
 }
 
-func (s signerMock) Sign(req signer.CertReq) (string, error) {
-	if req.Key == "goodkey" {
+func (s signerMock) Sign(ctx context.Context, payload []byte, id string, principals []string) (string, error) {
+	var pubkey struct {
+		PubKey string `json:"public_key" binding:"required"`
+	}
+	err := json.Unmarshal(payload, &pubkey)
+	if err != nil {
+		log.Errorf("json unmarshaling failed: %s", err)
+		return "", fmt.Errorf("JSON unmarshaling failed: %s", err)
+	}
+
+	if pubkey.PubKey == "goodkey" {
 		return "goodcert", nil
 	}
 
-	if req.Key == "badkey" {
+	if pubkey.PubKey == "badkey" {
 		return "", fmt.Errorf("bad key format")
 	}
 

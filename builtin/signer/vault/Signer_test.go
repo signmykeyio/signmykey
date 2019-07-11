@@ -1,10 +1,11 @@
 package vault
 
 import (
+	"context"
+	"fmt"
 	"sort"
 	"testing"
 
-	"github.com/signmykeyio/signmykey/builtin/signer"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/ssh"
 )
@@ -26,19 +27,21 @@ func TestSigner(t *testing.T) {
 	testKey := "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDCScycMJgKYj7IsyrPYsCVryhz4//mjekvElmihYLc/njL1cC9KBTRhdbV1NYw9RFC/CENAwrHcGXAcgMuY0fFUQOyKDa6HmVIxT8vszcePAutl6YvcFYuTCJRYjOQXWBmYEe1NJI8yfR+CMU8HdfXbXUhU93UxpNX8rzXGv3KSSky6v1BAkzTl5QiQRdjn18Wf8z3e1sMbxjfD+ygas9rpmbUONsUc6d5U6YYTroJA/DoRIG92IBK9GjH1w/l9Wvcs2V5atCorKwasdCsEFO5Jv84XO41smo/IF+gd0hUtKDDGkk/djk3TmC9h2WUBb43lxiv0wn2ByTIMAorCqFb" // nolint: lll
 
 	cases := []struct {
-		req    signer.CertReq
-		expErr bool
+		payload    []byte
+		id         string
+		principals []string
+		expErr     bool
 	}{
-		{signer.CertReq{"invalid key", "test", []string{"root", "admin"}}, true},
-		{signer.CertReq{testKey, "testid", []string{"admin", "root"}}, false},
-		{signer.CertReq{testKey, "testid", []string{"root", "admin"}}, false},
-		{signer.CertReq{"", "testid", []string{"root", "admin"}}, true},
-		{signer.CertReq{testKey, "", []string{"root", "admin"}}, true},
-		{signer.CertReq{testKey, "testid", []string{}}, true},
+		{[]byte("{\"public_key\": \"invalid key\"}"), "test", []string{"root", "admin"}, true},
+		{[]byte(fmt.Sprintf("{\"public_key\": \"%s\"}", testKey)), "testid", []string{"admin", "root"}, false},
+		{[]byte(fmt.Sprintf("{\"public_key\": \"%s\"}", testKey)), "testid", []string{"root", "admin"}, false},
+		{[]byte(""), "testid", []string{"root", "admin"}, true},
+		{[]byte(fmt.Sprintf("{\"public_key\": \"%s\"}", testKey)), "", []string{"root", "admin"}, true},
+		{[]byte(fmt.Sprintf("{\"public_key\": \"%s\"}", testKey)), "testid", []string{}, true},
 	}
 
 	for _, c := range cases {
-		cert, err := vs.Sign(c.req)
+		cert, err := vs.Sign(context.Background(), c.payload, c.id, c.principals)
 		if c.expErr {
 			assert.Error(t, err)
 		} else {
@@ -52,10 +55,10 @@ func TestSigner(t *testing.T) {
 		parsedCert, _, _, _, _ := ssh.ParseAuthorizedKey([]byte(cert))
 		sshCert := parsedCert.(*ssh.Certificate)
 
-		sort.Strings(c.req.Principals)
+		sort.Strings(c.principals)
 		sort.Strings(sshCert.ValidPrincipals)
 
-		assert.Equal(t, c.req.ID, sshCert.KeyId)
-		assert.Equal(t, c.req.Principals, sshCert.ValidPrincipals)
+		assert.Equal(t, c.id, sshCert.KeyId)
+		assert.Equal(t, c.principals, sshCert.ValidPrincipals)
 	}
 }

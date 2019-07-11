@@ -1,6 +1,7 @@
 package oidcropc
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,8 +10,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/signmykeyio/signmykey/builtin/authenticator/oidcropc"
 	"github.com/signmykeyio/signmykey/builtin/principals/common"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -59,28 +61,40 @@ func (p *Principals) Init(config *viper.Viper) error {
 }
 
 // Get method is used to get the list of principals associated to a specific user.
-func (p Principals) Get(user string) (principals []string, err error) {
+func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, []string, error) {
+
+	// Get token from OIDC authenticator
+	tokenCtx := ctx.Value(oidcropc.OIDCTokenKey)
+	if tokenCtx == nil {
+		log.Errorf("token context not available, oidcropc principals needs that ordcropc authenticator pass userinfo token")
+		return ctx, []string{}, errors.New("OIDC authenticator token not available")
+	}
+	token, ok := tokenCtx.(oidcropc.OIDCToken)
+	if !ok {
+		log.Errorf("token context has wrong type")
+		return ctx, []string{}, errors.New("OIDC authenticator token not available")
+	}
 
 	reqInfo, err := http.NewRequest("GET", p.OIDCUserinfoEndpoint, nil)
 	if err != nil {
-		return principals, err
+		return ctx, []string{}, err
 	}
 
 	// Add HTTP Authorization Header
-	bearer := "Bearer " + user
+	bearer := "Bearer " + string(token)
 	reqInfo.Header.Add("Authorization", bearer)
 
 	client := http.Client{Timeout: time.Second * 10}
 	resInfo, err := client.Do(reqInfo)
 	if err != nil {
-		return principals, err
+		return ctx, []string{}, err
 	}
 
 	defer resInfo.Body.Close()
 
 	bodyInfo, err := ioutil.ReadAll(resInfo.Body)
 	if err != nil {
-		return principals, err
+		return ctx, []string{}, err
 	}
 
 	// Replace `json:"oidcgroups"` oidcUserinfo struct tag with OIDCUserGroupsEntry config entry
@@ -89,13 +103,13 @@ func (p Principals) Get(user string) (principals []string, err error) {
 	oidcUserinfo1 := oidcUserinfo{}
 	err = json.Unmarshal(bodyInfoChange, &oidcUserinfo1)
 	if err != nil {
-		return principals, err
+		return ctx, []string{}, err
 	}
 
-	principals = oidcUserinfo1.Oidcgroups
-	logrus.Debug("OIDC principals: ", principals)
+	principals := oidcUserinfo1.Oidcgroups
+	log.Debug("OIDC principals: ", principals)
 
 	principals = common.TransformCase(p.TransformCase, principals)
 
-	return principals, nil
+	return ctx, principals, nil
 }

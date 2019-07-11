@@ -1,7 +1,9 @@
 package ldap
 
 import (
+	"context"
 	"crypto/tls"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
@@ -9,6 +11,7 @@ import (
 	"time"
 
 	"github.com/signmykeyio/signmykey/builtin/principals/common"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	ldap "gopkg.in/ldap.v2"
 )
@@ -27,6 +30,10 @@ type Principals struct {
 	TLSVerify       bool
 	Prefix          string
 	TransformCase   string
+}
+
+type ldapPrincipals struct {
+	User string `json:"user" binding:"required"`
 }
 
 // Init method is used to ingest config of Principals
@@ -79,29 +86,37 @@ func (p *Principals) Init(config *viper.Viper) error {
 }
 
 // Get method is used to get the list of principals associated to a specific user.
-func (p Principals) Get(user string) (principals []string, err error) {
+func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, []string, error) {
+
+	var ldapPrinc ldapPrincipals
+	err := json.Unmarshal(payload, &ldapPrinc)
+	if err != nil {
+		log.Errorf("json unmarshaling failed: %s", err)
+		return ctx, []string{}, fmt.Errorf("JSON unmarshaling failed: %s", err)
+	}
+
 	l, err := getLDAPConn(p)
 	if err != nil {
-		return principals, err
+		return ctx, []string{}, err
 	}
 	defer l.Close()
 
 	userSearchReq := ldap.NewSearchRequest(
 		p.UserSearchBase, ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-		fmt.Sprintf(p.UserSearchStr, ldap.EscapeFilter((user))),
+		fmt.Sprintf(p.UserSearchStr, ldap.EscapeFilter((ldapPrinc.User))),
 		[]string{},
 		nil,
 	)
 
 	usr, err := l.Search(userSearchReq)
 	if err != nil {
-		return principals, err
+		return ctx, []string{}, err
 	}
 
 	if len(usr.Entries) > 1 {
-		return principals, errors.New("too many user entries returned")
+		return ctx, []string{}, errors.New("too many user entries returned")
 	} else if len(usr.Entries) == 0 {
-		return principals, errors.New("user not found")
+		return ctx, []string{}, errors.New("user not found")
 	}
 
 	groupSearchRequest := ldap.NewSearchRequest(
@@ -114,13 +129,14 @@ func (p Principals) Get(user string) (principals []string, err error) {
 
 	gsr, err := l.Search(groupSearchRequest)
 	if err != nil {
-		return principals, err
+		return ctx, []string{}, err
 	}
 
 	if len(gsr.Entries) == 0 {
-		return principals, errors.New("no group found for this user")
+		return ctx, []string{}, errors.New("no group found for this user")
 	}
 
+	var principals []string
 	for _, group := range gsr.Entries {
 		principals = append(principals, group.DN)
 	}
@@ -129,7 +145,7 @@ func (p Principals) Get(user string) (principals []string, err error) {
 	principals = filterByPrefix(p.Prefix, principals)
 	principals = common.TransformCase(p.TransformCase, principals)
 
-	return principals, nil
+	return ctx, principals, nil
 }
 
 func getCN(list []string) []string {

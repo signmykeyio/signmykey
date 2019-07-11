@@ -1,6 +1,7 @@
 package oidcropc
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -22,10 +23,22 @@ type Authenticator struct {
 	OIDCAlternatePrincipal bool
 }
 
-type oidcToken struct {
+type oidcLogin struct {
+	User     string `json:"user" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type oidcTokenResponse struct {
 	Token string `json:"access_token"`
 	Error string `json:"error"`
 }
+
+// Type and const for context manipulation
+type OIDCToken string
+
+type OIDCTokenKeyType string
+
+const OIDCTokenKey OIDCTokenKeyType = "oidcToken"
 
 // Init method is used to ingest config of Authenticator
 func (a *Authenticator) Init(config *viper.Viper) error {
@@ -55,20 +68,27 @@ func (a *Authenticator) Init(config *viper.Viper) error {
 }
 
 // Login method is used to check if a couple of user/password is valid in OIDC.
-func (a *Authenticator) Login(user, password string) (valid bool, swapuser string, err error) {
+func (a *Authenticator) Login(ctx context.Context, payload []byte) (resultCtx context.Context, valid bool, id string, err error) {
+
+	var login oidcLogin
+	err = json.Unmarshal(payload, &login)
+	if err != nil {
+		log.Errorf("json unmarshaling failed: %s", err)
+		return ctx, false, "", fmt.Errorf("JSON unmarshaling failed: %s", err)
+	}
 
 	v := url.Values{}
 	v.Set("grant_type", "password")
-	v.Add("username", user)
-	v.Add("password", password)
+	v.Add("username", login.User)
+	v.Add("password", login.Password)
 	v.Add("client_id", a.OIDCClientID)
 	v.Add("client_secret", a.OIDCClientSecret)
 
-	payload := strings.NewReader(v.Encode())
+	oidcPayload := strings.NewReader(v.Encode())
 
-	reqToken, err := http.NewRequest("POST", a.OIDCTokenEndpoint, payload)
+	reqToken, err := http.NewRequest("POST", a.OIDCTokenEndpoint, oidcPayload)
 	if err != nil {
-		return false, "", err
+		return ctx, false, "", err
 	}
 
 	reqToken.Header.Add("content-type", "application/x-www-form-urlencoded")
@@ -76,41 +96,33 @@ func (a *Authenticator) Login(user, password string) (valid bool, swapuser strin
 	client := http.Client{Timeout: time.Second * 10}
 	resToken, err := client.Do(reqToken)
 	if err != nil {
-		return false, "", err
+		return ctx, false, "", err
 	}
-
 	defer resToken.Body.Close()
 
 	bodyToken, err := ioutil.ReadAll(resToken.Body)
 	if err != nil {
-		return false, "", errors.New("can't read body")
+		return ctx, false, "", errors.New("can't read body")
 	}
 
-	oidcToken1 := oidcToken{}
-	err = json.Unmarshal(bodyToken, &oidcToken1)
+	tokenRes := oidcTokenResponse{}
+	err = json.Unmarshal(bodyToken, &tokenRes)
 
-	log.Debugf("OIDC Token: %s", oidcToken1.Token)
+	log.Debugf("OIDC Token: %s", tokenRes.Token)
 
 	if err != nil {
-		return false, "", err
+		return ctx, false, "", err
 	}
 
 	// return OAuth 2.0 error response if any
 	if resToken.StatusCode != 200 {
-		return false, "", errors.New(oidcToken1.Error)
+		return ctx, false, "", errors.New(tokenRes.Error)
 	}
 
 	// exit if OIDC Token is empty
-	if oidcToken1.Token == "" {
-		return false, "", nil
+	if tokenRes.Token == "" {
+		return ctx, false, "", nil
 	}
 
-	// if not using OIDC Principals flow
-	if a.OIDCAlternatePrincipal {
-		swapuser = ""
-	} else {
-		swapuser = oidcToken1.Token
-	}
-
-	return true, swapuser, nil
+	return context.WithValue(ctx, OIDCTokenKey, OIDCToken(tokenRes.Token)), true, fmt.Sprintf("oidc-%s", login.User), nil
 }

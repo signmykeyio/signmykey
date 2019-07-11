@@ -2,6 +2,7 @@ package vault
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/signmykeyio/signmykey/builtin/signer"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -25,6 +27,10 @@ type Signer struct {
 	Role     string
 	SignTTL  string
 	fullAddr string
+}
+
+type vaultSignReq struct {
+	PubKey string `json:"public_key" binding:"required"`
 }
 
 // Init method is used to ingest config of Signer
@@ -120,11 +126,13 @@ func (v Signer) ReadCA() (string, error) {
 }
 
 // Sign method is used to sign passed SSH Key.
-func (v Signer) Sign(certreq signer.CertReq) (string, error) {
+func (v Signer) Sign(ctx context.Context, payload []byte, id string, principals []string) (cert string, err error) {
 
-	err := certreq.CheckCertReqFields()
+	var signReq vaultSignReq
+	err = json.Unmarshal(payload, &signReq)
 	if err != nil {
-		return "", errors.Wrap(err, "certificate request fields checking failed")
+		log.Errorf("json unmarshaling failed: %s", err)
+		return "", fmt.Errorf("JSON unmarshaling failed: %s", err)
 	}
 
 	token, err := v.getToken()
@@ -132,6 +140,11 @@ func (v Signer) Sign(certreq signer.CertReq) (string, error) {
 		return "", errors.Wrap(err, "error getting auth token")
 	}
 
+	certreq := signer.CertReq{
+		Key:        signReq.PubKey,
+		ID:         id,
+		Principals: principals,
+	}
 	data, err := json.Marshal(map[string]string{
 		"key_id":           certreq.ID,
 		"public_key":       certreq.Key,

@@ -1,17 +1,14 @@
 package api
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"net/http"
 
 	"github.com/go-chi/render"
-	"github.com/signmykeyio/signmykey/builtin/signer"
 	log "github.com/sirupsen/logrus"
 )
 
 func signHandler(w http.ResponseWriter, r *http.Request) {
-	var login Login
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -21,23 +18,7 @@ func signHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = json.Unmarshal(body, &login)
-	if err != nil {
-		log.Errorf("json unmarshaling failed: %s", err)
-		render.Status(r, 400)
-		render.JSON(w, r, map[string]string{"error": "JSON unmarshaling failed"})
-		return
-	}
-
-	err = login.Validate()
-	if err != nil {
-		log.Errorf("missing field(s) in signing request: %s", err)
-		render.Status(r, 400)
-		render.JSON(w, r, map[string]string{"error": "missing field(s) in signing request"})
-		return
-	}
-
-	valid, swapuser, err := config.Auth.Login(login.User, login.Password)
+	ctx, valid, id, err := config.Auth.Login(r.Context(), body)
 	if !valid {
 		log.Errorf("login failed: %s", err)
 		render.Status(r, 401)
@@ -45,12 +26,7 @@ func signHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Swap login user with extra parameter such as OIDC Auth token for Principals search
-	if swapuser != "" {
-		login.User = swapuser
-	}
-
-	principals, err := config.Princs.Get(login.User)
+	ctx, principals, err := config.Princs.Get(ctx, body)
 	if err != nil {
 		log.Errorf("error getting list of principals: %s", err)
 		render.Status(r, 401)
@@ -58,12 +34,7 @@ func signHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req := signer.CertReq{
-		Key:        login.PubKey,
-		ID:         login.User,
-		Principals: principals,
-	}
-	cert, err := config.Signer.Sign(req)
+	cert, err := config.Signer.Sign(ctx, body, id, principals)
 	if err != nil {
 		log.Errorf("server error during key signing: %s", err)
 		render.Status(r, 400)

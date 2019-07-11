@@ -2,6 +2,7 @@ package oidcropc
 
 import (
 	"bytes"
+	"context"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -18,7 +19,7 @@ func TestAuthenticator(t *testing.T) {
 		OIDCClientSecret:  "461c5204-160b-45cf-8609-aa5d500e6093",
 	}
 
-	valid, _, err := oidc.Login("fakeuser", "fakepassword")
+	_, valid, _, err := oidc.Login(context.Background(), []byte("jsonpayload"))
 	if !valid || err != nil {
 		t.Logf("%s", err)
 		t.Fail()
