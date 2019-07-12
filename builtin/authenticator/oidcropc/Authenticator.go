@@ -17,10 +17,9 @@ import (
 
 // Authenticator struct represents OIDC options for SMK Authentication.
 type Authenticator struct {
-	OIDCTokenEndpoint      string
-	OIDCClientID           string
-	OIDCClientSecret       string
-	OIDCAlternatePrincipal bool
+	OIDCTokenEndpoint string
+	OIDCClientID      string
+	OIDCClientSecret  string
 }
 
 type oidcLogin struct {
@@ -62,7 +61,6 @@ func (a *Authenticator) Init(config *viper.Viper) error {
 	a.OIDCTokenEndpoint = config.GetString("oidcTokenEndpoint")
 	a.OIDCClientID = config.GetString("oidcClientID")
 	a.OIDCClientSecret = config.GetString("oidcClientSecret")
-	a.OIDCAlternatePrincipal = config.GetBool("oidcAlternatePrincipal")
 
 	return nil
 }
