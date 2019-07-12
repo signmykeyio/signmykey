@@ -32,11 +32,13 @@ type oidcTokenResponse struct {
 	Error string `json:"error"`
 }
 
-// Type and const for context manipulation
+// OIDCToken represents a OIDC userinfo token
 type OIDCToken string
 
+// OIDCTokenKeyType represents an OIDC context key type
 type OIDCTokenKeyType string
 
+// OIDCTokenKey represents an OIDC context key
 const OIDCTokenKey OIDCTokenKeyType = "oidcToken"
 
 // Init method is used to ingest config of Authenticator
