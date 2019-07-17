@@ -2,6 +2,7 @@ package ldap
 
 import (
 	"bytes"
+	"context"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -26,7 +27,7 @@ func TestPrincipals(t *testing.T) {
 		Prefix:          "smk-",
 	}
 
-	principals, err := ldap.Get("fakeuser")
+	_, principals, err := ldap.Get(context.Background(), []byte("{\"user\": \"fakeuser\"}"))
 	if err != nil {
 		t.Logf("%s", err)
 		t.Fail()

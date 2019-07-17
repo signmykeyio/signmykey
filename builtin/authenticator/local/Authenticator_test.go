@@ -2,6 +2,7 @@ package local
 
 import (
 	"bytes"
+	"context"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -25,26 +26,29 @@ users:
 	local.Init(testConfig)
 
 	cases := []struct {
-		user     string
-		password string
-		err      string
-		valid    bool
+		payload []byte
+		id      string
+		err     string
+		valid   bool
 	}{
-		{"", "", "empty username", false},
-		{"", "badpassword", "empty username", false},
-		{"baduser", "", "empty password", false},
-		{"baduser", "badpassword", "user not found", false},
-		{"gooduser", "badpassword", "bad password", false},
-		{"gooduser", "goodpassword", "", true},
+		{[]byte(""), "", "JSON unmarshaling failed: unexpected end of JSON input", false},
+		{[]byte("{\"user\":\"\"}"), "", "empty username", false},
+		{[]byte("{\"password\":\"\"}"), "", "empty username", false},
+		{[]byte("{\"user\":\"baduser\"}"), "", "empty password", false},
+		{[]byte("{\"user\":\"baduser\",\"password\":\"badpassword\"}"), "", "user not found", false},
+		{[]byte("{\"user\":\"gooduser\",\"password\":\"badpassword\"}"), "", "bad password", false},
+		{[]byte("{\"user\":\"gooduser\",\"password\":\"goodpassword\"}"), "local-gooduser", "", true},
 	}
 
 	for _, c := range cases {
-		valid, err := local.Login(c.user, c.password)
+		_, valid, id, err := local.Login(context.Background(), c.payload)
+
+		assert.Equal(t, c.valid, valid)
+
+		assert.Equal(t, id, c.id)
 
 		if !c.valid {
 			assert.EqualError(t, err, c.err)
 		}
-
-		assert.Equal(t, c.valid, valid)
 	}
 }

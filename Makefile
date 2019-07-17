@@ -20,7 +20,7 @@ lint_install:
 	mv gometalinter-2.0.12-linux-amd64/* /home/travis/bin/
 
 lint: ## Lint the files
-	gometalinter --exclude=.*_test.go --concurrency=1 --deadline=1000s --line-length=100 --disable-all --enable=vet --enable=vetshadow --enable=deadcode --enable=gocyclo --enable=golint --enable=dupl --enable=ineffassign --enable=goconst --enable=gosec --enable=goimports --enable=lll --enable=misspell ./...
+	gometalinter --exclude=.*_test.go --concurrency=1 --deadline=1000s --disable-all --enable=vet --enable=vetshadow --enable=deadcode --enable=gocyclo --enable=golint --enable=dupl --enable=ineffassign --enable=goconst --enable=gosec --enable=goimports --enable=misspell ./...
 
 test: ## Run unittests
 	go test -race ${PKG_LIST}

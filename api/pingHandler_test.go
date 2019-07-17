@@ -33,10 +33,20 @@ func TestPingHandler(t *testing.T) {
 		req, _ := http.NewRequest(c.method, c.url, nil)
 		router.ServeHTTP(w, req)
 
-		var response JSONResponse
-		json.Unmarshal(w.Body.Bytes(), &response)
+		if c.code != w.Code {
+			assert.FailNowf(t, "bad status code", "expected %d, have %d", c.code, w.Code)
+		}
 
-		assert.Equal(t, c.code, w.Code)
+		if c.code != 200 {
+			continue
+		}
+
+		var response JSONResponse
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		if err != nil {
+			assert.Failf(t, "Error not expected", err.Error())
+		}
+
 		assert.Equal(t, c.response, response)
 		assert.Contains(t, w.Header().Get("Content-Type"), c.contentType)
 	}

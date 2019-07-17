@@ -9,9 +9,11 @@ import (
 	"github.com/signmykeyio/signmykey/builtin/authenticator"
 	ldapAuth "github.com/signmykeyio/signmykey/builtin/authenticator/ldap"
 	localAuth "github.com/signmykeyio/signmykey/builtin/authenticator/local"
+	oidcropcAuth "github.com/signmykeyio/signmykey/builtin/authenticator/oidcropc"
 	"github.com/signmykeyio/signmykey/builtin/principals"
 	ldapPrinc "github.com/signmykeyio/signmykey/builtin/principals/ldap"
 	localPrinc "github.com/signmykeyio/signmykey/builtin/principals/local"
+	oidcropcPrinc "github.com/signmykeyio/signmykey/builtin/principals/oidcropc"
 	"github.com/signmykeyio/signmykey/builtin/signer"
 	localSign "github.com/signmykeyio/signmykey/builtin/signer/local"
 	vaultSign "github.com/signmykeyio/signmykey/builtin/signer/vault"
@@ -54,8 +56,9 @@ var serverCmd = &cobra.Command{
 			logrus.Fatal("authenticator type not defined in config")
 		}
 		authType := map[string]authenticator.Authenticator{
-			"ldap":  &ldapAuth.Authenticator{},
-			"local": &localAuth.Authenticator{},
+			"local":    &localAuth.Authenticator{},
+			"ldap":     &ldapAuth.Authenticator{},
+			"oidcropc": &oidcropcAuth.Authenticator{},
 		}
 		auth, ok := authType[authTypeConfig]
 		if !ok {
@@ -72,8 +75,9 @@ var serverCmd = &cobra.Command{
 			return errors.New("principals type not defined in config")
 		}
 		princsType := map[string]principals.Principals{
-			"local": &localPrinc.Principals{},
-			"ldap":  &ldapPrinc.Principals{},
+			"local":    &localPrinc.Principals{},
+			"ldap":     &ldapPrinc.Principals{},
+			"oidcropc": &oidcropcPrinc.Principals{},
 		}
 		princs, ok := princsType[princsTypeConfig]
 		if !ok {

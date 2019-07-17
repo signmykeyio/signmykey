@@ -37,12 +37,12 @@ Create the */etc/ssh/authorized_principals* directory
 mkdir /etc/ssh/authorized_principals/
 ```
 
-Also create the file */etc/ssh/authorized_principals/root* for the root user
+Also create the file */etc/ssh/authorized_principals/root* for the **root** user
 ```
 hackers
 superheros
 ```
-It means that users with **hackers** and **superheros** principals can login as root to the server with ssh.
+It means that users with **hackers** and **superheros** principals can login as **root** to the server with ssh.
 
 ## Restart
 

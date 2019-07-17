@@ -45,3 +45,21 @@ authenticatorOpts:
   * **ldapBindPassword** - LDAP bind password
   * **ldapBase** - LDAP search base
   * **ldapSearch** - LDAP search string to find user
+
+## OIDC ROPC
+
+### Example Usage
+
+```
+authenticatorType: oidcropc
+authenticatorOpts:
+  oidcTokenEndpoint: "https://idp.my.corp/auth/realms/mycorp/protocol/openid-connect/token"
+  oidcClientID: "signmykey"
+  oidcClientSecret: "93fac2d9-bd8f-453a-9ece-e2c430f0ee04"
+```
+
+### Options
+
+  * **oidcTokenEndpoint** - OpenID Connect token Endpoint (required)
+  * **oidcClientID** - OpenID Connect Client ID (required)
+  * **oidcClientSecret** - OpenID Connect Client Secret (required)

@@ -15,7 +15,7 @@ Then
 ```sh
 useradd --no-create-home -s /bin/false signmykey
 apt update && apt install signmykey
-wget https://gitlab.com/signmykey/signmykey/raw/master/signmykey.service -O /etc/systemd/system/signmykey.service
+wget https://raw.githubusercontent.com/signmykeyio/signmykey/master/signmykey.service -O /etc/systemd/system/signmykey.service
 systemctl enable signmykey.service
 ``` 
 
@@ -45,6 +45,8 @@ chmod 400 /etc/signmykey/server.key
 File */etc/signmykey/server.yml*
 
 In this file, you put the Vault AppRole credentials.
+
+### LDAP configuration alternative
 
 ```
 authenticatorType: ldap
@@ -78,7 +80,7 @@ signerOpts:
   vaultRole: "sign-user-role"
   vaultRoleID: "11940c2d-4639-9358-d750-cdb7cf409ff4"
   vaultSecretID: "8b4c901f-1f84-5049-17ee-92de12b6b1e5"
-  vaultSignTTL: "24h"
+  vaultSignTTL: "12h"
 
 address: "0.0.0.0:443"
 tlsDisable: false
@@ -86,7 +88,37 @@ tlsCert: "/etc/signmykey/server.pem"
 tlsKey: "/etc/signmykey/server.key"
 ```
 
-Secure the config file
+### OIDC ROPC configuration alternative
+```
+authenticatorType: oidcropc
+authenticatorOpts:
+  oidcTokenEndpoint: "https://idp.my.corp/auth/realms/mycorp/protocol/openid-connect/token"
+  oidcClientID: "signmykey"
+  oidcClientSecret: "93fac2d9-bd8f-453a-9ece-e2c430f0ee04"
+
+principalsType: oidcropc
+principalsOpts:
+  oidcUserinfoEndpoint: "https://idp.my.corp/auth/realms/mycorp/protocol/openid-connect/userinfo"
+  oidcUserGroupsEntry: "oidc-groups"
+
+signerType: vault
+signerOpts:
+  vaultAddr: "localhost"
+  vaultPort: 8200
+  vaultTLS: true
+  vaultPath: "ssh"
+  vaultRole: "sign-user-role"
+  vaultRoleID: "11940c2d-4639-9358-d750-cdb7cf409ff4"
+  vaultSecretID: "8b4c901f-1f84-5049-17ee-92de12b6b1e5"
+  vaultSignTTL: "12h"
+
+address: "0.0.0.0:443"
+tlsDisable: false
+tlsCert: "/etc/signmykey/server.pem" 
+tlsKey: "/etc/signmykey/server.key"
+```
+
+### Secure the config file
 
 ```sh
 chmod 600 /etc/signmykey/server.yml

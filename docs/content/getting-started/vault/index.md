@@ -45,7 +45,7 @@ echo '{                                            "allow_user_certificates": tr
   ],
   "key_type": "ca",
   "default_user": "root",
-  "max_ttl": "24h" ,
+  "max_ttl": "12h" ,
   "ttl": "30m"
 }' > sign-user-role.json
 ```
