@@ -9,7 +9,7 @@ This HOWTO describe how to configure a Vault server with a PKI to sign its own c
 ### Download
 ```sh
 apt install unzip
-VAULTVERSION=0.10.4
+VAULTVERSION=1.1.3
 cd /tmp
 wget https://releases.hashicorp.com/vault/${VAULTVERSION}/vault_${VAULTVERSION}_linux_amd64.zip
 unzip vault_${VAULTVERSION}_linux_amd64.zip && rm vault_${VAULTVERSION}_linux_amd64.zip

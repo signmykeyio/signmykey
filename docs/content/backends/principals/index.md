@@ -51,3 +51,21 @@ principalsOpts:
   * **ldapGroupSearch** - LDAP search string to find groups
   * **ldapGroupPrefix** - Filter LDAP groups by prefix
   * **transformCase** - Change case of returned principals (default: none) (must be "none", "lower" or "upper")
+
+## OIDC ROPC
+
+### Example Usage
+
+```
+principalsType: oidcropc
+principalsOpts:
+  oidcUserinfoEndpoint: "https://idp.my.corp/auth/realms/mycorp/protocol/openid-connect/userinfo"
+  oidcUserGroupsEntry: "oidc-groups"
+  transformCase: upper
+```
+
+### Options
+
+  * **oidcUserinfoEndpoint** - OpenID Connect userinfo Endpoint (required)
+  * **oidcUserGroupsEntry** - OpenID Connect group entry name returned by userinfo endpoint (required)
+  * **transformCase** - Change case of returned principals (default: none) (must be "none", "lower" or "upper")

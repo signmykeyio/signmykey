@@ -114,6 +114,12 @@ canonifyurls = true
 	url    = "howtos/ldapserver/"
   weight = 2
 
+[[menu.main]]
+  parent = "howtos"
+	name   = "OpenID Connect ROPC"
+	url    = "howtos/oidcropc/"
+  weight = 2
+
 [blackfriday]
 	smartypants	   = true
 	fractions      = true
