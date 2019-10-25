@@ -1,6 +1,6 @@
 language: go
 go:
-- '1.12.1'
+- '1.13.3'
 go_import_path: github.com/signmykeyio/signmykey
 env:
   - GO111MODULE=on GOPROXY=https://proxy.golang.org 
