@@ -22,7 +22,7 @@ curl -Lo signmykey https://github.com/signmykeyio/signmykey/releases/download/v0
 ```
 * Install it in your PATH:
 ```
-sudo mv signmykey /usr/bin/
+chmod +x signmykey && sudo mv signmykey /usr/bin/
 ```
 
 ## Quickstart
