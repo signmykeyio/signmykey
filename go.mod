@@ -37,3 +37,5 @@ require (
 	gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2 // indirect
 	gopkg.in/ldap.v2 v2.5.1
 )
+
+go 1.13
