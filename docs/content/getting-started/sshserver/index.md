@@ -2,12 +2,16 @@
 title: SSH Server
 ---
 
-## Configuration
+### Configuration
 
 In order to use SSH principals, you must configure your SSH servers to use them.
 
 You can find [here](/getting-started/vault/#export-ca-public-key) how to generate the file */etc/ssh/ca.pem*.
 
+
+## Linux server
+
+{{< warning title="Warning" >}} Open SSH Server must be installed on the server. {{< /warning >}}
 Modify the file */etc/ssh/sshd_config* with the following parameters
 
 ```
@@ -29,8 +33,7 @@ PasswordAuthentication no
 ...
 ``` 
 
-## Principals
-
+# Principals
 
 Create the */etc/ssh/authorized_principals* directory
 ```sh
@@ -44,7 +47,7 @@ superheros
 ```
 It means that users with **hackers** and **superheros** principals can login as **root** to the server with ssh.
 
-## Restart
+# Restart
 
 {{< warning title="Warning" >}}
 Be sure to be able to connect via a console to your server.
@@ -53,3 +56,58 @@ Be sure to be able to connect via a console to your server.
 ```sh
 systemctl restart sshd.service
 ```
+
+
+## Windows
+
+{{< warning title="Warning" >}} Open SSH Server must be installed on the server. On Windows 2019 Server the service is present by default, just enable it. {{< /warning >}}
+Modify the file *C:\ProgramData\ssh\sshd_config* with the following parameters
+
+```
+...
+# Allow log into **
+SyslogFacility LOCAL0
+
+# Copy Vault SSH CA
+TrustedUserCAKeys __PROGRAMDATA__/ssh/trusted-vault-ca-keys.pub
+
+# Permit user principals
+AuthorizedPrincipalsFile __PROGRAMDATA__/ssh/authorized_principals
+
+# Deny non signed key files
+AuthorizedKeysFile  none
+
+# Deny password authentication
+PasswordAuthentication no
+
+# Nor mandatory but usefull when user has Administrators' right
+Match Group administrators
+#       AuthorizedKeysFile __PROGRAMDATA__/ssh/administrators_authorized_keys
+       AuthorizedPrincipalsFile __PROGRAMDATA__/ssh/authorized_principals
+...
+```
+
+# Principals
+
+Create the *C:\ProgramData\ssh\authorized_princpals* file
+Be sure to only grant RO on this file for SYSTEM user.
+
+In this file indicate all the principals that are owned by users you want to be able to connect to the server.
+```
+hackers, superheros
+```
+It means that users with **hackers** and **superheros** principals can login to the server with ssh.
+
+# Restart
+
+{{< warning title="Warning" >}}
+Be sure to be able to connect via a console/rdp to your server.
+{{< /warning >}}
+
+Reload the service in the in the *Services* application
+or
+In cmd.exe
+```
+net stop gsw_sshd && net start gsw_sshd
+```
+
