@@ -30,7 +30,7 @@ jobs:
         run: go get github.com/mitchellh/gox && mkdir -p bin && go mod download
 
       - name: Build
-        run: ~/go/bin/gox -osarch="darwin/386 darwin/amd64 linux/386 linux/amd64 linux/arm windows/amd64" -ldflags="-extldflags '-static' -X github.com/signmykeyio/signmykey/cmd.versionString=${{ steps.get_version.outputs.VERSION }}" -output="bin/signmykey_{{.OS}}_{{.Arch}}"
+        run: ~/go/bin/gox -osarch="darwin/amd64 linux/386 linux/amd64 linux/arm windows/amd64" -ldflags="-extldflags '-static' -X github.com/signmykeyio/signmykey/cmd.versionString=${{ steps.get_version.outputs.VERSION }}" -output="bin/signmykey_{{.OS}}_{{.Arch}}"
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v1-release
