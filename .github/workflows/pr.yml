@@ -5,19 +5,19 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go 1.14
+      - name: Set up Go 1.15
         uses: actions/setup-go@v1
         with:
-          go-version: 1.14.2
+          go-version: 1.15.2
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v1
 
       - name: Setup Lint
-        run: curl -LO https://github.com/golangci/golangci-lint/releases/download/v1.24.0/golangci-lint-1.24.0-linux-amd64.tar.gz && tar -xf golangci-lint-1.24.0-linux-amd64.tar.gz
+        run: curl -LO https://github.com/golangci/golangci-lint/releases/download/v1.31.0/golangci-lint-1.31.0-linux-amd64.tar.gz && tar -xf golangci-lint-1.31.0-linux-amd64.tar.gz
 
       - name: Lint
-        run: golangci-lint-1.24.0-linux-amd64/golangci-lint run
+        run: golangci-lint-1.31.0-linux-amd64/golangci-lint run
 
       - name: Setup Build
         run: go get github.com/mitchellh/gox && mkdir -p bin && go mod download
