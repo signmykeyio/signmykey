@@ -1,6 +1,6 @@
 package api
 
-import "github.com/pkg/errors"
+import "errors"
 
 // Login represents credentials expected by SMK server
 type Login struct {

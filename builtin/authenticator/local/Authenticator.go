@@ -40,7 +40,7 @@ func (a Authenticator) Login(ctx context.Context, payload []byte) (resultCtx con
 	err = json.Unmarshal(payload, &login)
 	if err != nil {
 		log.Errorf("json unmarshaling failed: %s", err)
-		return ctx, false, "", fmt.Errorf("JSON unmarshaling failed: %s", err)
+		return ctx, false, "", fmt.Errorf("JSON unmarshaling failed: %w", err)
 	}
 
 	if len(login.User) == 0 {

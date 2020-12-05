@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/signmykeyio/signmykey/builtin/signer"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -76,7 +75,7 @@ func (v *Signer) Init(config *viper.Viper) error {
 func (v Signer) ReadCA() (string, error) {
 	token, err := v.getToken()
 	if err != nil {
-		return "", errors.Wrap(err, "error getting auth token")
+		return "", fmt.Errorf("error getting auth token: %w", err)
 	}
 
 	client := http.Client{Timeout: time.Second * 10}
@@ -86,13 +85,13 @@ func (v Signer) ReadCA() (string, error) {
 		nil,
 	)
 	if err != nil {
-		return "", errors.Wrap(err, "error creating new httprequest")
+		return "", fmt.Errorf("error creating new httprequest: %w", err)
 	}
 	req.Header.Add("X-Vault-Token", token)
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", errors.Wrap(err, "failed during Get request")
+		return "", fmt.Errorf("failed during Get request: %w", err)
 	}
 	defer resp.Body.Close() // nolint: errcheck
 
@@ -102,13 +101,13 @@ func (v Signer) ReadCA() (string, error) {
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", errors.Wrap(err, "error reading response body")
+		return "", fmt.Errorf("error reading response body: %w", err)
 	}
 
 	var caResp map[string]interface{}
 	err = json.Unmarshal(body, &caResp)
 	if err != nil {
-		return "", errors.Wrap(err, "error unmarshaling vault response")
+		return "", fmt.Errorf("error unmarshaling vault response: %w", err)
 	}
 	val, ok := caResp["data"].(map[string]interface{})
 	if !ok {
@@ -132,12 +131,12 @@ func (v Signer) Sign(ctx context.Context, payload []byte, id string, principals 
 	err = json.Unmarshal(payload, &signReq)
 	if err != nil {
 		log.Errorf("json unmarshaling failed: %s", err)
-		return "", fmt.Errorf("JSON unmarshaling failed: %s", err)
+		return "", fmt.Errorf("JSON unmarshaling failed: %w", err)
 	}
 
 	token, err := v.getToken()
 	if err != nil {
-		return "", errors.Wrap(err, "error getting auth token")
+		return "", fmt.Errorf("error getting auth token: %w", err)
 	}
 
 	certreq := signer.CertReq{
@@ -152,7 +151,7 @@ func (v Signer) Sign(ctx context.Context, payload []byte, id string, principals 
 		"ttl":              v.SignTTL,
 	})
 	if err != nil {
-		return "", errors.Wrap(err, "marshaling of sign request payload failed")
+		return "", fmt.Errorf("marshaling of sign request payload failed: %w", err)
 	}
 
 	client := http.Client{Timeout: time.Second * 10}
@@ -162,13 +161,13 @@ func (v Signer) Sign(ctx context.Context, payload []byte, id string, principals 
 		bytes.NewBuffer(data),
 	)
 	if err != nil {
-		return "", errors.Wrap(err, "error creating new httprequest")
+		return "", fmt.Errorf("error creating new httprequest: %w", err)
 	}
 	req.Header.Add("X-Vault-Token", token)
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", errors.Wrap(err, "failed during Post request")
+		return "", fmt.Errorf("failed during POST request: %w", err)
 	}
 	defer resp.Body.Close() // nolint: errcheck
 
@@ -184,13 +183,13 @@ func (v Signer) Sign(ctx context.Context, payload []byte, id string, principals 
 func extractSignedKey(resp *http.Response) (string, error) {
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", errors.Wrap(err, "error reading response body")
+		return "", fmt.Errorf("error reading response body: %w", err)
 	}
 
 	var signResp map[string]interface{}
 	err = json.Unmarshal(body, &signResp)
 	if err != nil {
-		return "", errors.Wrap(err, "error unmarshaling Vault response")
+		return "", fmt.Errorf("error unmarshaling Vault response: %w", err)
 	}
 	val, ok := signResp["data"].(map[string]interface{})
 	if !ok {

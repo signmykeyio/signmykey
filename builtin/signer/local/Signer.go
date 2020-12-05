@@ -5,11 +5,11 @@ import (
 	"crypto/rand"
 	"encoding/binary"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/signmykeyio/signmykey/builtin/signer"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -46,21 +46,21 @@ func (s *Signer) Init(config *viper.Viper) error {
 	// Read and parse CA private key
 	key, err := ioutil.ReadFile(config.GetString("caKey"))
 	if err != nil {
-		return errors.Wrapf(err, "error reading CA private key file %s", config.GetString("caKey"))
+		return fmt.Errorf("error reading CA private key file %s: %w", config.GetString("caKey"), err)
 	}
 	s.CAKey, err = ssh.ParsePrivateKey(key)
 	if err != nil {
-		return errors.Wrap(err, "error parsing CA private key")
+		return fmt.Errorf("error parsing CA private key: %w", err)
 	}
 
 	// Read and parse CA public key
 	pubKey, err := ioutil.ReadFile(config.GetString("caCert"))
 	if err != nil {
-		return errors.Wrapf(err, "error reading CA public key file %s", config.GetString("caCert"))
+		return fmt.Errorf("error reading CA public key file %s: %w", config.GetString("caCert"), err)
 	}
 	s.CACert, _, _, _, err = ssh.ParseAuthorizedKey(pubKey)
 	if err != nil {
-		return errors.Wrap(err, "error parsing CA public key")
+		return fmt.Errorf("error parsing CA public key: %w", err)
 	}
 
 	config.SetDefault("extensions", map[string]string{
@@ -90,7 +90,7 @@ func (s Signer) Sign(ctx context.Context, payload []byte, id string, principals 
 	err = json.Unmarshal(payload, &signReq)
 	if err != nil {
 		log.Errorf("json unmarshaling failed: %s", err)
-		return "", fmt.Errorf("JSON unmarshaling failed: %s", err)
+		return "", fmt.Errorf("JSON unmarshaling failed: %w", err)
 	}
 
 	if id == "" {
@@ -109,13 +109,13 @@ func (s Signer) Sign(ctx context.Context, payload []byte, id string, principals 
 	buf := make([]byte, 8)
 	_, err = rand.Read(buf)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to read random bytes")
+		return "", fmt.Errorf("failed to read random bytes: %w", err)
 	}
 	serial := binary.LittleEndian.Uint64(buf)
 
 	pubKey, _, _, _, err := ssh.ParseAuthorizedKey([]byte(certreq.Key))
 	if err != nil {
-		return "", fmt.Errorf("failed to parse user public key: %s", err)
+		return "", fmt.Errorf("failed to parse user public key: %w", err)
 	}
 
 	certificate := ssh.Certificate{
@@ -134,7 +134,7 @@ func (s Signer) Sign(ctx context.Context, payload []byte, id string, principals 
 
 	err = certificate.SignCert(rand.Reader, s.CAKey)
 	if err != nil {
-		return "", fmt.Errorf("failed to sign user public key: %s", err)
+		return "", fmt.Errorf("failed to sign user public key: %w", err)
 	}
 
 	marshaledCertificate := ssh.MarshalAuthorizedKey(&certificate)

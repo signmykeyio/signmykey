@@ -100,11 +100,11 @@ func (a authMock) Login(ctx context.Context, payload []byte) (context.Context, b
 	err := json.Unmarshal(payload, &login)
 	if _, ok := err.(*json.SyntaxError); ok {
 		log.Errorf("invalid json request body: %s", err)
-		return ctx, false, "", fmt.Errorf("invalid json request body: %s", err)
+		return ctx, false, "", fmt.Errorf("invalid json request body: %w", err)
 	}
 	if err != nil {
 		log.Errorf("json unmarshaling failed: %s", err)
-		return ctx, false, "", fmt.Errorf("JSON unmarshaling failed: %s", err)
+		return ctx, false, "", fmt.Errorf("JSON unmarshaling failed: %w", err)
 	}
 
 	if login.User != "testuser" && login.User != "emptyprincsuser" {
@@ -136,11 +136,11 @@ func (p princsMock) Get(ctx context.Context, payload []byte) (context.Context, [
 	err := json.Unmarshal(payload, &login)
 	if _, ok := err.(*json.SyntaxError); ok {
 		log.Errorf("invalid json request body: %s", err)
-		return ctx, []string{}, fmt.Errorf("invalid json request body: %s", err)
+		return ctx, []string{}, fmt.Errorf("invalid json request body: %w", err)
 	}
 	if err != nil {
 		log.Errorf("json unmarshaling failed: %s", err)
-		return ctx, []string{}, fmt.Errorf("JSON unmarshaling failed: %s", err)
+		return ctx, []string{}, fmt.Errorf("JSON unmarshaling failed: %w", err)
 	}
 
 	if login.User == "emptyprincsuser" {
@@ -167,7 +167,7 @@ func (s signerMock) Sign(ctx context.Context, payload []byte, id string, princip
 	err := json.Unmarshal(payload, &pubkey)
 	if err != nil {
 		log.Errorf("json unmarshaling failed: %s", err)
-		return "", fmt.Errorf("JSON unmarshaling failed: %s", err)
+		return "", fmt.Errorf("JSON unmarshaling failed: %w", err)
 	}
 
 	if pubkey.PubKey == "goodkey" {

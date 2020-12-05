@@ -38,7 +38,7 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 	err := json.Unmarshal(payload, &local)
 	if err != nil {
 		log.Errorf("json unmarshaling failed: %s", err)
-		return ctx, []string{}, fmt.Errorf("JSON unmarshaling failed: %s", err)
+		return ctx, []string{}, fmt.Errorf("JSON unmarshaling failed: %w", err)
 	}
 
 	if !p.UserMap.IsSet(local.User) {
