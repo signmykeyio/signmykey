@@ -8,47 +8,40 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go 1.15
-        uses: actions/setup-go@v1
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
         with:
           go-version: 1.15.2
+
+      - name: Run Golang CI Lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.33
+
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v3
+        with:
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          args: release --rm-dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
 
       - name: Get the version
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
-
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v1
-
-      - name: Setup Lint
-        run: curl -LO https://github.com/golangci/golangci-lint/releases/download/v1.31.0/golangci-lint-1.31.0-linux-amd64.tar.gz && tar -xf golangci-lint-1.31.0-linux-amd64.tar.gz
-
-      - name: Lint
-        run: golangci-lint-1.31.0-linux-amd64/golangci-lint run
-
-      - name: Setup Build
-        run: go get github.com/mitchellh/gox && mkdir -p bin && go mod download
-
-      - name: Build
-        run: ~/go/bin/gox -osarch="darwin/amd64 linux/386 linux/amd64 linux/arm windows/amd64" -ldflags="-extldflags '-static' -X github.com/signmykeyio/signmykey/cmd.versionString=${{ steps.get_version.outputs.VERSION }}" -output="bin/signmykey_{{.OS}}_{{.Arch}}"
-
-      - name: Upload binaries to release
-        uses: svenstaro/upload-release-action@v1-release
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: bin/*
-          tag: ${{ github.ref }}
-          overwrite: true
-          file_glob: true
-
-      - name: FPM Setup
-        run: sudo apt update && sudo apt install ruby-dev build-essential rpm -y && sudo gem install --no-document fpm
-
-      - name: FPM Build
-        run: |
-          cp bin/signmykey_linux_amd64 signmykey
-          fpm -s dir -t deb -n signmykey -m "contact@pablo-ruth.fr" --url "https://github.com/signmykeyio/signmykey" --description "An automated SSH Certificate Authority" --category "admin" -v ${{ steps.get_version.outputs.VERSION }} --prefix /usr/bin signmykey
-          fpm -s dir -t rpm -n signmykey -m "contact@pablo-ruth.fr" --url "https://github.com/signmykeyio/signmykey" --description "An automated SSH Certificate Authority" --category "admin" -v ${{ steps.get_version.outputs.VERSION }} --prefix /usr/bin signmykey
 
       - name: FPM Upload Tag
         env:
@@ -56,8 +49,8 @@ jobs:
           BINTRAY_TOKEN: ${{ secrets.BINTRAY_TOKEN }}
         run: |
           curl -u${BINTRAY_USER}:${BINTRAY_TOKEN} --data '{"name":"${{ steps.get_version.outputs.VERSION }}","desc":"${{ steps.get_version.outputs.VERSION }}"}' https://api.bintray.com//packages/signmykeyio/signmykey-deb/signmykey/versions
-          curl -T signmykey_${{ steps.get_version.outputs.VERSION }}_amd64.deb -u${BINTRAY_USER}:${BINTRAY_TOKEN} "https://api.bintray.com/content/signmykeyio/signmykey-deb/signmykey/${{ steps.get_version.outputs.VERSION }}/pool/signmykey_${{ steps.get_version.outputs.VERSION }}_amd64.deb;deb_distribution=stable;deb_component=main;deb_architecture=amd64"
+          curl -T bin/signmykey_${{ steps.get_version.outputs.VERSION }}_amd64.deb -u${BINTRAY_USER}:${BINTRAY_TOKEN} "https://api.bintray.com/content/signmykeyio/signmykey-deb/signmykey/${{ steps.get_version.outputs.VERSION }}/pool/signmykey_${{ steps.get_version.outputs.VERSION }}_amd64.deb;deb_distribution=stable;deb_component=main;deb_architecture=amd64"
           curl -u${BINTRAY_USER}:${BINTRAY_TOKEN} --data '{"discard":true,"publish_wait_for_secs":-1,"subject":"signmykey.io"}' "https://api.bintray.com/content/signmykeyio/signmykey-deb/signmykey/${{ steps.get_version.outputs.VERSION }}/publish"
           curl -u${BINTRAY_USER}:${BINTRAY_TOKEN} --data '{"name":"${{ steps.get_version.outputs.VERSION }}","desc":"${{ steps.get_version.outputs.VERSION }}"}' https://api.bintray.com//packages/signmykeyio/signmykey-rpm/signmykey/versions
-          curl -T signmykey-${{ steps.get_version.outputs.VERSION }}-1.x86_64.rpm -u${BINTRAY_USER}:${BINTRAY_TOKEN} "https://api.bintray.com/content/signmykeyio/signmykey-rpm/signmykey/${{ steps.get_version.outputs.VERSION }}/pool/signmykey-${{ steps.get_version.outputs.VERSION }}-1.x86_64.rpm"
+          curl -T bin/signmykey-${{ steps.get_version.outputs.VERSION }}-x86_64.rpm -u${BINTRAY_USER}:${BINTRAY_TOKEN} "https://api.bintray.com/content/signmykeyio/signmykey-rpm/signmykey/${{ steps.get_version.outputs.VERSION }}/pool/signmykey-${{ steps.get_version.outputs.VERSION }}-1.x86_64.rpm"
           curl -u${BINTRAY_USER}:${BINTRAY_TOKEN} --data '{"discard":true,"publish_wait_for_secs":-1,"subject":"signmykey.io"}' "https://api.bintray.com/content/signmykeyio/signmykey-rpm/signmykey/${{ steps.get_version.outputs.VERSION }}/publish"

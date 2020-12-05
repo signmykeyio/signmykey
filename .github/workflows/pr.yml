@@ -5,22 +5,23 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go 1.15
-        uses: actions/setup-go@v1
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
         with:
           go-version: 1.15.2
 
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v1
+      - name: Run Golang CI Lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.33
 
-      - name: Setup Lint
-        run: curl -LO https://github.com/golangci/golangci-lint/releases/download/v1.31.0/golangci-lint-1.31.0-linux-amd64.tar.gz && tar -xf golangci-lint-1.31.0-linux-amd64.tar.gz
-
-      - name: Lint
-        run: golangci-lint-1.31.0-linux-amd64/golangci-lint run
-
-      - name: Setup Build
-        run: go get github.com/mitchellh/gox && mkdir -p bin && go mod download
-
-      - name: Build
-        run: ~/go/bin/gox -osarch="darwin/amd64 linux/386 linux/amd64 linux/arm windows/amd64" -ldflags="-extldflags '-static' -X github.com/signmykeyio/signmykey/cmd.versionString=${GITHUB_RUN_NUMBER}" -output="bin/signmykey_{{.OS}}_{{.Arch}}"
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          args: release --snapshot --skip-sign --rm-dist
