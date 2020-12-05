@@ -10,7 +10,6 @@ import (
 	"math/big"
 
 	"github.com/fatih/color"
-	"github.com/pkg/errors"
 	"github.com/signmykeyio/signmykey/api"
 	localAuth "github.com/signmykeyio/signmykey/builtin/authenticator/local"
 	localPrinc "github.com/signmykeyio/signmykey/builtin/principals/local"
@@ -36,14 +35,14 @@ var serverDevCmd = &cobra.Command{
 		// Authenticator init
 		password, hash, err := generateAndHashPassword()
 		if err != nil {
-			return errors.Wrap(err, "error getting new password and hash")
+			return fmt.Errorf("error getting new password and hash: %w", err)
 		}
 		auth := &localAuth.Authenticator{}
 		authConfig := viper.New()
 		authConfig.SetConfigType("yaml")
 		err = authConfig.ReadConfig(bytes.NewBuffer([]byte(fmt.Sprintf("%s: %s", devUser, hash))))
 		if err != nil {
-			return errors.Wrap(err, "error reading local authenticator config")
+			return fmt.Errorf("error reading local authenticator config: %w", err)
 		}
 		auth.UserMap = authConfig
 
@@ -55,11 +54,11 @@ var serverDevCmd = &cobra.Command{
 users:
   %s: %s`, devUser, devUser))))
 		if err != nil {
-			return errors.Wrap(err, "error reading local principals config")
+			return fmt.Errorf("error reading local principals config: %w", err)
 		}
 		err = princs.Init(princsConfig)
 		if err != nil {
-			return errors.Wrap(err, "error initializing local principals")
+			return fmt.Errorf("error initializing local principals: %w", err)
 		}
 
 		// Signer init
@@ -100,7 +99,7 @@ users:
 func generateCA() (ssh.Signer, ssh.PublicKey, error) {
 	privateSeed, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "error generating CA private key")
+		return nil, nil, fmt.Errorf("error generating CA private key: %w", err)
 	}
 
 	privateBlock := pem.Block{
@@ -111,12 +110,12 @@ func generateCA() (ssh.Signer, ssh.PublicKey, error) {
 
 	signer, err := ssh.ParsePrivateKey(pem.EncodeToMemory(&privateBlock))
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "error parsing CA private key")
+		return nil, nil, fmt.Errorf("error parsing CA private key: %w", err)
 	}
 
 	public, err := ssh.NewPublicKey(&privateSeed.PublicKey)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "error generation CA public key")
+		return nil, nil, fmt.Errorf("error generation CA public key: %w", err)
 	}
 
 	return signer, public, nil
@@ -129,14 +128,14 @@ func generateAndHashPassword() (string, string, error) {
 	for i := range passwordBytes {
 		random, err := rand.Int(rand.Reader, big.NewInt(int64(len(letterBytes))))
 		if err != nil {
-			return "", "", errors.Wrap(err, "error getting random number for password generation")
+			return "", "", fmt.Errorf("error getting random number for password generation: %w", err)
 		}
 		passwordBytes[i] = letterBytes[random.Int64()]
 	}
 
 	hash, err := bcrypt.GenerateFromPassword(passwordBytes, bcrypt.DefaultCost)
 	if err != nil {
-		return "", "", errors.Wrap(err, "error hashing generated password")
+		return "", "", fmt.Errorf("error hashing generated password: %w", err)
 	}
 
 	return string(passwordBytes), string(hash), nil
