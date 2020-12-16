@@ -3,7 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"strings"
+	"os"
 
 	"github.com/signmykeyio/signmykey/api"
 	"github.com/signmykeyio/signmykey/builtin/authenticator"
@@ -22,38 +22,50 @@ import (
 	"github.com/spf13/viper"
 )
 
-var serverCfgFile string
+var (
+	serverCfgFile   string
+	serverLogFormat string
+)
 
 var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Start signmykey server",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
+
+		// Create logger
+		logFormatter := map[string]logrus.Formatter{
+			"json": &logrus.JSONFormatter{DisableTimestamp: true},
+			"text": &logrus.TextFormatter{},
+		}
+		if serverLogFormat != "json" && serverLogFormat != "text" {
+			fmt.Println("Flag --log-format value must be \"json\" or \"text\"")
+			os.Exit(1)
+		}
+		logger := logrus.New()
+		logger.Formatter = logFormatter[serverLogFormat]
+
 		// load config
 		if err := initConfig(serverCfgFile); err != nil {
-			return err
+			logger.WithField("ctx", "server").WithError(fmt.Errorf("failed to load config! %s", err)).Error("Loading config")
+			return
 		}
 
-		logrus.Info("start signmykey server")
+		logger.WithField("ctx", "server").Info("Starting signmykey server")
 
 		// Log level
-		logLevelConfig := map[string]logrus.Level{
-			"debug": logrus.DebugLevel,
-			"info":  logrus.InfoLevel,
-			"warn":  logrus.WarnLevel,
-			"fatal": logrus.FatalLevel,
-			"panic": logrus.PanicLevel,
-		}
 		viper.SetDefault("logLevel", "info")
-		logLevel, ok := logLevelConfig[strings.ToLower(viper.GetString("logLevel"))]
-		if !ok {
-			logrus.Fatalf("invalid logLevel %s (debug,info,warn,fatal,panic)", viper.GetString("logLevel"))
+		logLevel, err := logrus.ParseLevel(viper.GetString("logLevel"))
+		if err != nil {
+			logger.WithField("ctx", "server").WithError(err).Error("Setting logLevel")
+			return
 		}
-		logrus.SetLevel(logLevel)
+		logger.SetLevel(logLevel)
 
 		// Authenticator init
 		authTypeConfig := viper.GetString("authenticatorType")
 		if authTypeConfig == "" {
-			logrus.Fatal("authenticator type not defined in config")
+			logger.WithField("ctx", "server").WithError(errors.New("authenticator type not defined in config")).Error("Setting Authenticator type")
+			return
 		}
 		authType := map[string]authenticator.Authenticator{
 			"local":    &localAuth.Authenticator{},
@@ -62,17 +74,20 @@ var serverCmd = &cobra.Command{
 		}
 		auth, ok := authType[authTypeConfig]
 		if !ok {
-			return fmt.Errorf("unknown authenticator type %s", authTypeConfig)
+			logger.WithField("ctx", "server").WithError(fmt.Errorf("unknown authenticator type %s", authTypeConfig)).Error("Setting Authenticator type")
+			return
 		}
-		err := auth.Init(viper.Sub("authenticatorOpts"))
+		err = auth.Init(viper.Sub("authenticatorOpts"))
 		if err != nil {
-			return err
+			logger.WithField("ctx", "server").WithError(err).Error("Setting Authenticator options")
+			return
 		}
 
 		// Principals init
 		princsTypeConfig := viper.GetString("principalsType")
 		if princsTypeConfig == "" {
-			return errors.New("principals type not defined in config")
+			logger.WithField("ctx", "server").WithError(errors.New("principals type not defined in config")).Error("Setting Principals type")
+			return
 		}
 		princsType := map[string]principals.Principals{
 			"local":    &localPrinc.Principals{},
@@ -81,17 +96,20 @@ var serverCmd = &cobra.Command{
 		}
 		princs, ok := princsType[princsTypeConfig]
 		if !ok {
-			return fmt.Errorf("unknown principals type %s", princsTypeConfig)
+			logger.WithField("ctx", "server").WithError(fmt.Errorf("unknown principals type %s", princsTypeConfig)).Error("Setting Principals type")
+			return
 		}
 		err = princs.Init(viper.Sub("principalsOpts"))
 		if err != nil {
-			return err
+			logger.WithField("ctx", "server").WithError(err).Error("Setting Principals options")
+			return
 		}
 
 		// Signer init
 		signerTypeConfig := viper.GetString("signerType")
 		if signerTypeConfig == "" {
-			return errors.New("signer type not defined in config")
+			logger.WithField("ctx", "server").WithError(errors.New("singer type not defined in config")).Error("Setting Signer type")
+			return
 		}
 		signerType := map[string]signer.Signer{
 			"vault": &vaultSign.Signer{},
@@ -99,11 +117,13 @@ var serverCmd = &cobra.Command{
 		}
 		signer, ok := signerType[signerTypeConfig]
 		if !ok {
-			return fmt.Errorf("unknown signer type %s", signerTypeConfig)
+			logger.WithField("ctx", "server").WithError(fmt.Errorf("unknown signer type %s", signerTypeConfig)).Error("Setting Signer type")
+			return
 		}
 		err = signer.Init(viper.Sub("SignerOpts"))
 		if err != nil {
-			return err
+			logger.WithField("ctx", "server").WithError(err).Error("Setting Signer options")
+			return
 		}
 
 		viper.SetDefault("address", "0.0.0.0:9600")
@@ -111,7 +131,8 @@ var serverCmd = &cobra.Command{
 
 		if !viper.GetBool("tlsDisable") {
 			if viper.GetString("tlsCert") == "" || viper.GetString("tlsKey") == "" {
-				return fmt.Errorf("tlsCert and tlsKey must be defined if tlsDisable is False")
+				logger.WithField("ctx", "server").WithError(errors.New("tlsCert and tlsKey must be defined if tlsDisable is False")).Error("Setting TLS config")
+				return
 			}
 		}
 
@@ -120,21 +141,22 @@ var serverCmd = &cobra.Command{
 			Princs: princs,
 			Signer: signer,
 
+			Logger: logger,
+
 			Addr:       viper.GetString("address"),
 			TLSDisable: viper.GetBool("tlsDisable"),
 			TLSCert:    viper.GetString("tlsCert"),
 			TLSKey:     viper.GetString("tlsKey"),
 		}
 
-		err = api.Serve(config)
-
-		return err
+		api.Serve(config)
+		logger.WithField("ctx", "server").Info("Stopping HTTP server")
 	},
 }
 
 func init() {
-	serverCmd.Flags().StringVarP(
-		&serverCfgFile, "cfg", "c", "/etc/signmykey/server.yml", "config file")
+	serverCmd.Flags().StringVarP(&serverCfgFile, "cfg", "c", "/etc/signmykey/server.yml", "config file")
+	serverCmd.Flags().StringVarP(&serverLogFormat, "log-format", "l", "json", "logging format (json/text)")
 
 	rootCmd.AddCommand(serverCmd)
 }

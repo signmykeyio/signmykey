@@ -26,23 +26,26 @@ var devUser string
 var serverDevCmd = &cobra.Command{
 	Use:   "dev",
 	Short: "Start signmykey server in DEV mode",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 
-		// Log level
-		logrus.SetLevel(logrus.InfoLevel)
-		logrus.Info("start signmykey server in DEV mode")
+		// Logging
+		logger := logrus.New()
+		logger.SetLevel(logrus.InfoLevel)
+		logger.WithField("ctx", "server").Warn("Starting signmykey server in DEV mode")
 
 		// Authenticator init
 		password, hash, err := generateAndHashPassword()
 		if err != nil {
-			return fmt.Errorf("error getting new password and hash: %w", err)
+			logger.WithField("ctx", "server").WithError(err).Error("Generating new password and hash")
+			return
 		}
 		auth := &localAuth.Authenticator{}
 		authConfig := viper.New()
 		authConfig.SetConfigType("yaml")
 		err = authConfig.ReadConfig(bytes.NewBuffer([]byte(fmt.Sprintf("%s: %s", devUser, hash))))
 		if err != nil {
-			return fmt.Errorf("error reading local authenticator config: %w", err)
+			logger.WithField("ctx", "server").WithError(err).Error("Loading local authenticator config")
+			return
 		}
 		auth.UserMap = authConfig
 
@@ -54,17 +57,20 @@ var serverDevCmd = &cobra.Command{
 users:
   %s: %s`, devUser, devUser))))
 		if err != nil {
-			return fmt.Errorf("error reading local principals config: %w", err)
+			logger.WithField("ctx", "server").WithError(err).Error("Loading local principals config")
+			return
 		}
 		err = princs.Init(princsConfig)
 		if err != nil {
-			return fmt.Errorf("error initializing local principals: %w", err)
+			logger.WithField("ctx", "server").WithError(err).Error("initializing local principals")
+			return
 		}
 
 		// Signer init
 		caSigner, caPub, err := generateCA()
 		if err != nil {
-			return err
+			logger.WithField("ctx", "server").WithError(err).Error("Generating temp SSH Certificate Authority")
+			return
 		}
 		signer := &localSign.Signer{
 			CACert: caPub,
@@ -84,15 +90,15 @@ users:
 			Princs: princs,
 			Signer: signer,
 
+			Logger: logger,
+
 			Addr:       "127.0.0.1:9600",
 			TLSDisable: true,
 		}
 
 		displayHowto(password, ssh.MarshalAuthorizedKey(caPub))
 
-		err = api.Serve(config)
-
-		return err
+		api.Serve(config)
 	},
 }
 

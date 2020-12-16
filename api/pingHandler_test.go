@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,7 +27,7 @@ func TestPingHandler(t *testing.T) {
 		{"DELETE", "/v1/ping", 405, JSONResponse(nil), ""},
 	}
 
-	router := Router()
+	router := Router(logrus.New())
 
 	for _, c := range cases {
 		w := httptest.NewRecorder()
