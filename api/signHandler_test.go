@@ -66,7 +66,7 @@ func TestSignHandler(t *testing.T) {
 		Princs: &princsMock{},
 		Signer: &signerMock{},
 	}
-	router := Router()
+	router := Router(log.New())
 
 	for _, c := range cases {
 		w := httptest.NewRecorder()

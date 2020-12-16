@@ -3,6 +3,7 @@ package api
 import (
 	"crypto/tls"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -12,7 +13,7 @@ import (
 	"github.com/signmykeyio/signmykey/builtin/authenticator"
 	"github.com/signmykeyio/signmykey/builtin/principals"
 	"github.com/signmykeyio/signmykey/builtin/signer"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // Config represents the config of the API webserver.
@@ -22,35 +23,44 @@ type Config struct {
 	TLSCert    string
 	TLSKey     string
 
+	Logger *logrus.Logger
+
 	Auth   authenticator.Authenticator
 	Princs principals.Principals
 	Signer signer.Signer
 }
+
+type contextKey string
 
 var (
 	config Config
 )
 
 // Serve the API webserver and register all handlers
-func Serve(startconfig Config) error {
+func Serve(startconfig Config) {
 	config = startconfig
 
 	// Config logging
-	formatter := &log.TextFormatter{}
-	log.SetFormatter(formatter)
+	logger := config.Logger
 
 	if config.TLSDisable {
-		log.Warnf("!!!running signmykey server with TLS disabled is strongly discouraged!!!")
-		log.Printf("signmykey server listen on http://%s", config.Addr)
-		return http.ListenAndServe(config.Addr, Router())
+		logger.WithField("ctx", "api").Warn("Running signmykey server with TLS disabled is strongly discouraged!")
+		logger.WithField("ctx", "api").Infof("Signmykey server listen on http://%s", config.Addr)
+		err := http.ListenAndServe(config.Addr, Router(logger))
+		if err != nil {
+			logger.WithField("ctx", "api").WithError(err).Error("Serving HTTP")
+		}
+		return
 	}
 
 	if _, err := os.Stat(config.TLSCert); os.IsNotExist(err) {
-		return fmt.Errorf("Cert file %s doesn't exist", err)
+		logger.WithField("ctx", "api").WithError(err).Error("Load TLS certificate")
+		return
 	}
 
 	if _, err := os.Stat(config.TLSKey); os.IsNotExist(err) {
-		return fmt.Errorf("Key file %s doesn't exist", err)
+		logger.WithField("ctx", "api").WithError(err).Error("Load TLS key")
+		return
 	}
 
 	tlsCfg := &tls.Config{
@@ -69,24 +79,34 @@ func Serve(startconfig Config) error {
 			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
 		},
 	}
+
+	// Create standard logger from logrus for http.Server internal ErrorLog
+	lw := logger.WithField("ctx", "api").WriterLevel(logrus.ErrorLevel)
+	defer lw.Close()
+
 	srv := &http.Server{
 		Addr:         config.Addr,
-		Handler:      Router(),
+		Handler:      Router(logger),
 		TLSConfig:    tlsCfg,
 		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler)),
+		ErrorLog:     log.New(lw, "", 0),
 	}
 
-	log.Printf("signmykey server listen on https://%s", config.Addr)
-	return srv.ListenAndServeTLS(config.TLSCert, config.TLSKey)
+	logger.WithField("ctx", "api").Infof("Signmykey server listen on https://%s", config.Addr)
+	err := srv.ListenAndServeTLS(config.TLSCert, config.TLSKey)
+	if err != nil {
+		logger.WithField("ctx", "api").WithError(err).Error("Serving HTTP request")
+		return
+	}
 }
 
 // Router returns *chi.Mux config
-func Router() *chi.Mux {
+func Router(logger *logrus.Logger) *chi.Mux {
 	router := chi.NewRouter()
 	router.Use(
 		middleware.RequestID,
 		middleware.RealIP,
-		middleware.Logger,
+		Logger(logger),
 		middleware.Recoverer,
 		middleware.Timeout(15*time.Second),
 	)
