@@ -1,3 +1,13 @@
+:warning: **APT GPG Key deprecation** :warning:
+
+The GPG key used to sign APT repository expired. A new one is released at gpg.signmykey.io. To add it to your APT truststore, use this command:
+```
+curl https://gpg.signmykey.io/signmykey.pub | sudo apt-key add -
+```
+:warning: **APT GPG Key deprecation** :warning:
+
+----
+
 ![Signmykey logo](docs/content/images/logo-full.png)
 
 ----
@@ -18,7 +28,7 @@ Three types of backends are supported by Signmykey:
 
 * Download **signmykey** zip file (on 64bits linux):
 ```
-curl -Lo signmykey https://github.com/signmykeyio/signmykey/releases/download/v0.4.2/signmykey_linux_amd64
+curl -Lo signmykey https://github.com/signmykeyio/signmykey/releases/download/v0.5.0/signmykey_linux_amd64
 ```
 * Install it in your PATH:
 ```
