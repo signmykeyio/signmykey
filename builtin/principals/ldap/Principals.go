@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
+	ldap "github.com/go-ldap/ldap/v3"
 	"github.com/signmykeyio/signmykey/builtin/principals/common"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	ldap "gopkg.in/ldap.v2"
 )
 
 // Principals struct represents LDAP options for getting principals list from LDAP.

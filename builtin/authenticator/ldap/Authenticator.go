@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
+	ldap "github.com/go-ldap/ldap/v3"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	ldap "gopkg.in/ldap.v2"
 )
 
 // Authenticator struct represents LDAP options for SMK Authentication.
