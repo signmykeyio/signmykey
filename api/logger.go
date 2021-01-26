@@ -37,7 +37,7 @@ func Logger(logger *logrus.Logger) func(next http.Handler) http.Handler {
 
 			reqID := middleware.GetReqID(r.Context())
 
-			logger.WithFields(logrus.Fields{
+			reqLogger := logger.WithFields(logrus.Fields{
 				"ctx":    "http",
 				"host":   r.Host,
 				"path":   r.URL.Path,
@@ -45,10 +45,16 @@ func Logger(logger *logrus.Logger) func(next http.Handler) http.Handler {
 				"proto":  r.Proto,
 				"method": r.Method,
 				"req_id": reqID,
-			}).Info("HTTP Request")
+			})
+			// Only log ping endpoint as debug
+			if r.URL.Path == "/v1/ping" {
+				reqLogger.Debug("HTTP Request")
+			} else {
+				reqLogger.Info("HTTP Request")
+			}
 
 			defer func() {
-				logger.WithFields(logrus.Fields{
+				resLogger := logger.WithFields(logrus.Fields{
 					"ctx":      "http",
 					"host":     r.Host,
 					"path":     r.URL.Path,
@@ -58,7 +64,13 @@ func Logger(logger *logrus.Logger) func(next http.Handler) http.Handler {
 					"duration": time.Since(t1).String(),
 					"status":   recorder.Status,
 					"req_id":   reqID,
-				}).Info("HTTP Response")
+				})
+				// Only log ping endpoint as debug
+				if r.URL.Path == "/v1/ping" {
+					resLogger.Debug("HTTP Response")
+				} else {
+					resLogger.Info("HTTP Response")
+				}
 			}()
 
 			// Embed logger in context
