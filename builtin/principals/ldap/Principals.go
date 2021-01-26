@@ -110,7 +110,7 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 
 	usr, err := l.Search(userSearchReq)
 	if err != nil {
-		return ctx, []string{}, err
+		return ctx, []string{}, fmt.Errorf("execute LDAP user search request: %w", err)
 	}
 
 	if len(usr.Entries) > 1 {
@@ -122,14 +122,14 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 	groupSearchRequest := ldap.NewSearchRequest(
 		p.GroupSearchBase,
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-		fmt.Sprintf(p.GroupSearchStr, usr.Entries[0].DN),
+		fmt.Sprintf(p.GroupSearchStr, ldap.EscapeFilter(usr.Entries[0].DN)),
 		[]string{},
 		nil,
 	)
 
 	gsr, err := l.Search(groupSearchRequest)
 	if err != nil {
-		return ctx, []string{}, err
+		return ctx, []string{}, fmt.Errorf("execute LDAP groups search request: %w", err)
 	}
 
 	if len(gsr.Entries) == 0 {
