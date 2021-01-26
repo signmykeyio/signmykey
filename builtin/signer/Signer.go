@@ -10,7 +10,7 @@ import (
 type Signer interface {
 	Init(config *viper.Viper) error
 	Sign(ctx context.Context, payload []byte, id string, principals []string) (cert string, err error)
-	ReadCA() (string, error)
+	ReadCA(ctx context.Context) (cert string, err error)
 }
 
 // CertReq represents certificate request

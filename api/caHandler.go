@@ -19,7 +19,7 @@ func caHandler(w http.ResponseWriter, r *http.Request) {
 		"req_id":  reqID,
 	})
 
-	publicKey, err := config.Signer.ReadCA()
+	publicKey, err := config.Signer.ReadCA(r.Context())
 	if err != nil {
 		logger.WithError(err).Error("Getting SSH CA certificate")
 		render.Status(r, 500)
