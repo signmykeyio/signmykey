@@ -156,7 +156,7 @@ func (s signerMock) Init(config *viper.Viper) error {
 	return nil
 }
 
-func (s signerMock) ReadCA() (string, error) {
+func (s signerMock) ReadCA(ctx context.Context) (string, error) {
 	return "", nil
 }
 

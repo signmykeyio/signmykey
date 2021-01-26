@@ -79,7 +79,7 @@ func (s *Signer) Init(config *viper.Viper) error {
 }
 
 // ReadCA method read CA public cert from local file
-func (s Signer) ReadCA() (string, error) {
+func (s Signer) ReadCA(ctx context.Context) (string, error) {
 	return string(ssh.MarshalAuthorizedKey(s.CACert)), nil
 }
 

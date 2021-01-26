@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/signmykeyio/signmykey/builtin/signer"
 	log "github.com/sirupsen/logrus"
@@ -72,23 +71,21 @@ func (v *Signer) Init(config *viper.Viper) error {
 }
 
 // ReadCA method read CA public cert from Hashicorp Vault backend
-func (v Signer) ReadCA() (string, error) {
-	token, err := v.getToken()
+func (v Signer) ReadCA(ctx context.Context) (string, error) {
+	token, err := v.getToken(ctx)
 	if err != nil {
 		return "", fmt.Errorf("error getting auth token: %w", err)
 	}
 
-	client := http.Client{Timeout: time.Second * 10}
-	req, err := http.NewRequest(
-		"GET",
-		fmt.Sprintf("%s/%s/config/ca", v.fullAddr, v.Path),
-		nil,
-	)
+	// Create Vault CA request
+	client := http.Client{}
+	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/%s/config/ca", v.fullAddr, v.Path), nil)
 	if err != nil {
 		return "", fmt.Errorf("error creating new httprequest: %w", err)
 	}
 	req.Header.Add("X-Vault-Token", token)
 
+	// Execute Vault CA request
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("failed during Get request: %w", err)
@@ -104,6 +101,7 @@ func (v Signer) ReadCA() (string, error) {
 		return "", fmt.Errorf("error reading response body: %w", err)
 	}
 
+	// Parse Vault CA JSON response
 	var caResp map[string]interface{}
 	err = json.Unmarshal(body, &caResp)
 	if err != nil {
@@ -134,7 +132,7 @@ func (v Signer) Sign(ctx context.Context, payload []byte, id string, principals 
 		return "", fmt.Errorf("JSON unmarshaling failed: %w", err)
 	}
 
-	token, err := v.getToken()
+	token, err := v.getToken(ctx)
 	if err != nil {
 		return "", fmt.Errorf("error getting auth token: %w", err)
 	}
@@ -154,12 +152,8 @@ func (v Signer) Sign(ctx context.Context, payload []byte, id string, principals 
 		return "", fmt.Errorf("marshaling of sign request payload failed: %w", err)
 	}
 
-	client := http.Client{Timeout: time.Second * 10}
-	req, err := http.NewRequest(
-		"POST",
-		fmt.Sprintf("%s/%s/sign/%s", v.fullAddr, v.Path, v.Role),
-		bytes.NewBuffer(data),
-	)
+	client := http.Client{}
+	req, err := http.NewRequestWithContext(ctx, "POST", fmt.Sprintf("%s/%s/sign/%s", v.fullAddr, v.Path, v.Role), bytes.NewBuffer(data))
 	if err != nil {
 		return "", fmt.Errorf("error creating new httprequest: %w", err)
 	}
@@ -203,7 +197,7 @@ func extractSignedKey(resp *http.Response) (string, error) {
 	return signedKey, nil
 }
 
-func (v Signer) getToken() (string, error) {
+func (v Signer) getToken(ctx context.Context) (string, error) {
 
 	data, err := json.Marshal(map[string]string{
 		"role_id":   v.RoleID,
@@ -213,12 +207,13 @@ func (v Signer) getToken() (string, error) {
 		return "", err
 	}
 
-	client := http.Client{Timeout: time.Second * 10}
-	resp, err := client.Post(
-		fmt.Sprintf("%s/auth/approle/login", v.fullAddr),
-		"application/json",
-		bytes.NewBuffer(data))
+	client := http.Client{}
+	req, err := http.NewRequestWithContext(ctx, "POST", fmt.Sprintf("%s/auth/approle/login", v.fullAddr), bytes.NewBuffer(data))
+	if err != nil {
+		return "", fmt.Errorf("error creating new httprequest: %w", err)
+	}
 
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", err
 	}
