@@ -30,7 +30,7 @@ Three types of backends are supported by Signmykey:
 
 * Download **signmykey** zip file (ex: on 64bits linux):
 ```
-curl -Lo signmykey https://github.com/signmykeyio/signmykey/releases/download/v0.5.0/signmykey_linux_amd64
+curl -Lo signmykey https://github.com/signmykeyio/signmykey/releases/download/v0.5.1/signmykey_linux_amd64
 ```
 * Install it in your PATH:
 ```
