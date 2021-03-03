@@ -16,23 +16,61 @@ curl https://gpg.signmykey.io/signmykey.pub | sudo apt-key add -
 
 ----
 
-Signmykey is an automated SSH Certificate Authority. It allows you to securly and centraly manage SSH accesses to your infrastructure.
+Signmykey is an automated SSH Certificate Authority. It allows you to securely and centrally manage SSH accesses to your infrastructure.
 
 Three types of backends are supported by Signmykey:
 
-* **Authorization**: users can be authentified through different systems like LDAP or Local map.
-* **Principals**: list of principals applied to SSH certificates can be created dynamically from LDAP groups or set staticaly in local config.
+* **Authenticator**: users can be authenticated through different systems like LDAP or Local map.
+* **Principals**: list of principals applied to SSH certificates can be created dynamically from LDAP groups or set statically in local config.
 * **Signer**: cryptographic signing operations of SSH certificates can be done directly by Signmykey or via Hashicorp Vault.
 
 ## Install
 
-* Download **signmykey** zip file (on 64bits linux):
+### Manual
+
+* Download **signmykey** zip file (ex: on 64bits linux):
 ```
 curl -Lo signmykey https://github.com/signmykeyio/signmykey/releases/download/v0.5.0/signmykey_linux_amd64
 ```
 * Install it in your PATH:
 ```
 chmod +x signmykey && sudo mv signmykey /usr/bin/
+```
+
+### APT
+
+* Ensure you have curl and gpg
+```
+apt update && apt install ca-certificates curl gnupg
+```
+* Add Signmykey GPG to your APT truststore
+```
+curl https://gpg.signmykey.io/signmykey.pub | apt-key add -
+```
+* Add Signmykey repository
+```
+echo 'deb https://apt.signmykey.io stable main' >> /etc/apt/sources.list.d/signmykey.list
+```
+* Install Signmykey package
+```
+apt update && apt install signmykey
+```
+
+### YUM
+
+* Add Signmykey repository
+```
+echo "[signmykey]
+name=Signmykey repo
+baseurl=https://rpm.signmykey.io/
+enabled=1
+gpgcheck=0
+repo_gpgcheck=1
+gpgkey=https://gpg.signmykey.io/signmykey.pub" > /etc/yum.repos.d/signmykey.repo
+```
+* Install Signmykey package
+```
+yum install signmykey
 ```
 
 ## Quickstart
