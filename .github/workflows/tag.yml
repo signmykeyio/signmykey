@@ -43,14 +43,7 @@ jobs:
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
 
-      - name: FPM Upload Tag
-        env:
-          BINTRAY_USER: ${{ secrets.BINTRAY_USER }}
-          BINTRAY_TOKEN: ${{ secrets.BINTRAY_TOKEN }}
-        run: |
-          curl -u${BINTRAY_USER}:${BINTRAY_TOKEN} --data '{"name":"${{ steps.get_version.outputs.VERSION }}","desc":"${{ steps.get_version.outputs.VERSION }}"}' https://api.bintray.com//packages/signmykeyio/signmykey-deb/signmykey/versions
-          curl -T bin/signmykey_${{ steps.get_version.outputs.VERSION }}_amd64.deb -u${BINTRAY_USER}:${BINTRAY_TOKEN} "https://api.bintray.com/content/signmykeyio/signmykey-deb/signmykey/${{ steps.get_version.outputs.VERSION }}/pool/signmykey_${{ steps.get_version.outputs.VERSION }}_amd64.deb;deb_distribution=stable;deb_component=main;deb_architecture=amd64"
-          curl -u${BINTRAY_USER}:${BINTRAY_TOKEN} --data '{"discard":true,"publish_wait_for_secs":-1,"subject":"signmykey.io"}' "https://api.bintray.com/content/signmykeyio/signmykey-deb/signmykey/${{ steps.get_version.outputs.VERSION }}/publish"
-          curl -u${BINTRAY_USER}:${BINTRAY_TOKEN} --data '{"name":"${{ steps.get_version.outputs.VERSION }}","desc":"${{ steps.get_version.outputs.VERSION }}"}' https://api.bintray.com//packages/signmykeyio/signmykey-rpm/signmykey/versions
-          curl -T bin/signmykey-${{ steps.get_version.outputs.VERSION }}-x86_64.rpm -u${BINTRAY_USER}:${BINTRAY_TOKEN} "https://api.bintray.com/content/signmykeyio/signmykey-rpm/signmykey/${{ steps.get_version.outputs.VERSION }}/pool/signmykey-${{ steps.get_version.outputs.VERSION }}-1.x86_64.rpm"
-          curl -u${BINTRAY_USER}:${BINTRAY_TOKEN} --data '{"discard":true,"publish_wait_for_secs":-1,"subject":"signmykey.io"}' "https://api.bintray.com/content/signmykeyio/signmykey-rpm/signmykey/${{ steps.get_version.outputs.VERSION }}/publish"
+      - uses: jfrog/setup-jfrog-cli@v1
+      - run: |
+          jfrog rt upload --url https://signmykey.jfrog.io/artifactory/ --apikey=${{ secrets.JFROG_APIKEY }} --deb stable/main/amd64 bin/signmykey_${{ steps.get_version.outputs.VERSION }}_amd64.deb signmykey-deb/
+          jfrog rt upload --url https://signmykey.jfrog.io/artifactory/ --apikey=${{ secrets.JFROG_APIKEY }} bin/signmykey-${{ steps.get_version.outputs.VERSION }}-x86_64.rpm signmykey-rpm/
