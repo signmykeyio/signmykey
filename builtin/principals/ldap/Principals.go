@@ -30,6 +30,7 @@ type Principals struct {
 	TLSVerify       bool
 	Prefix          string
 	TransformCase   string
+	AddUser         bool
 }
 
 type ldapPrincipals struct {
@@ -81,6 +82,7 @@ func (p *Principals) Init(config *viper.Viper) error {
 	p.GroupSearchStr = config.GetString("ldapGroupSearch")
 	p.Prefix = config.GetString("ldapGroupPrefix")
 	p.TransformCase = tc
+	p.AddUser = config.GetBool("addUser")
 
 	return nil
 }
@@ -144,6 +146,10 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 	principals = getCN(principals)
 	principals = filterByPrefix(p.Prefix, principals)
 	principals = common.TransformCase(p.TransformCase, principals)
+
+	if p.AddUser {
+		principals = append(principals, ldapPrinc.User)
+	}
 
 	return ctx, principals, nil
 }

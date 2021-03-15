@@ -51,6 +51,7 @@ principalsOpts:
   * **ldapGroupSearch** - LDAP search string to find groups
   * **ldapGroupPrefix** - Filter LDAP groups by prefix
   * **transformCase** - Change case of returned principals (default: none) (must be "none", "lower" or "upper")
+  * **addUser** - Add the username you used to login to the principals list
 
 ## OIDC ROPC
 
