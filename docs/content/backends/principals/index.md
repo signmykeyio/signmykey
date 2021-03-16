@@ -69,3 +69,13 @@ principalsOpts:
   * **oidcUserinfoEndpoint** - OpenID Connect userinfo Endpoint (required)
   * **oidcUserGroupsEntry** - OpenID Connect group entry name returned by userinfo endpoint (required)
   * **transformCase** - Change case of returned principals (default: none) (must be "none", "lower" or "upper")
+
+## User
+
+Just adds username that you used to login to the principals list
+
+### Example Usage
+
+```
+principalsType: user
+```
