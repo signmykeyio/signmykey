@@ -79,3 +79,27 @@ Just adds username that you used to login to the principals list
 ```
 principalsType: user
 ```
+
+## Multiple principals providers
+
+It is possible to configure multiple principals providers at the same time. For example, you can get
+principals list from ldap and user provider: the result will be ldap groups and current username. If
+you have "principalsProviders" and "principalsType" in config file, first one will be used.
+
+### Example usage
+
+```
+principalsProviders:
+  user:  # has no options yet
+  ldap:
+    ldapAddr: localhost
+    ldapPort: 3893
+    ldapTLS: False
+    ldapTLSVerify: False
+    ldapBindUser: "cn=serviceuser,ou=svcaccts,dc=glauth,dc=com"
+    ldapBindPassword: "mysecret" 
+    ldapUserBase: "dc=glauth,dc=com"
+    ldapUserSearch: "(cn=%s)"
+    ldapGroupBase: "dc=glauth,dc=com"
+    ldapGroupSearch: "(&(objectClass=group)((member=%s)))"
+```

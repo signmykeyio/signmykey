@@ -85,28 +85,58 @@ var serverCmd = &cobra.Command{
 		}
 
 		// Principals init
-		princsTypeConfig := viper.GetString("principalsType")
-		if princsTypeConfig == "" {
-			logger.WithField("ctx", "server").WithError(errors.New("principals type not defined in config")).Error("Setting Principals type")
-			return
-		}
 		princsType := map[string]principals.Principals{
 			"local":    &localPrinc.Principals{},
 			"ldap":     &ldapPrinc.Principals{},
 			"oidcropc": &oidcropcPrinc.Principals{},
 			"user":     &userPrinc.Principals{},
 		}
-		princs, ok := princsType[princsTypeConfig]
-		if !ok {
-			logger.WithField("ctx", "server").WithError(fmt.Errorf("unknown principals type %s", princsTypeConfig)).Error("Setting Principals type")
+		princsProviders := []principals.Principals{}
+
+		if viper.IsSet("principalsProviders") {
+			for princsTypeConfig := range viper.GetStringMap("principalsProviders") {
+				princsOptsSection := "principalsProviders." + princsTypeConfig
+
+				logger.WithField("ctx", "server").Infof("Configure %v principals provider", princsTypeConfig)
+				princs, ok := princsType[princsTypeConfig]
+				if !ok {
+					logger.WithField("ctx", "server").WithError(fmt.Errorf("unknown principals type %s", princsTypeConfig)).Error("Setting Principals type")
+					return
+				}
+				err = princs.Init(viper.Sub(princsOptsSection))
+				if err != nil {
+					logger.WithField("ctx", "server").WithError(err).Error("Setting Principals options")
+					return
+				}
+
+				princsProviders = append(princsProviders, princs)
+			}
+		} else {
+			princsTypeConfig := viper.GetString("principalsType")
+			if princsTypeConfig == "" {
+				logger.WithField("ctx", "server").WithError(errors.New("principals type not defined in config")).Error("Setting Principals type")
+				return
+			}
+
+			logger.WithField("ctx", "server").Infof("Configure %v principals provider", princsTypeConfig)
+			princs, ok := princsType[princsTypeConfig]
+			if !ok {
+				logger.WithField("ctx", "server").WithError(fmt.Errorf("unknown principals type %s", princsTypeConfig)).Error("Setting Principals type")
+				return
+			}
+			err = princs.Init(viper.Sub("principalsOpts"))
+			if err != nil {
+				logger.WithField("ctx", "server").WithError(err).Error("Setting Principals options")
+				return
+			}
+
+			princsProviders = append(princsProviders, princs)
+		}
+
+		if len(princsProviders) == 0 {
+			logger.WithField("ctx", "server").Error("principals providers list is not configured")
 			return
 		}
-		err = princs.Init(viper.Sub("principalsOpts"))
-		if err != nil {
-			logger.WithField("ctx", "server").WithError(err).Error("Setting Principals options")
-			return
-		}
-		princsProviders := []principals.Principals{princs}
 
 		// Signer init
 		signerTypeConfig := viper.GetString("signerType")
