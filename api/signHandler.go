@@ -59,9 +59,7 @@ func signHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		for _, v := range princs {
-			principals = append(principals, v)
-		}
+		principals = append(principals, princs...)
 	}
 
 	if len(principals) == 0 {
