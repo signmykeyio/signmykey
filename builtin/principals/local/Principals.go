@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	builtinPrincs "github.com/signmykeyio/signmykey/builtin/principals"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -54,7 +55,7 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 	}
 
 	if len(principals) == 0 {
-		return ctx, principals, fmt.Errorf("No more principals after trim for %s", local.User)
+		return ctx, principals, builtinPrincs.NewNotFoundError("ldap", "No more principals after trim for "+local.User)
 	}
 
 	return ctx, principals, nil

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	ldap "github.com/go-ldap/ldap/v3"
+	builtinPrincs "github.com/signmykeyio/signmykey/builtin/principals"
 	"github.com/signmykeyio/signmykey/builtin/principals/common"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -133,7 +134,7 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 	}
 
 	if len(gsr.Entries) == 0 {
-		return ctx, []string{}, errors.New("no group found for this user")
+		return ctx, []string{}, builtinPrincs.NewNotFoundError("ldap", "no group found for "+ldapPrinc.User)
 	}
 
 	var principals []string

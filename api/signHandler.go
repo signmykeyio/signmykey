@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -9,6 +10,8 @@ import (
 	"github.com/go-chi/render"
 	"github.com/signmykeyio/signmykey/client"
 	"github.com/sirupsen/logrus"
+
+	builtinPrincs "github.com/signmykeyio/signmykey/builtin/principals"
 )
 
 func signHandler(w http.ResponseWriter, r *http.Request) {
@@ -44,6 +47,12 @@ func signHandler(w http.ResponseWriter, r *http.Request) {
 	for _, princsProvider := range config.Princs {
 		_, princs, err := princsProvider.Get(ctx, body)
 		if err != nil {
+			// this is not critical error, next provider cat return principals
+			var principalsNotFoundError *builtinPrincs.NotFoundError
+			if errors.As(err, &principalsNotFoundError) {
+				logger.Info(err.Error())
+				continue
+			}
 			logger.WithError(err).Error("Getting list of user principals")
 			render.Status(r, 401)
 			render.JSON(w, r, map[string]string{"error": "error getting list of principals"})
