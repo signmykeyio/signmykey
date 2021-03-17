@@ -12,12 +12,13 @@ type Principals interface {
 	Get(ctx context.Context, payload []byte) (context.Context, []string, error)
 }
 
-// principals errors
+// NotFoundError it's principals provider error when no principals is found
 type NotFoundError struct {
 	provider string
 	msg      string
 }
 
+// NewNotFoundError creates new NotFoundError error with given privder name and message
 func NewNotFoundError(provider, msg string) *NotFoundError {
 	return &NotFoundError{provider: provider, msg: msg}
 }
