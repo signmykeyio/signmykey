@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/signmykeyio/signmykey/builtin/principals"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
@@ -63,7 +64,7 @@ func TestSignHandler(t *testing.T) {
 
 	config = Config{
 		Auth:   &authMock{},
-		Princs: &princsMock{},
+		Princs: []principals.Principals{&princsMock{}},
 		Signer: &signerMock{},
 	}
 	router := Router(log.New())
@@ -179,4 +180,76 @@ func (s signerMock) Sign(ctx context.Context, payload []byte, id string, princip
 	}
 
 	return "", fmt.Errorf("failed to sign key")
+}
+
+type princsMock2 struct{}
+
+func (p princsMock2) Init(config *viper.Viper) error {
+	return nil
+}
+
+func (p princsMock2) Get(ctx context.Context, payload []byte) (context.Context, []string, error) {
+	var login struct {
+		User     string `json:"user" binding:"required"`
+		Password string `json:"password" binding:"required"`
+	}
+	err := json.Unmarshal(payload, &login)
+	if _, ok := err.(*json.SyntaxError); ok {
+		log.Errorf("invalid json request body: %s", err)
+		return ctx, []string{}, fmt.Errorf("invalid json request body: %w", err)
+	}
+	if err != nil {
+		log.Errorf("json unmarshaling failed: %s", err)
+		return ctx, []string{}, fmt.Errorf("JSON unmarshaling failed: %w", err)
+	}
+
+	return ctx, []string{}, nil
+}
+
+func TestSignHandlerNoPrincipalsFound(t *testing.T) {
+	type JSONResponse map[string]interface{}
+
+	cases := []struct {
+		method      string
+		url         string
+		code        int
+		payload     []byte
+		response    interface{}
+		contentType string
+	}{
+		{
+			"POST", "/v1/sign", 401,
+			[]byte(`{"user":"emptyprincsuser","password":"testpassword","public_key":"goodkey"}`),
+			JSONResponse{"error": "no principals found"},
+			"application/json",
+		},
+	}
+
+	config = Config{
+		Auth:   &authMock{},
+		Princs: []principals.Principals{&princsMock2{}},
+		Signer: &signerMock{},
+	}
+	router := Router(log.New())
+
+	for _, c := range cases {
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest(c.method, c.url, bytes.NewBuffer(c.payload))
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, w.Code, c.code)
+
+		if c.response == nil {
+			continue
+		}
+
+		var response JSONResponse
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		if err != nil {
+			assert.Failf(t, "failed to unmarshal response", "%+v", c)
+		}
+
+		assert.Equal(t, c.response, response)
+		assert.Contains(t, w.Header().Get("Content-Type"), c.contentType)
+	}
 }

@@ -40,13 +40,28 @@ func signHandler(w http.ResponseWriter, r *http.Request) {
 	logger = logger.WithField("user", id)
 	logger.Info("User authenticated")
 
-	ctx, principals, err := config.Princs.Get(ctx, body)
-	if err != nil {
-		logger.WithError(err).Error("Getting list of user principals")
+	principals := []string{}
+	for _, princsProvider := range config.Princs {
+		_, princs, err := princsProvider.Get(ctx, body)
+		if err != nil {
+			logger.WithError(err).Error("Getting list of user principals")
+			render.Status(r, 401)
+			render.JSON(w, r, map[string]string{"error": "error getting list of principals"})
+			return
+		}
+
+		for _, v := range princs {
+			principals = append(principals, v)
+		}
+	}
+
+	if len(principals) == 0 {
+		logger.Error("No principals found")
 		render.Status(r, 401)
-		render.JSON(w, r, map[string]string{"error": "error getting list of principals"})
+		render.JSON(w, r, map[string]string{"error": "no principals found"})
 		return
 	}
+
 	logger = logger.WithField("principals", principals)
 	logger.Info("User principals retrieved")
 

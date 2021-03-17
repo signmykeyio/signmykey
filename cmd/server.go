@@ -106,6 +106,7 @@ var serverCmd = &cobra.Command{
 			logger.WithField("ctx", "server").WithError(err).Error("Setting Principals options")
 			return
 		}
+		princsProviders := []principals.Principals{princs}
 
 		// Signer init
 		signerTypeConfig := viper.GetString("signerType")
@@ -140,7 +141,7 @@ var serverCmd = &cobra.Command{
 
 		config := api.Config{
 			Auth:   auth,
-			Princs: princs,
+			Princs: princsProviders,
 			Signer: signer,
 
 			Logger: logger,
