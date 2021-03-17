@@ -55,7 +55,7 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 	}
 
 	if len(principals) == 0 {
-		return ctx, principals, builtinPrincs.NewNotFoundError("ldap", "No more principals after trim for "+local.User)
+		return ctx, principals, builtinPrincs.NewNotFoundError("local", "No more principals after trim for "+local.User)
 	}
 
 	return ctx, principals, nil
