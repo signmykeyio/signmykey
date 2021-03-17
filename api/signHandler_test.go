@@ -220,7 +220,7 @@ func TestSignHandlerNoPrincipalsFound(t *testing.T) {
 		{
 			"POST", "/v1/sign", 401,
 			[]byte(`{"user":"emptyprincsuser","password":"testpassword","public_key":"goodkey"}`),
-			JSONResponse{"error": "no principals found"},
+			JSONResponse{"error": "error getting list of principals"},
 			"application/json",
 		},
 	}

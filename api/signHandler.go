@@ -1,7 +1,9 @@
 package api
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -43,29 +45,11 @@ func signHandler(w http.ResponseWriter, r *http.Request) {
 	logger = logger.WithField("user", id)
 	logger.Info("User authenticated")
 
-	principals := []string{}
-	for _, princsProvider := range config.Princs {
-		_, princs, err := princsProvider.Get(ctx, body)
-		if err != nil {
-			// this is not critical error, next provider cat return principals
-			var principalsNotFoundError *builtinPrincs.NotFoundError
-			if errors.As(err, &principalsNotFoundError) {
-				logger.Info(err.Error())
-				continue
-			}
-			logger.WithError(err).Error("Getting list of user principals")
-			render.Status(r, 401)
-			render.JSON(w, r, map[string]string{"error": "error getting list of principals"})
-			return
-		}
-
-		principals = append(principals, princs...)
-	}
-
-	if len(principals) == 0 {
-		logger.Error("No principals found")
+	principals, err := loadPrincipals(ctx, body, logger)
+	if err != nil {
+		logger.WithError(err).Error("Getting list of user principals")
 		render.Status(r, 401)
-		render.JSON(w, r, map[string]string{"error": "no principals found"})
+		render.JSON(w, r, map[string]string{"error": "error getting list of principals"})
 		return
 	}
 
@@ -84,4 +68,28 @@ func signHandler(w http.ResponseWriter, r *http.Request) {
 	logger.WithField("expire", time.Unix(int64(before), 0)).Info("SSH certificate generated")
 
 	render.JSON(w, r, map[string]string{"certificate": cert})
+}
+
+func loadPrincipals(ctx context.Context, body []byte, logger *logrus.Entry) ([]string, error) {
+	principals := []string{}
+	for _, princsProvider := range config.Princs {
+		_, princs, err := princsProvider.Get(ctx, body)
+		if err != nil {
+			// this is not critical error, next provider cat return principals
+			var principalsNotFoundError *builtinPrincs.NotFoundError
+			if errors.As(err, &principalsNotFoundError) {
+				logger.Info(err.Error())
+				continue
+			}
+			return []string{}, err
+		}
+
+		principals = append(principals, princs...)
+	}
+
+	if len(principals) == 0 {
+		return []string{}, fmt.Errorf("no principals found")
+	}
+
+	return principals, nil
 }
