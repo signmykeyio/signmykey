@@ -14,6 +14,7 @@ import (
 	ldapPrinc "github.com/signmykeyio/signmykey/builtin/principals/ldap"
 	localPrinc "github.com/signmykeyio/signmykey/builtin/principals/local"
 	oidcropcPrinc "github.com/signmykeyio/signmykey/builtin/principals/oidcropc"
+	userPrinc "github.com/signmykeyio/signmykey/builtin/principals/user"
 	"github.com/signmykeyio/signmykey/builtin/signer"
 	localSign "github.com/signmykeyio/signmykey/builtin/signer/local"
 	vaultSign "github.com/signmykeyio/signmykey/builtin/signer/vault"
@@ -93,6 +94,7 @@ var serverCmd = &cobra.Command{
 			"local":    &localPrinc.Principals{},
 			"ldap":     &ldapPrinc.Principals{},
 			"oidcropc": &oidcropcPrinc.Principals{},
+			"user":     &userPrinc.Principals{},
 		}
 		princs, ok := princsType[princsTypeConfig]
 		if !ok {
