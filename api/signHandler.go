@@ -1,6 +1,8 @@
 package api
 
 import (
+	"context"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -40,7 +42,7 @@ func signHandler(w http.ResponseWriter, r *http.Request) {
 	logger = logger.WithField("user", id)
 	logger.Info("User authenticated")
 
-	ctx, principals, err := config.Princs.Get(ctx, body)
+	ctx, principals, err := loadPrincipals(ctx, body)
 	if err != nil {
 		logger.WithError(err).Error("Getting list of user principals")
 		render.Status(r, 401)
@@ -62,4 +64,22 @@ func signHandler(w http.ResponseWriter, r *http.Request) {
 	logger.WithField("expire", time.Unix(int64(before), 0)).Info("SSH certificate generated")
 
 	render.JSON(w, r, map[string]string{"certificate": cert})
+}
+
+func loadPrincipals(ctx context.Context, body []byte) (context.Context, []string, error) {
+	principals := []string{}
+	for _, princsProvider := range config.Princs {
+		_, princs, err := princsProvider.Get(ctx, body)
+		if err != nil {
+			return ctx, []string{}, err
+		}
+
+		principals = append(principals, princs...)
+	}
+
+	if len(principals) == 0 {
+		return ctx, []string{}, fmt.Errorf("no principals found")
+	}
+
+	return ctx, principals, nil
 }

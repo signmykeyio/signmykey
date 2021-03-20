@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/signmykeyio/signmykey/builtin/principals"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
@@ -63,7 +64,7 @@ func TestSignHandler(t *testing.T) {
 
 	config = Config{
 		Auth:   &authMock{},
-		Princs: &princsMock{},
+		Princs: []principals.Principals{&princsMock{}},
 		Signer: &signerMock{},
 	}
 	router := Router(log.New())

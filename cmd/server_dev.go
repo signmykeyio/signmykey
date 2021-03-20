@@ -12,6 +12,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/signmykeyio/signmykey/api"
 	localAuth "github.com/signmykeyio/signmykey/builtin/authenticator/local"
+	"github.com/signmykeyio/signmykey/builtin/principals"
 	localPrinc "github.com/signmykeyio/signmykey/builtin/principals/local"
 	localSign "github.com/signmykeyio/signmykey/builtin/signer/local"
 	"github.com/sirupsen/logrus"
@@ -87,7 +88,7 @@ users:
 
 		config := api.Config{
 			Auth:   auth,
-			Princs: princs,
+			Princs: []principals.Principals{princs},
 			Signer: signer,
 
 			Logger: logger,

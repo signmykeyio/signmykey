@@ -26,7 +26,7 @@ type Config struct {
 	Logger *logrus.Logger
 
 	Auth   authenticator.Authenticator
-	Princs principals.Principals
+	Princs []principals.Principals
 	Signer signer.Signer
 }
 
