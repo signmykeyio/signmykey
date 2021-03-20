@@ -80,3 +80,33 @@ this provider.
 ```
 principalsType: user
 ```
+
+## Multiple principals providers
+
+It is possible to configure multiple principals providers at the same time. For example, you can "chain"
+user, ldap and local providers: the resulted principals list will be your user name, ldap groups and 
+local principals.
+
+If "principalsProviders" and "principalsType" are both configured, first one will be used.
+
+### Example usage
+
+```
+principalsProviders:
+  user:  # has no options yet
+  ldap:
+    ldapAddr: localhost
+    ldapPort: 3893
+    ldapTLS: False
+    ldapTLSVerify: False
+    ldapBindUser: "cn=serviceuser,ou=svcaccts,dc=glauth,dc=com"
+    ldapBindPassword: "mysecret"
+    ldapUserBase: "dc=glauth,dc=com"
+    ldapUserSearch: "(cn=%s)"
+    ldapGroupBase: "dc=glauth,dc=com"
+    ldapGroupSearch: "(&(objectClass=group)((member=%s)))"
+  local:
+    users:
+      foouser: fooprincpal,anotherprincipal,thirdprincipal
+      baruser: anotherprincipal
+```
