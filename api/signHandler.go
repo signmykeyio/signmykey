@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -11,6 +12,8 @@ import (
 	"github.com/go-chi/render"
 	"github.com/signmykeyio/signmykey/client"
 	"github.com/sirupsen/logrus"
+
+	princsPkg "github.com/signmykeyio/signmykey/builtin/principals"
 )
 
 func signHandler(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +45,7 @@ func signHandler(w http.ResponseWriter, r *http.Request) {
 	logger = logger.WithField("user", id)
 	logger.Info("User authenticated")
 
-	ctx, principals, err := loadPrincipals(ctx, body)
+	ctx, principals, err := loadPrincipals(ctx, body, logger)
 	if err != nil {
 		logger.WithError(err).Error("Getting list of user principals")
 		render.Status(r, 401)
@@ -66,11 +69,18 @@ func signHandler(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, map[string]string{"certificate": cert})
 }
 
-func loadPrincipals(ctx context.Context, body []byte) (context.Context, []string, error) {
+func loadPrincipals(ctx context.Context, body []byte, logger *logrus.Entry) (context.Context, []string, error) {
 	principals := []string{}
 	for _, princsProvider := range config.Princs {
 		_, princs, err := princsProvider.Get(ctx, body)
 		if err != nil {
+			// actually, this isn't an error, next provider can return principals
+			var principalsNotFoundError *princsPkg.NotFoundError
+			if errors.As(err, &principalsNotFoundError) {
+				// let admin known that this provider didn't return principals
+				logger.Info(err.Error())
+				continue
+			}
 			return ctx, []string{}, err
 		}
 

@@ -9,6 +9,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+
+	princsPkg "github.com/signmykeyio/signmykey/builtin/principals"
 )
 
 // Principals struct represents map of principals by user.
@@ -42,7 +44,7 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 	}
 
 	if !p.UserMap.IsSet(local.User) {
-		return ctx, []string{}, fmt.Errorf("No principals found for %s", local.User)
+		return ctx, []string{}, princsPkg.NewNotFoundError("local", "No principals found for "+local.User)
 	}
 
 	principals := []string{}
@@ -54,7 +56,7 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 	}
 
 	if len(principals) == 0 {
-		return ctx, principals, fmt.Errorf("No more principals after trim for %s", local.User)
+		return ctx, principals, princsPkg.NewNotFoundError("local", "No more principals after trim for "+local.User)
 	}
 
 	return ctx, principals, nil
