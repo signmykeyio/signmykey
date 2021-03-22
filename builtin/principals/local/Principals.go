@@ -44,7 +44,7 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 	}
 
 	if !p.UserMap.IsSet(local.User) {
-		return ctx, []string{}, princsPkg.NewNotFoundError("local", "No principals found for "+local.User)
+		return ctx, []string{}, princsPkg.NewNotFoundError("local", "No principals found")
 	}
 
 	principals := []string{}
@@ -56,7 +56,7 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 	}
 
 	if len(principals) == 0 {
-		return ctx, principals, princsPkg.NewNotFoundError("local", "No more principals after trim for "+local.User)
+		return ctx, principals, princsPkg.NewNotFoundError("local", "No more principals after trim")
 	}
 
 	return ctx, principals, nil

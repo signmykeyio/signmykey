@@ -135,7 +135,7 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 	}
 
 	if len(gsr.Entries) == 0 {
-		return ctx, []string{}, princsPkg.NewNotFoundError("ldap", "No group found for user "+ldapPrinc.User)
+		return ctx, []string{}, princsPkg.NewNotFoundError("ldap", "No group found")
 	}
 
 	var principals []string
