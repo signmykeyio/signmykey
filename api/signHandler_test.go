@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/signmykeyio/signmykey/builtin/principals"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
@@ -48,6 +49,12 @@ func TestSignHandler(t *testing.T) {
 			"application/json",
 		},
 		{
+			"POST", "/v1/sign", 401,
+			[]byte(`{"user":"emptyallprincsuser","password":"testpassword","public_key":"goodkey"}`),
+			JSONResponse{"error": "error getting list of principals"},
+			"application/json",
+		},
+		{
 			"POST", "/v1/sign", 400,
 			[]byte(`{"user":"testuser","password":"testpassword","public_key":"badkey"}`),
 			JSONResponse{"error": "unknown server error during key signing"},
@@ -63,7 +70,7 @@ func TestSignHandler(t *testing.T) {
 
 	config = Config{
 		Auth:   &authMock{},
-		Princs: &princsMock{},
+		Princs: []principals.Principals{&princsMock{}},
 		Signer: &signerMock{},
 	}
 	router := Router(log.New())
@@ -107,7 +114,7 @@ func (a authMock) Login(ctx context.Context, payload []byte) (context.Context, b
 		return ctx, false, "", fmt.Errorf("JSON unmarshaling failed: %w", err)
 	}
 
-	if login.User != "testuser" && login.User != "emptyprincsuser" {
+	if login.User != "testuser" && login.User != "emptyprincsuser" && login.User != "emptyallprincsuser" {
 		return ctx, false, "", fmt.Errorf("unknown username")
 	}
 
@@ -144,6 +151,10 @@ func (p princsMock) Get(ctx context.Context, payload []byte) (context.Context, [
 	}
 
 	if login.User == "emptyprincsuser" {
+		return ctx, []string{}, principals.NewNotFoundError("mock", "empty list of principals")
+	}
+
+	if login.User == "emptyallprincsuser" {
 		return ctx, []string{}, fmt.Errorf("empty list of principals")
 	}
 

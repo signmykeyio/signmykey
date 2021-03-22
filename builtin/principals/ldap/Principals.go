@@ -14,6 +14,8 @@ import (
 	"github.com/signmykeyio/signmykey/builtin/principals/common"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+
+	princsPkg "github.com/signmykeyio/signmykey/builtin/principals"
 )
 
 // Principals struct represents LDAP options for getting principals list from LDAP.
@@ -133,7 +135,7 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 	}
 
 	if len(gsr.Entries) == 0 {
-		return ctx, []string{}, errors.New("no group found for this user")
+		return ctx, []string{}, princsPkg.NewNotFoundError("ldap", "No group found")
 	}
 
 	var principals []string
