@@ -2,13 +2,12 @@ module github.com/signmykeyio/signmykey
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
-	github.com/dghubble/sling v1.1.0
+	github.com/dghubble/sling v1.3.0
 	github.com/fatih/color v1.7.0
 	github.com/go-chi/chi v1.5.1
 	github.com/go-chi/render v1.0.1
 	github.com/go-ldap/ldap/v3 v3.2.4
 	github.com/golang/protobuf v1.3.1 // indirect
-	github.com/google/go-querystring v0.0.0-20170111101155-53e6ce116135 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/howeyc/gopass v0.0.0-20170109162249-bf9dde6d0d2c
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
