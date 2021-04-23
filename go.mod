@@ -5,7 +5,7 @@ require (
 	github.com/dghubble/sling v1.3.0
 	github.com/fatih/color v1.10.0
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
-	github.com/go-chi/chi v1.5.1
+	github.com/go-chi/chi v1.5.4
 	github.com/go-chi/render v1.0.1
 	github.com/go-ldap/ldap/v3 v3.3.0
 	github.com/hashicorp/hcl v1.0.0 // indirect
