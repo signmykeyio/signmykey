@@ -3,7 +3,7 @@ module github.com/signmykeyio/signmykey
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/dghubble/sling v1.3.0
-	github.com/fatih/color v1.10.0
+	github.com/fatih/color v1.11.0
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
 	github.com/go-chi/chi v1.5.4
 	github.com/go-chi/render v1.0.1
