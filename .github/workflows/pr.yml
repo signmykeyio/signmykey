@@ -25,3 +25,9 @@ jobs:
         with:
           version: latest
           args: release --snapshot --skip-sign --rm-dist
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: binaries
+          path: bin/
+          retention-days: 5
