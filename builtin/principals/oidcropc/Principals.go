@@ -27,6 +27,10 @@ type oidcUserinfo struct {
 	Oidcgroups []string `json:"oidcgroups"`
 }
 
+type oidcUserinfoTest struct {
+	Oidcgroups map[string]interface{} `json:"-"`
+}
+
 // Init method is used to ingest config of Principals
 func (p *Principals) Init(config *viper.Viper) error {
 	neededEntries := []string{
@@ -81,8 +85,7 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 	}
 
 	// Add HTTP Authorization Header
-	bearer := "Bearer " + string(token)
-	reqInfo.Header.Add("Authorization", bearer)
+	reqInfo.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	client := http.Client{Timeout: time.Second * 10}
 	resInfo, err := client.Do(reqInfo)
@@ -97,16 +100,41 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 		return ctx, []string{}, err
 	}
 
-	// Replace `json:"oidcgroups"` oidcUserinfo struct tag with OIDCUserGroupsEntry config entry
-	bodyInfoChange := []byte(strings.Replace(string(bodyInfo), p.OIDCUserGroupsEntry, "oidcgroups", 1))
+	fmt.Printf("\n\n%s\n\n", bodyInfo)
 
-	oidcUserinfo1 := oidcUserinfo{}
-	err = json.Unmarshal(bodyInfoChange, &oidcUserinfo1)
+	oidcUserinfo := make(map[string]interface{})
+	err = json.Unmarshal(bodyInfo, &oidcUserinfo)
 	if err != nil {
 		return ctx, []string{}, err
 	}
 
-	principals := oidcUserinfo1.Oidcgroups
+	fmt.Printf("\n\n%+v\n\n", oidcUserinfo)
+
+	principals := []string{}
+	for _, entry := range strings.Split(p.OIDCUserGroupsEntry, ",") {
+		rawGroups, ok := oidcUserinfo[entry]
+		if !ok {
+			log.Infof("oidc entry %s doesn't exists", entry)
+			continue
+		}
+
+		groups, ok := rawGroups.([]interface{})
+		if !ok {
+			log.Infof("oidc groups %s is not a slice", rawGroups)
+			continue
+		}
+
+		for _, rawGroup := range groups {
+			group, ok := rawGroup.(string)
+			if !ok {
+				log.Infof("oidc groups %s is not a string", rawGroup)
+				continue
+			}
+
+			principals = append(principals, group)
+		}
+	}
+
 	log.Debug("OIDC principals: ", principals)
 
 	principals = common.TransformCase(p.TransformCase, principals)
