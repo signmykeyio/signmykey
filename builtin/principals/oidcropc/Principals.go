@@ -68,15 +68,9 @@ func (p *Principals) Init(config *viper.Viper) error {
 func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, []string, error) {
 
 	// Get token from OIDC authenticator
-	tokenCtx := ctx.Value(oidcropc.OIDCTokenKey)
-	if tokenCtx == nil {
-		log.Errorf("token context not available, oidcropc principals needs that ordcropc authenticator pass userinfo token")
-		return ctx, []string{}, errors.New("OIDC authenticator token not available")
-	}
-	token, ok := tokenCtx.(oidcropc.OIDCToken)
-	if !ok {
-		log.Errorf("token context has wrong type")
-		return ctx, []string{}, errors.New("OIDC authenticator token not available")
+	token, err := getTokenFromContext(ctx)
+	if err != nil {
+		return ctx, []string{}, err
 	}
 
 	reqInfo, err := http.NewRequest("GET", p.OIDCUserinfoEndpoint, nil)
@@ -136,4 +130,21 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 	principals = common.TransformCase(p.TransformCase, principals)
 
 	return ctx, principals, nil
+}
+
+func getTokenFromContext(ctx context.Context) (oidcropc.OIDCToken, error) {
+
+	// Get token from OIDC authenticator
+	tokenCtx := ctx.Value(oidcropc.OIDCTokenKey)
+	if tokenCtx == nil {
+		log.Errorf("token context not available, oidcropc principals needs that ordcropc authenticator pass userinfo token")
+		return "", errors.New("OIDC authenticator token not available")
+	}
+	token, ok := tokenCtx.(oidcropc.OIDCToken)
+	if !ok {
+		log.Errorf("token context has wrong type")
+		return "", errors.New("OIDC authenticator token not available")
+	}
+
+	return token, nil
 }

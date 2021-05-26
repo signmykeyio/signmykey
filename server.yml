@@ -1,0 +1,25 @@
+address: 0.0.0.0:8443
+tlsDisable: true
+
+signerType: vault
+signerOpts:
+  vaultAddr: vault.ouest-france.fr
+  vaultPort: 443
+  vaultTLS: true
+  vaultRoleID: 912ea4aa-16a1-9b4c-fb04-8838f476955e
+  vaultSecretID: 4e67d3d7-7a27-17a5-d16e-67228d04e11b
+  vaultPath: ssh
+  vaultRole: signmykey
+  vaultSignTTL: 36000
+
+authenticatorType: oidcropc
+authenticatorOpts:
+  oidcTokenEndpoint: "http://localhost:8080/auth/realms/myrealm/protocol/openid-connect/token"
+  oidcClientID: "signmykey"
+  oidcClientSecret: "840f7d3b-c4d8-4c6f-a608-f1727c735f8d"
+
+principalsType: oidcropc
+principalsOpts:
+  oidcUserinfoEndpoint: "http://localhost:8080/auth/realms/myrealm/protocol/openid-connect/userinfo"
+  oidcUserGroupsEntry: foogroup,oidc-groups
+  transformCase: upper
