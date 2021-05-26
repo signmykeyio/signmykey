@@ -100,15 +100,11 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 		return ctx, []string{}, err
 	}
 
-	fmt.Printf("\n\n%s\n\n", bodyInfo)
-
 	oidcUserinfo := make(map[string]interface{})
 	err = json.Unmarshal(bodyInfo, &oidcUserinfo)
 	if err != nil {
 		return ctx, []string{}, err
 	}
-
-	fmt.Printf("\n\n%+v\n\n", oidcUserinfo)
 
 	principals := []string{}
 	for _, entry := range strings.Split(p.OIDCUserGroupsEntry, ",") {
