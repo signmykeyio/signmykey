@@ -125,8 +125,6 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 		}
 	}
 
-	log.Debug("OIDC principals: ", principals)
-
 	principals = common.TransformCase(p.TransformCase, principals)
 
 	return ctx, principals, nil
