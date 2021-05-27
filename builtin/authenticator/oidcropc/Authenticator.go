@@ -108,8 +108,6 @@ func (a *Authenticator) Login(ctx context.Context, payload []byte) (resultCtx co
 	tokenRes := oidcTokenResponse{}
 	err = json.Unmarshal(bodyToken, &tokenRes)
 
-	log.Debugf("OIDC Token: %s", tokenRes.Token)
-
 	if err != nil {
 		return ctx, false, "", err
 	}

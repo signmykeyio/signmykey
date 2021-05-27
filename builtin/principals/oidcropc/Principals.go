@@ -27,6 +27,10 @@ type oidcUserinfo struct {
 	Oidcgroups []string `json:"oidcgroups"`
 }
 
+type oidcUserinfoTest struct {
+	Oidcgroups map[string]interface{} `json:"-"`
+}
+
 // Init method is used to ingest config of Principals
 func (p *Principals) Init(config *viper.Viper) error {
 	neededEntries := []string{
@@ -64,15 +68,9 @@ func (p *Principals) Init(config *viper.Viper) error {
 func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, []string, error) {
 
 	// Get token from OIDC authenticator
-	tokenCtx := ctx.Value(oidcropc.OIDCTokenKey)
-	if tokenCtx == nil {
-		log.Errorf("token context not available, oidcropc principals needs that ordcropc authenticator pass userinfo token")
-		return ctx, []string{}, errors.New("OIDC authenticator token not available")
-	}
-	token, ok := tokenCtx.(oidcropc.OIDCToken)
-	if !ok {
-		log.Errorf("token context has wrong type")
-		return ctx, []string{}, errors.New("OIDC authenticator token not available")
+	token, err := getTokenFromContext(ctx)
+	if err != nil {
+		return ctx, []string{}, err
 	}
 
 	reqInfo, err := http.NewRequest("GET", p.OIDCUserinfoEndpoint, nil)
@@ -81,8 +79,7 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 	}
 
 	// Add HTTP Authorization Header
-	bearer := "Bearer " + string(token)
-	reqInfo.Header.Add("Authorization", bearer)
+	reqInfo.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
 	client := http.Client{Timeout: time.Second * 10}
 	resInfo, err := client.Do(reqInfo)
@@ -97,19 +94,55 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 		return ctx, []string{}, err
 	}
 
-	// Replace `json:"oidcgroups"` oidcUserinfo struct tag with OIDCUserGroupsEntry config entry
-	bodyInfoChange := []byte(strings.Replace(string(bodyInfo), p.OIDCUserGroupsEntry, "oidcgroups", 1))
-
-	oidcUserinfo1 := oidcUserinfo{}
-	err = json.Unmarshal(bodyInfoChange, &oidcUserinfo1)
+	oidcUserinfo := make(map[string]interface{})
+	err = json.Unmarshal(bodyInfo, &oidcUserinfo)
 	if err != nil {
 		return ctx, []string{}, err
 	}
 
-	principals := oidcUserinfo1.Oidcgroups
-	log.Debug("OIDC principals: ", principals)
+	principals := []string{}
+	for _, entry := range strings.Split(p.OIDCUserGroupsEntry, ",") {
+		rawGroups, ok := oidcUserinfo[entry]
+		if !ok {
+			log.Infof("oidc entry %s doesn't exists", entry)
+			continue
+		}
+
+		groups, ok := rawGroups.([]interface{})
+		if !ok {
+			log.Infof("oidc groups %s is not a slice", rawGroups)
+			continue
+		}
+
+		for _, rawGroup := range groups {
+			group, ok := rawGroup.(string)
+			if !ok {
+				log.Infof("oidc groups %s is not a string", rawGroup)
+				continue
+			}
+
+			principals = append(principals, group)
+		}
+	}
 
 	principals = common.TransformCase(p.TransformCase, principals)
 
 	return ctx, principals, nil
+}
+
+func getTokenFromContext(ctx context.Context) (oidcropc.OIDCToken, error) {
+
+	// Get token from OIDC authenticator
+	tokenCtx := ctx.Value(oidcropc.OIDCTokenKey)
+	if tokenCtx == nil {
+		log.Errorf("token context not available, oidcropc principals needs that ordcropc authenticator pass userinfo token")
+		return "", errors.New("OIDC authenticator token not available")
+	}
+	token, ok := tokenCtx.(oidcropc.OIDCToken)
+	if !ok {
+		log.Errorf("token context has wrong type")
+		return "", errors.New("OIDC authenticator token not available")
+	}
+
+	return token, nil
 }
