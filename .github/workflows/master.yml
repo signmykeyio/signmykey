@@ -20,8 +20,6 @@ jobs:
 
       - name: Run Golang CI Lint
         uses: golangci/golangci-lint-action@v2
-        with:
-          version: v1.33
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
