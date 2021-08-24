@@ -16,12 +16,10 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: 1.16.0
+          go-version: 1.17.0
 
       - name: Run Golang CI Lint
         uses: golangci/golangci-lint-action@v2
-        with:
-          version: v1.33
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
