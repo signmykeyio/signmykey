@@ -2,7 +2,7 @@ module github.com/signmykeyio/signmykey
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
-	github.com/dghubble/sling v1.3.0
+	github.com/dghubble/sling v1.4.0
 	github.com/fatih/color v1.13.0
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
 	github.com/go-chi/chi v1.5.4
@@ -32,7 +32,7 @@ require (
 	github.com/Azure/go-ntlmssp v0.0.0-20200615164410-66371956d46c // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-asn1-ber/asn1-ber v1.5.1 // indirect
-	github.com/google/go-querystring v1.0.0 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.9 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
