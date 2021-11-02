@@ -9,12 +9,12 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/howeyc/gopass"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/signmykeyio/signmykey/client"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"golang.org/x/term"
 )
 
 var clientCfgFile string
@@ -57,7 +57,7 @@ var rootCmd = &cobra.Command{
 		password := viper.GetString("password")
 		if password == "" {
 			fmt.Printf("Password (will be hidden): ")
-			passwordBytes, err := gopass.GetPasswd()
+			passwordBytes, err := term.ReadPassword(int(os.Stdin.Fd()))
 			if err != nil {
 				return err
 			}
