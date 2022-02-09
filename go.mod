@@ -4,7 +4,6 @@ require (
 	github.com/dghubble/sling v1.4.0
 	github.com/fatih/color v1.13.0
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
-	github.com/go-chi/chi v1.5.4
 	github.com/go-chi/render v1.0.1
 	github.com/go-ldap/ldap/v3 v3.4.1
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -26,7 +25,10 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-require golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1
+require (
+	github.com/go-chi/chi/v5 v5.0.7
+	golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1
+)
 
 require (
 	github.com/Azure/go-ntlmssp v0.0.0-20200615164410-66371956d46c // indirect
