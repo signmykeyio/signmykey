@@ -56,7 +56,7 @@ var rootCmd = &cobra.Command{
 
 		password := viper.GetString("password")
 		if password == "" {
-			fmt.Printf("Password (will be hidden): ")
+			fmt.Printf("Enter signmykey password (will be hidden): ")
 			passwordBytes, err := term.ReadPassword(int(os.Stdin.Fd()))
 			if err != nil {
 				return err
