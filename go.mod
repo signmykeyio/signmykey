@@ -5,7 +5,7 @@ require (
 	github.com/fatih/color v1.13.0
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/go-chi/render v1.0.1
-	github.com/go-ldap/ldap/v3 v3.4.2
+	github.com/go-ldap/ldap/v3 v3.4.3
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
@@ -20,7 +20,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.10.0
 	github.com/stretchr/testify v1.7.1
-	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
+	golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29
 	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
@@ -31,9 +31,9 @@ require (
 )
 
 require (
-	github.com/Azure/go-ntlmssp v0.0.0-20200615164410-66371956d46c // indirect
+	github.com/Azure/go-ntlmssp v0.0.0-20211209120228-48547f28849e // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/go-asn1-ber/asn1-ber v1.5.1 // indirect
+	github.com/go-asn1-ber/asn1-ber v1.5.4 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
