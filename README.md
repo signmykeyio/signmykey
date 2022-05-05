@@ -1,13 +1,3 @@
-:warning: **APT GPG Key deprecation** :warning:
-
-The GPG key used to sign APT repository expired. A new one is released at gpg.signmykey.io. To add it to your APT truststore, use this command:
-```
-curl https://gpg.signmykey.io/signmykey.pub | sudo apt-key add -
-```
-:warning: **APT GPG Key deprecation** :warning:
-
-----
-
 ![Signmykey logo](docs/content/images/logo-full.png)
 
 ----
