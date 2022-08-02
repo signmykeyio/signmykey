@@ -8,7 +8,7 @@ require (
 	github.com/go-ldap/ldap/v3 v3.4.3
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/sirupsen/logrus v1.8.1
-	github.com/spf13/cobra v1.4.0
+	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.11.0
 	github.com/stretchr/testify v1.7.3
 	golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f
