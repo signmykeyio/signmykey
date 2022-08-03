@@ -31,7 +31,7 @@ chmod +x signmykey && sudo mv signmykey /usr/bin/
 
 * Ensure you have curl and gpg
 ```
-apt update && apt install ca-certificates curl gnupg
+sudo apt update && sudo apt install ca-certificates curl gnupg
 ```
 * Add Signmykey GPG to your APT truststore
 ```
@@ -39,11 +39,11 @@ curl https://gpg.signmykey.io/signmykey.pub | sudo gpg --dearmor -o /etc/apt/tru
 ```
 * Add Signmykey repository
 ```
-echo 'deb [signed-by=/etc/apt/trusted.gpg.d/signmykey.gpg] https://apt.signmykey.io stable main' >> /etc/apt/sources.list.d/signmykey.list
+echo 'deb [signed-by=/etc/apt/trusted.gpg.d/signmykey.gpg] https://apt.signmykey.io stable main' | sudo tee /etc/apt/sources.list.d/signmykey.list
 ```
 * Install Signmykey package
 ```
-apt update && apt install signmykey
+sudo apt update && sudo apt install signmykey
 ```
 
 ### YUM
@@ -60,7 +60,7 @@ gpgkey=https://gpg.signmykey.io/signmykey.pub" > /etc/yum.repos.d/signmykey.repo
 ```
 * Install Signmykey package
 ```
-yum install signmykey
+sudo yum install signmykey
 ```
 
 ## Quickstart
