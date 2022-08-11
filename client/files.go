@@ -13,7 +13,7 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 )
 
-// based on `man ssh` -i identity_file default values
+// DefaultSSHKeys is based on `man ssh` -i identity_file default values
 var DefaultSSHKeys = []string{
 	"~/.ssh/id_dsa.pub",
 	"~/.ssh/id_ecdsa.pub",
