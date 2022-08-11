@@ -139,7 +139,7 @@ Please generate at least one with command like this :
 
 		// keys list is not explicitly set, suggest generating ed25519 as default
 		if reflect.DeepEqual(keys, DefaultSSHKeys) {
-			errStr += fmt.Sprint("\tssh-keygen -f ~/.ssh/id_ed25519 -t ed25519\n")
+			errStr += "\tssh-keygen -f ~/.ssh/id_ed25519 -t ed25519\n"
 		} else {
 			for _, key := range keys {
 				suggestedSSHKey := strings.Replace(key, ".pub", "", 1)
