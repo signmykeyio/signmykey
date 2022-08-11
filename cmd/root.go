@@ -19,16 +19,6 @@ import (
 
 var clientCfgFile string
 
-// based on `man ssh` -i identity_file default values
-var defaultSSHKeys = []string{
-	"~/.ssh/id_dsa.pub",
-	"~/.ssh/id_ecdsa.pub",
-	"~/.ssh/id_ecdsa_sk.pub",
-	"~/.ssh/id_ed25519.pub",
-	"~/.ssh/id_ed25519_sk.pub",
-	"~/.ssh/id_rsa.pub",
-}
-
 var rootCmd = &cobra.Command{
 	Use:           "signmykey",
 	Short:         "A client-server to sign ssh keys",
@@ -152,7 +142,7 @@ func init() {
 		os.Exit(1)
 	}
 
-	rootCmd.Flags().StringSliceP("key", "k", defaultSSHKeys, "Path of public key to sign")
+	rootCmd.Flags().StringSliceP("key", "k", client.DefaultSSHKeys, "Path of public key to sign")
 	if err := viper.BindPFlag("key", rootCmd.Flags().Lookup("key")); err != nil {
 		color.Red(fmt.Sprintf("%s", err))
 		os.Exit(1)

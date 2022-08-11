@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"reflect"
 	"strings"
 	"time"
 
@@ -11,6 +12,16 @@ import (
 
 	homedir "github.com/mitchellh/go-homedir"
 )
+
+// based on `man ssh` -i identity_file default values
+var DefaultSSHKeys = []string{
+	"~/.ssh/id_dsa.pub",
+	"~/.ssh/id_ecdsa.pub",
+	"~/.ssh/id_ecdsa_sk.pub",
+	"~/.ssh/id_ed25519.pub",
+	"~/.ssh/id_ed25519_sk.pub",
+	"~/.ssh/id_rsa.pub",
+}
 
 // GetUserPubKey returns user's SSH public key as string.
 func GetUserPubKey(key string) (string, error) {
@@ -106,7 +117,7 @@ func WriteUserSignedKey(signedKey string, key string) (err error) {
 }
 
 // FindUserPubKeys checks every pubkey in `keys` list and returns only existsing keys (or error if
-// all pubkeys doesn't exist)
+// all pubkeys don't exist)
 func FindUserPubKeys(keys []string) ([]string, error) {
 	var found = []string{}
 	for _, key := range keys {
@@ -120,18 +131,23 @@ func FindUserPubKeys(keys []string) ([]string, error) {
 	}
 
 	if len(found) == 0 {
-		suggestedSSHKey := "~/.ssh/id_ed25519"
-		// only 1 key set in smk.yml, suggest to generate it if it doesn't exist
-		if len(keys) == 1 {
-			suggestedSSHKey = strings.Replace(keys[0], ".pub", "", 1)
+		var errStr = fmt.Sprintf(`user SSH keys at %s doesn't exist.
+
+Please generate at least one with command like this :
+
+`, strings.Join(keys, ", "))
+
+		// keys list is not explicitly set, suggest generating ed25519 as default
+		if reflect.DeepEqual(keys, DefaultSSHKeys) {
+			errStr += fmt.Sprint("\tssh-keygen -f ~/.ssh/id_ed25519 -t ed25519\n")
+		} else {
+			for _, key := range keys {
+				suggestedSSHKey := strings.Replace(key, ".pub", "", 1)
+				errStr += fmt.Sprintf("\tssh-keygen -f %s -t %s\n", suggestedSSHKey, chooseSSHKeyType(suggestedSSHKey))
+			}
 		}
 
-		return nil, fmt.Errorf(`user SSH key(s) at %s doesn't exist.
-
-Please generate one with this command :
-
-	ssh-keygen -f %s -t %s`,
-			strings.Join(keys, ", "), suggestedSSHKey, chooseSSHKeyType(suggestedSSHKey))
+		return nil, fmt.Errorf(errStr)
 	}
 	return found, nil
 }
