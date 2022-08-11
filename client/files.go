@@ -28,23 +28,17 @@ func GetUserPubKey(key string) (string, error) {
 }
 
 // UserPubKeyExists checks if public key file exists.
-func UserPubKeyExists(key string) error {
+func UserPubKeyExists(key string) (string, error) {
 	pubKeyPath, err := homedir.Expand(key)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if _, err := os.Stat(pubKeyPath); os.IsNotExist(err) {
-		keyPath := strings.Replace(pubKeyPath, ".pub", "", 1)
-
-		return fmt.Errorf(`user SSH key at %s doesn't exist.
-Please generate one with this command :
-
-    ssh-keygen -f %s`,
-			pubKeyPath, keyPath)
+		return "", nil
 	}
 
-	return nil
+	return pubKeyPath, nil
 }
 
 // CertStillValid checks if the certificate is not expired.
@@ -109,4 +103,36 @@ func WriteUserSignedKey(signedKey string, key string) (err error) {
 
 	_, err = signedKeyFile.WriteString(signedKey)
 	return err
+}
+
+// FindUserPubKeys checks every pubkey in `keys` list and returns only existsing keys (or error if
+// all pubkeys doesn't exist)
+func FindUserPubKeys(keys []string) ([]string, error) {
+	var found = []string{}
+	for _, key := range keys {
+		pubKeyPath, err := UserPubKeyExists(key)
+		if err != nil {
+			return nil, err
+		}
+		if pubKeyPath != "" {
+			found = append(found, pubKeyPath)
+		}
+	}
+
+	suggestedSSHKey := "~/.ssh/id_ed25519"
+	// we set only 1 key in smk.yml, suggest to generate it if it doesn't exist
+	if len(keys) == 1 {
+		suggestedSSHKey = strings.Replace(keys[0], ".pub", "", 1)
+	}
+
+	// TODO: add type -t ed25519
+	if len(found) == 0 {
+		return nil, fmt.Errorf(`user SSH keys at %s doesn't exist.
+
+Please generate one with this command :
+
+	ssh-keygen -f %s`,
+			strings.Join(keys, ", "), suggestedSSHKey)
+	}
+	return found, nil
 }

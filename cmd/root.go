@@ -19,6 +19,16 @@ import (
 
 var clientCfgFile string
 
+// based on `man ssh` -i identity_file default values
+var defaultSSHKeys = []string{
+	"~/.ssh/id_dsa.pub",
+	"~/.ssh/id_ecdsa.pub",
+	"~/.ssh/id_ecdsa_sk.pub",
+	"~/.ssh/id_ed25519.pub",
+	"~/.ssh/id_ed25519_sk.pub",
+	"~/.ssh/id_rsa.pub",
+}
+
 var rootCmd = &cobra.Command{
 	Use:           "signmykey",
 	Short:         "A client-server to sign ssh keys",
@@ -35,14 +45,29 @@ var rootCmd = &cobra.Command{
 			return errors.New("SMK Server address must end with a slash")
 		}
 
-		err := client.UserPubKeyExists(viper.GetString("key"))
+		_, err := client.FindUserPubKeys(viper.GetStringSlice("key"))
 		return err
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
+		pubKeysFiles := []string{}
+		foundPubKeysFiles, err := client.FindUserPubKeys(viper.GetStringSlice("key"))
+		if err != nil {
+			return err
+		}
+
 		if viper.GetBool("expired") {
-			if client.CertStillValid(viper.GetString("key")) {
+			// filter only expired keys
+			for _, pubKeyFile := range foundPubKeysFiles {
+				if !client.CertStillValid(pubKeyFile) {
+					pubKeysFiles = append(pubKeysFiles, pubKeyFile)
+				}
+			}
+			if len(pubKeysFiles) == 0 {
 				return nil
 			}
+		} else {
+			// process all found pubkeys
+			pubKeysFiles = foundPubKeysFiles
 		}
 
 		username := viper.GetString("user")
@@ -64,30 +89,33 @@ var rootCmd = &cobra.Command{
 			password = string(passwordBytes)
 		}
 
-		pubKey, err := client.GetUserPubKey(viper.GetString("key"))
-		if err != nil {
-			return err
-		}
-
 		smkAddr := viper.GetString("addr")
-		signedKey, err := client.Sign(smkAddr, username, password, pubKey)
-		if err != nil {
-			return err
-		}
 
-		err = client.WriteUserSignedKey(signedKey, viper.GetString("key"))
-		if err != nil {
-			return err
-		}
+		for _, pubKeyFile := range pubKeysFiles {
+			pubKey, err := client.GetUserPubKey(pubKeyFile)
+			if err != nil {
+				return err
+			}
 
-		color.Green("\nYour SSH Key is successfully signed !")
+			signedKey, err := client.Sign(smkAddr, username, password, pubKey)
+			if err != nil {
+				return err
+			}
 
-		principals, before, err := client.CertInfo(signedKey)
-		if err != nil {
-			return err
+			err = client.WriteUserSignedKey(signedKey, pubKeyFile)
+			if err != nil {
+				return err
+			}
+
+			color.Green("\nYour SSH Key %s is successfully signed !", pubKeyFile)
+
+			principals, before, err := client.CertInfo(signedKey)
+			if err != nil {
+				return err
+			}
+			color.HiBlack("\n  - Valid until: %s", time.Unix(int64(before), 0))
+			color.HiBlack("  - Principals: %s", strings.Join(principals, ","))
 		}
-		color.HiBlack("\n  - Valid until: %s", time.Unix(int64(before), 0))
-		color.HiBlack("  - Principals: %s", strings.Join(principals, ","))
 
 		return nil
 	},
@@ -124,7 +152,7 @@ func init() {
 		os.Exit(1)
 	}
 
-	rootCmd.Flags().StringP("key", "k", "~/.ssh/id_rsa.pub", "Path of public key to sign")
+	rootCmd.Flags().StringSliceP("key", "k", defaultSSHKeys, "Path of public key to sign")
 	if err := viper.BindPFlag("key", rootCmd.Flags().Lookup("key")); err != nil {
 		color.Red(fmt.Sprintf("%s", err))
 		os.Exit(1)
