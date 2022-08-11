@@ -119,20 +119,36 @@ func FindUserPubKeys(keys []string) ([]string, error) {
 		}
 	}
 
-	suggestedSSHKey := "~/.ssh/id_ed25519"
-	// we set only 1 key in smk.yml, suggest to generate it if it doesn't exist
-	if len(keys) == 1 {
-		suggestedSSHKey = strings.Replace(keys[0], ".pub", "", 1)
-	}
-
-	// TODO: add type -t ed25519
 	if len(found) == 0 {
-		return nil, fmt.Errorf(`user SSH keys at %s doesn't exist.
+		suggestedSSHKey := "~/.ssh/id_ed25519"
+		// only 1 key set in smk.yml, suggest to generate it if it doesn't exist
+		if len(keys) == 1 {
+			suggestedSSHKey = strings.Replace(keys[0], ".pub", "", 1)
+		}
+
+		return nil, fmt.Errorf(`user SSH key(s) at %s doesn't exist.
 
 Please generate one with this command :
 
-	ssh-keygen -f %s`,
-			strings.Join(keys, ", "), suggestedSSHKey)
+	ssh-keygen -f %s -t %s`,
+			strings.Join(keys, ", "), suggestedSSHKey, chooseSSHKeyType(suggestedSSHKey))
 	}
 	return found, nil
+}
+
+func chooseSSHKeyType(key string) string {
+	switch {
+	case strings.Contains(key, "dsa"):
+		return "dsa"
+	case strings.Contains(key, "ecdsa_sk"):
+		return "ecdsa-sk"
+	case strings.Contains(key, "ecdsa"):
+		return "ecdsa"
+	case strings.Contains(key, "ed25519_sk"):
+		return "ecdsa-sk"
+	case strings.Contains(key, "rsa"):
+		return "rsa"
+	default:
+		return "ed25519"
+	}
 }
