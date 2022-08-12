@@ -162,7 +162,7 @@ func chooseSSHKeyType(key string) string {
 	case strings.Contains(key, "dsa"):
 		return "dsa"
 	case strings.Contains(key, "rsa"):
-		return "rsa"
+		return "rsa-sha2-512"
 	default:
 		return "ed25519"
 	}
