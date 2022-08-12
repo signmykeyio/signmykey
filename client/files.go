@@ -2,7 +2,6 @@ package client
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"reflect"
 	"strings"
@@ -30,7 +29,7 @@ func GetUserPubKey(key string) (string, error) {
 		return "", err
 	}
 
-	pubKey, err := ioutil.ReadFile(pubKeyPath) // nolint: gosec
+	pubKey, err := os.ReadFile(pubKeyPath) // nolint: gosec
 	if err != nil {
 		return "", err
 	}
@@ -63,7 +62,7 @@ func CertStillValid(path string) bool {
 		return false
 	}
 
-	cert, err := ioutil.ReadFile(fullPath) // nolint: gosec
+	cert, err := os.ReadFile(fullPath) // nolint: gosec
 	if err != nil {
 		return false
 	}
