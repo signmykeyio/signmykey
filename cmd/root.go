@@ -83,24 +83,24 @@ var rootCmd = &cobra.Command{
 		for _, pubKeyFile := range pubKeysFiles {
 			pubKey, err := client.GetUserPubKey(pubKeyFile)
 			if err != nil {
-				return err
+				return fmt.Errorf("%v, public key: %v", err, pubKeyFile)
 			}
 
 			signedKey, err := client.Sign(smkAddr, username, password, pubKey)
 			if err != nil {
-				return err
+				return fmt.Errorf("%v, public key: %v", err, pubKeyFile)
 			}
 
 			err = client.WriteUserSignedKey(signedKey, pubKeyFile)
 			if err != nil {
-				return err
+				return fmt.Errorf("%v, public key: %v", err, pubKeyFile)
 			}
 
 			color.Green("\nYour SSH Key %s is successfully signed !", pubKeyFile)
 
 			principals, before, err := client.CertInfo(signedKey)
 			if err != nil {
-				return err
+				return fmt.Errorf("%v, public key: %v", err, pubKeyFile)
 			}
 			color.HiBlack("\n  - Valid until: %s", time.Unix(int64(before), 0))
 			color.HiBlack("  - Principals: %s", strings.Join(principals, ","))
