@@ -17,7 +17,7 @@ func TestChooseSSHKeyType(t *testing.T) {
 		{"~/.ssh/id_ecdsa_sk.pub", "ecdsa-sk", false},
 		{"~/.ssh/id_ed25519.pub", "ed25519", false},
 		{"~/.ssh/id_ed25519_sk.pub", "ed25519-sk", false},
-		{"~/.ssh/id_rsa.pub", "rsa-sha2-512", false},
+		{"~/.ssh/id_rsa.pub", "rsa", false},
 		{"~/.ssh/test_default_type.pub", "ed25519", false},
 	}
 
