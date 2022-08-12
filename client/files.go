@@ -142,7 +142,12 @@ Please generate at least one with command like this :
 		} else {
 			for _, key := range keys {
 				suggestedSSHKey := strings.Replace(key, ".pub", "", 1)
-				errStr += fmt.Sprintf("\tssh-keygen -f %s -t %s\n", suggestedSSHKey, chooseSSHKeyType(suggestedSSHKey))
+				suggestedSSHType, isDeprecated := chooseSSHKeyType(suggestedSSHKey)
+				if isDeprecated {
+					errStr += fmt.Sprintf("\tssh-keygen -f %s -t %s [deprecated, consider using ed25519 instead]\n", suggestedSSHKey, suggestedSSHType)
+				} else {
+					errStr += fmt.Sprintf("\tssh-keygen -f %s -t %s\n", suggestedSSHKey, suggestedSSHType)
+				}
 			}
 		}
 
@@ -151,19 +156,20 @@ Please generate at least one with command like this :
 	return found, nil
 }
 
-func chooseSSHKeyType(key string) string {
+// chooseSSHKeyType returns ssh type and deprecated flag based on ssh public key file name
+func chooseSSHKeyType(key string) (string, bool) {
 	switch {
 	case strings.Contains(key, "ecdsa_sk"):
-		return "ecdsa-sk"
+		return "ecdsa-sk", false
 	case strings.Contains(key, "ed25519_sk"):
-		return "ed25519-sk"
+		return "ed25519-sk", false
 	case strings.Contains(key, "ecdsa"):
-		return "ecdsa"
+		return "ecdsa", false
 	case strings.Contains(key, "dsa"):
-		return "dsa"
+		return "dsa", true
 	case strings.Contains(key, "rsa"):
-		return "rsa-sha2-512"
+		return "rsa-sha2-512", false
 	default:
-		return "ed25519"
+		return "ed25519", false
 	}
 }

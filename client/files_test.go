@@ -8,20 +8,22 @@ import (
 
 func TestChooseSSHKeyType(t *testing.T) {
 	cases := []struct {
-		keyName string
-		keyType string
+		keyName       string
+		keyType       string
+		keyDeprecated bool
 	}{
-		{"~/.ssh/id_dsa.pub", "dsa"},
-		{"~/.ssh/id_ecdsa.pub", "ecdsa"},
-		{"~/.ssh/id_ecdsa_sk.pub", "ecdsa-sk"},
-		{"~/.ssh/id_ed25519.pub", "ed25519"},
-		{"~/.ssh/id_ed25519_sk.pub", "ed25519-sk"},
-		{"~/.ssh/id_rsa.pub", "rsa-sha2-512"},
-		{"~/.ssh/test_default_type.pub", "ed25519"},
+		{"~/.ssh/id_dsa.pub", "dsa", true},
+		{"~/.ssh/id_ecdsa.pub", "ecdsa", false},
+		{"~/.ssh/id_ecdsa_sk.pub", "ecdsa-sk", false},
+		{"~/.ssh/id_ed25519.pub", "ed25519", false},
+		{"~/.ssh/id_ed25519_sk.pub", "ed25519-sk", false},
+		{"~/.ssh/id_rsa.pub", "rsa-sha2-512", false},
+		{"~/.ssh/test_default_type.pub", "ed25519", false},
 	}
 
 	for _, c := range cases {
-		keyType := chooseSSHKeyType(c.keyName)
+		keyType, isDeprecated := chooseSSHKeyType(c.keyName)
 		assert.Equal(t, c.keyType, keyType)
+		assert.Equal(t, c.keyDeprecated, isDeprecated)
 	}
 }
