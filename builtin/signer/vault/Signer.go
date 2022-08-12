@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -96,7 +96,7 @@ func (v Signer) ReadCA(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("unknown error from Vault with status code %d", resp.StatusCode)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", fmt.Errorf("error reading response body: %w", err)
 	}
@@ -175,7 +175,7 @@ func (v Signer) Sign(ctx context.Context, payload []byte, id string, principals 
 }
 
 func extractSignedKey(resp *http.Response) (string, error) {
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", fmt.Errorf("error reading response body: %w", err)
 	}
@@ -229,7 +229,7 @@ func (v Signer) getToken(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("unknown error during authentication with status code %d", resp.StatusCode)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}

@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -27,7 +27,7 @@ func signHandler(w http.ResponseWriter, r *http.Request) {
 		"req_id":  reqID,
 	})
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		logger.WithError(err).Error("Reading signing request body")
 		render.Status(r, 400)

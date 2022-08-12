@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -100,7 +100,7 @@ func (a *Authenticator) Login(ctx context.Context, payload []byte) (resultCtx co
 	}
 	defer resToken.Body.Close()
 
-	bodyToken, err := ioutil.ReadAll(resToken.Body)
+	bodyToken, err := io.ReadAll(resToken.Body)
 	if err != nil {
 		return ctx, false, "", errors.New("can't read body")
 	}
