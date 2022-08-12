@@ -78,15 +78,15 @@ func CertStillValid(path string) bool {
 }
 
 // CertInfo extract principals and expiration from SSH certificate
-func CertInfo(cert string) (principals []string, before uint64, err error) {
+func CertInfo(cert string) (principals []string, before uint64, algo string, err error) {
+	algo = strings.Split(cert, " ")[0]
 	parsedKey, _, _, _, err := ssh.ParseAuthorizedKey([]byte(cert))
 	if err != nil {
-		return principals, before, err
+		return principals, before, algo, err
 	}
-
 	parsedCert := parsedKey.(*ssh.Certificate)
 
-	return parsedCert.ValidPrincipals, parsedCert.ValidBefore, nil
+	return parsedCert.ValidPrincipals, parsedCert.ValidBefore, algo, nil
 }
 
 // WriteUserSignedKey writes user certificate on disk.
@@ -171,5 +171,17 @@ func chooseSSHKeyType(key string) (string, bool) {
 		return "rsa", false
 	default:
 		return "ed25519", false
+	}
+}
+
+// CertAlgoIsDeprecated returns true if certificate algorithm is deprecated by openssh
+func CertAlgoIsDeprecated(s string) bool {
+	switch {
+	case s == ssh.CertAlgoRSAv01:
+		return true
+	case s == ssh.CertAlgoDSAv01:
+		return true
+	default:
+		return false
 	}
 }

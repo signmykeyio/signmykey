@@ -63,7 +63,7 @@ func signHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, before, _ := client.CertInfo(cert)
+	_, before, _, _ := client.CertInfo(cert)
 	logger.WithField("expire", time.Unix(int64(before), 0)).Info("SSH certificate generated")
 
 	render.JSON(w, r, map[string]string{"certificate": cert})

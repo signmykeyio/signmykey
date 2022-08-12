@@ -80,6 +80,7 @@ var rootCmd = &cobra.Command{
 
 		smkAddr := viper.GetString("addr")
 
+		deprecatedAlgos := []string{}
 		for _, pubKeyFile := range pubKeysFiles {
 			pubKey, err := client.GetUserPubKey(pubKeyFile)
 			if err != nil {
@@ -98,12 +99,26 @@ var rootCmd = &cobra.Command{
 
 			color.Green("\nYour SSH Key %s is successfully signed !", pubKeyFile)
 
-			principals, before, err := client.CertInfo(signedKey)
+			principals, before, algo, err := client.CertInfo(signedKey)
 			if err != nil {
 				return fmt.Errorf("%v, public key: %v", err, pubKeyFile)
 			}
 			color.HiBlack("\n  - Valid until: %s", time.Unix(int64(before), 0))
 			color.HiBlack("  - Principals: %s", strings.Join(principals, ","))
+			if client.CertAlgoIsDeprecated(algo) {
+				color.HiYellow("  - Algorithm is deprecated: %s", algo)
+				deprecatedAlgos = append(deprecatedAlgos, algo)
+			}
+		}
+
+		if len(deprecatedAlgos) != 0 {
+			color.HiYellow(`
+At least one of signed certificates has type that is deprecated by openssh.
+if you are experiencing connection errors, try to update signmykey signer backend.
+Also, you can temporary enable deprecated algorithm by adding to ~/.ssh/config :`)
+			for _, algo := range deprecatedAlgos {
+				color.HiYellow("\n  PubkeyAcceptedKeyTypes +%v", algo)
+			}
 		}
 
 		return nil

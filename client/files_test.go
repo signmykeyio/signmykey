@@ -27,3 +27,22 @@ func TestChooseSSHKeyType(t *testing.T) {
 		assert.Equal(t, c.keyDeprecated, isDeprecated)
 	}
 }
+
+
+func TestCertAlgoIsDeprecated(t *testing.T) {
+	cases := []struct {
+		algo string
+		isDeprecated bool
+	}{
+		{"ssh-rsa-cert-v01@openssh.com", true},
+		{"ssh-dss-cert-v01@openssh.com", true},
+		{"ssh-ed25519-cert-v01@openssh.com", false},
+		{"rsa-sha2-256-cert-v01@openssh.com", false},
+		{"rsa-sha2-512-cert-v01@openssh.com", false},
+	}
+
+	for _, c := range cases {
+		isDeprecated := CertAlgoIsDeprecated(c.algo)
+		assert.Equal(t, c.isDeprecated, isDeprecated)
+	}
+}
