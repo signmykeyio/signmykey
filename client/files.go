@@ -153,14 +153,14 @@ Please generate at least one with command like this :
 
 func chooseSSHKeyType(key string) string {
 	switch {
-	case strings.Contains(key, "dsa"):
-		return "dsa"
 	case strings.Contains(key, "ecdsa_sk"):
 		return "ecdsa-sk"
+	case strings.Contains(key, "ed25519_sk"):
+		return "ed25519-sk"
 	case strings.Contains(key, "ecdsa"):
 		return "ecdsa"
-	case strings.Contains(key, "ed25519_sk"):
-		return "ecdsa-sk"
+	case strings.Contains(key, "dsa"):
+		return "dsa"
 	case strings.Contains(key, "rsa"):
 		return "rsa"
 	default:
