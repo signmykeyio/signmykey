@@ -35,8 +35,7 @@ var rootCmd = &cobra.Command{
 			return errors.New("SMK Server address must end with a slash")
 		}
 
-		_, err := client.FindUserPubKeys(viper.GetStringSlice("key"))
-		return err
+		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		pubKeysFiles := []string{}
