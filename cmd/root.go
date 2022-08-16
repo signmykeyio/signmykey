@@ -35,14 +35,28 @@ var rootCmd = &cobra.Command{
 			return errors.New("SMK Server address must end with a slash")
 		}
 
-		err := client.UserPubKeyExists(viper.GetString("key"))
-		return err
+		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
+		pubKeysFiles := []string{}
+		foundPubKeysFiles, err := client.FindUserPubKeys(viper.GetStringSlice("key"))
+		if err != nil {
+			return err
+		}
+
 		if viper.GetBool("expired") {
-			if client.CertStillValid(viper.GetString("key")) {
+			// filter only expired keys
+			for _, pubKeyFile := range foundPubKeysFiles {
+				if !client.CertStillValid(pubKeyFile) {
+					pubKeysFiles = append(pubKeysFiles, pubKeyFile)
+				}
+			}
+			if len(pubKeysFiles) == 0 {
 				return nil
 			}
+		} else {
+			// process all found pubkeys
+			pubKeysFiles = foundPubKeysFiles
 		}
 
 		username := viper.GetString("user")
@@ -64,30 +78,48 @@ var rootCmd = &cobra.Command{
 			password = string(passwordBytes)
 		}
 
-		pubKey, err := client.GetUserPubKey(viper.GetString("key"))
-		if err != nil {
-			return err
-		}
-
 		smkAddr := viper.GetString("addr")
-		signedKey, err := client.Sign(smkAddr, username, password, pubKey)
-		if err != nil {
-			return err
+
+		deprecatedAlgos := []string{}
+		for _, pubKeyFile := range pubKeysFiles {
+			pubKey, err := client.GetUserPubKey(pubKeyFile)
+			if err != nil {
+				return fmt.Errorf("%v, public key: %v", err, pubKeyFile)
+			}
+
+			signedKey, err := client.Sign(smkAddr, username, password, pubKey)
+			if err != nil {
+				return fmt.Errorf("%v, public key: %v", err, pubKeyFile)
+			}
+
+			err = client.WriteUserSignedKey(signedKey, pubKeyFile)
+			if err != nil {
+				return fmt.Errorf("%v, public key: %v", err, pubKeyFile)
+			}
+
+			color.Green("\nYour SSH Key %s is successfully signed !", pubKeyFile)
+
+			principals, before, algo, err := client.CertInfo(signedKey)
+			if err != nil {
+				return fmt.Errorf("%v, public key: %v", err, pubKeyFile)
+			}
+			color.HiBlack("\n  - Valid until: %s", time.Unix(int64(before), 0))
+			color.HiBlack("  - Principals: %s", strings.Join(principals, ","))
+			if client.CertAlgoIsDeprecated(algo) {
+				color.HiYellow("  - Algorithm is deprecated: %s", algo)
+				deprecatedAlgos = append(deprecatedAlgos, algo)
+			}
 		}
 
-		err = client.WriteUserSignedKey(signedKey, viper.GetString("key"))
-		if err != nil {
-			return err
+		if len(deprecatedAlgos) != 0 {
+			color.HiYellow(`
+At least one of signed certificates has type that is deprecated by openssh.
+if you are experiencing connection errors, try to update signmykey signer backend.
+Also, you can temporary enable deprecated algorithm by adding to ~/.ssh/config :`)
+			for _, algo := range deprecatedAlgos {
+				color.HiYellow("\n  PubkeyAcceptedKeyTypes +%v", algo)
+			}
 		}
-
-		color.Green("\nYour SSH Key is successfully signed !")
-
-		principals, before, err := client.CertInfo(signedKey)
-		if err != nil {
-			return err
-		}
-		color.HiBlack("\n  - Valid until: %s", time.Unix(int64(before), 0))
-		color.HiBlack("  - Principals: %s", strings.Join(principals, ","))
 
 		return nil
 	},
@@ -124,7 +156,7 @@ func init() {
 		os.Exit(1)
 	}
 
-	rootCmd.Flags().StringP("key", "k", "~/.ssh/id_rsa.pub", "Path of public key to sign")
+	rootCmd.Flags().StringSliceP("key", "k", client.DefaultSSHKeys, "Path of public key to sign")
 	if err := viper.BindPFlag("key", rootCmd.Flags().Lookup("key")); err != nil {
 		color.Red(fmt.Sprintf("%s", err))
 		os.Exit(1)

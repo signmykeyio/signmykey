@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -89,7 +89,7 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 
 	defer resInfo.Body.Close()
 
-	bodyInfo, err := ioutil.ReadAll(resInfo.Body)
+	bodyInfo, err := io.ReadAll(resInfo.Body)
 	if err != nil {
 		return ctx, []string{}, err
 	}

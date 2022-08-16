@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"time"
 
 	"github.com/signmykeyio/signmykey/builtin/signer"
@@ -44,7 +44,7 @@ func (s *Signer) Init(config *viper.Viper) error {
 	}
 
 	// Read and parse CA private key
-	key, err := ioutil.ReadFile(config.GetString("caKey"))
+	key, err := os.ReadFile(config.GetString("caKey"))
 	if err != nil {
 		return fmt.Errorf("error reading CA private key file %s: %w", config.GetString("caKey"), err)
 	}
@@ -54,7 +54,7 @@ func (s *Signer) Init(config *viper.Viper) error {
 	}
 
 	// Read and parse CA public key
-	pubKey, err := ioutil.ReadFile(config.GetString("caCert"))
+	pubKey, err := os.ReadFile(config.GetString("caCert"))
 	if err != nil {
 		return fmt.Errorf("error reading CA public key file %s: %w", config.GetString("caCert"), err)
 	}
