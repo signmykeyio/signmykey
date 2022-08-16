@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"os/user"
@@ -28,11 +27,6 @@ var rootCmd = &cobra.Command{
 		// load config
 		if err := initConfig(clientCfgFile); err != nil {
 			return err
-		}
-
-		addr := viper.GetString("addr")
-		if addr[len(addr)-1] != '/' {
-			return errors.New("SMK Server address must end with a slash")
 		}
 
 		return nil
@@ -79,6 +73,9 @@ var rootCmd = &cobra.Command{
 		}
 
 		smkAddr := viper.GetString("addr")
+		if !strings.HasSuffix(smkAddr, "/") {
+			smkAddr = smkAddr + "/"
+		}
 
 		deprecatedAlgos := []string{}
 		for _, pubKeyFile := range pubKeysFiles {
