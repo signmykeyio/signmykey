@@ -1,8 +1,10 @@
 package local
 
 import (
+	"bytes"
 	"context"
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
 	"errors"
@@ -137,10 +139,46 @@ func (s Signer) Sign(ctx context.Context, payload []byte, id string, principals 
 		return "", fmt.Errorf("failed to sign user public key: %w", err)
 	}
 
-	marshaledCertificate := ssh.MarshalAuthorizedKey(&certificate)
-	if len(marshaledCertificate) == 0 {
-		return "", errors.New("failed to marshal signed certificate, empty result")
+	marshaledCertificate, err := MarshalCertificate(certificate)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal certificate: %w", err)
 	}
 
 	return string(marshaledCertificate), nil
+}
+
+// MarshalCertificate serializes certificate for inclusion in an OpenSSH
+// certificate file. The return value ends with newline.
+func MarshalCertificate(certificate ssh.Certificate) ([]byte, error) {
+
+	// Test if certificate is empty
+	if len(certificate.Marshal()) == 0 {
+		return nil, errors.New("certificate is empty")
+	}
+
+	// Infer certificate type from public key type
+	var certType string
+	if certificate.Key.Type() == ssh.KeyAlgoRSA {
+
+		switch certificate.Signature.Format {
+		case ssh.KeyAlgoRSASHA256:
+			certType = ssh.CertAlgoRSASHA256v01
+		case ssh.KeyAlgoRSASHA512:
+			certType = ssh.CertAlgoRSASHA512v01
+		default:
+			return nil, fmt.Errorf("unsupported signature format: %q", certificate.Signature.Format)
+		}
+	} else {
+		certType = certificate.Type()
+	}
+
+	// Marshal certificate
+	b := &bytes.Buffer{}
+	b.WriteString(certType)
+	b.WriteByte(' ')
+	e := base64.NewEncoder(base64.StdEncoding, b)
+	e.Write(certificate.Marshal())
+	e.Close()
+	b.WriteByte('\n')
+	return b.Bytes(), nil
 }

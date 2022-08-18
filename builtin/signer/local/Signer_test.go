@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -42,7 +43,9 @@ aTf+DpVUfDDy7z+wU4lB5XKPp3tpVbnUvF13dJJ8qHNl79BNaso158af4mfX5A8K
 i9Jm7L090D/cW6+hyuIzXBEyp+u1FXzaaEEMw9dsFyp9URYd1b03
 -----END RSA PRIVATE KEY-----
 `)
-	testKey := "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDXtOZp9B+Qh/DvRC75EaIoTi79TDHPQwfzIb7hcZl/Aj3NWykk8NBAIx3Mpx39sZJNtDW/AGWI9yEliSk34y4EYq3sMfgdytkVWxh3t8U6Lb7t7+I4OejCBti1tQT3g3HmxTiq1vrz7FEtZ2Ji7gc1ZaRTXvjFcayTR/7a4hSYqgnkmGUWBD3OQEP6nuC6KuU9Aur0CvVKWclRGAhE6fJI54R3D6KucL2mCWWQDlJarVv8cKDj/WVIZqt8CdgE46HNxCRcSDUzpTUSqThPM9oqaPC6xBLjpBEwTQpvOnYufB4TOepjdy+221cLkaflgn0JZZyU/39VNXbI7no/VPwh"
+	testRSAKey := "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDXtOZp9B+Qh/DvRC75EaIoTi79TDHPQwfzIb7hcZl/Aj3NWykk8NBAIx3Mpx39sZJNtDW/AGWI9yEliSk34y4EYq3sMfgdytkVWxh3t8U6Lb7t7+I4OejCBti1tQT3g3HmxTiq1vrz7FEtZ2Ji7gc1ZaRTXvjFcayTR/7a4hSYqgnkmGUWBD3OQEP6nuC6KuU9Aur0CvVKWclRGAhE6fJI54R3D6KucL2mCWWQDlJarVv8cKDj/WVIZqt8CdgE46HNxCRcSDUzpTUSqThPM9oqaPC6xBLjpBEwTQpvOnYufB4TOepjdy+221cLkaflgn0JZZyU/39VNXbI7no/VPwh"
+	testED25519Key := "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPj1WAlZx6m7gMNww+GzgltxptwnkgYYCAiiZLgmQ+QD"
+	testECDSAKey := "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFpfzsV/feXs64+x59lJokYYffA24Us8DYWj555trgY2ttWr7LgSCw/BfCxP2cqvWDZ9XHlEjnfjaWbcTr1kKvk="
 
 	CACert, _, _, _, err := ssh.ParseAuthorizedKey(testCACert)
 	if err != nil {
@@ -63,16 +66,19 @@ i9Jm7L090D/cW6+hyuIzXBEyp+u1FXzaaEEMw9dsFyp9URYd1b03
 	cases := []struct {
 		description string
 		payload     []byte
+		certType    string
 		id          string
 		principals  []string
 		expErr      bool
 	}{
-		{"test with an invalid key", []byte("{\"public_key\": \"invalid key\"}"), "test", []string{"root", "admin"}, true},
-		{"test with valid key and principals", []byte(fmt.Sprintf("{\"public_key\": \"%s\"}", testKey)), "testid", []string{"admin", "root"}, false},
-		{"test with valid key and reversed principals", []byte(fmt.Sprintf("{\"public_key\": \"%s\"}", testKey)), "testid", []string{"root", "admin"}, false},
-		{"test with an empty key", []byte(""), "testid", []string{"root", "admin"}, true},
-		{"test with an empty id", []byte(fmt.Sprintf("{\"public_key\": \"%s\"}", testKey)), "", []string{"root", "admin"}, true},
-		{"test with no principals", []byte(fmt.Sprintf("{\"public_key\": \"%s\"}", testKey)), "testid", []string{}, true},
+		{"test with an invalid key", []byte("{\"public_key\": \"invalid key\"}"), "", "test", []string{"root", "admin"}, true},
+		{"test with an empty key", []byte(""), "", "testid", []string{"root", "admin"}, true},
+		{"test with an empty id", []byte(fmt.Sprintf("{\"public_key\": \"%s\"}", testRSAKey)), "", "", []string{"root", "admin"}, true},
+		{"test with no principals", []byte(fmt.Sprintf("{\"public_key\": \"%s\"}", testRSAKey)), "", "testid", []string{}, true},
+		{"test with valid RSA key and principals", []byte(fmt.Sprintf("{\"public_key\": \"%s\"}", testRSAKey)), ssh.CertSigAlgoRSASHA2512v01, "testid", []string{"admin", "root"}, false},
+		{"test with valid RSA key and reversed principals", []byte(fmt.Sprintf("{\"public_key\": \"%s\"}", testRSAKey)), ssh.CertSigAlgoRSASHA2512v01, "testid", []string{"root", "admin"}, false},
+		{"test with valid ED25519 key and principals", []byte(fmt.Sprintf("{\"public_key\": \"%s\"}", testED25519Key)), ssh.CertAlgoED25519v01, "testid", []string{"admin", "root"}, false},
+		{"test with valid ECDSA key and principals", []byte(fmt.Sprintf("{\"public_key\": \"%s\"}", testECDSAKey)), ssh.CertAlgoECDSA256v01, "testid", []string{"admin", "root"}, false},
 	}
 
 	for _, c := range cases {
@@ -85,6 +91,10 @@ i9Jm7L090D/cW6+hyuIzXBEyp+u1FXzaaEEMw9dsFyp9URYd1b03
 
 		if err != nil {
 			continue
+		}
+
+		if !strings.HasPrefix(cert, c.certType) {
+			t.Errorf("expected cert type %s, got %s", c.certType, strings.Split(cert, " ")[0])
 		}
 
 		parsedCert, _, _, _, _ := ssh.ParseAuthorizedKey([]byte(cert))
