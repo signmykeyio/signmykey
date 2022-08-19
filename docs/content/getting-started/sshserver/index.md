@@ -122,7 +122,7 @@ Therefor you have two choices :
 
 Check signmykey page
 ```
-[signmykey](../../signmykey/index.md)
+[signmykey](/signmykey/docs/content/getting-started/signmykey/index.md)
 ```
 
 ##### Authorize deprecated algorithm
