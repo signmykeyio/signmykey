@@ -1,15 +1,15 @@
----
-title: SSH Server
----
 
-### Configuration
+# SSH Server
+
+
+## Configuration
 
 In order to use SSH principals, you must configure your SSH servers to use them.
 
 You can find [here](/getting-started/vault/#export-ca-public-key) how to generate the file */etc/ssh/ca.pem*.
 
 
-## Linux server
+### Linux server
 
 {{< warning title="Warning" >}} Open SSH Server must be installed on the server. {{< /warning >}}
 Modify the file */etc/ssh/sshd_config* with the following parameters
@@ -33,7 +33,7 @@ PasswordAuthentication no
 ...
 ``` 
 
-# Principals
+#### Principals
 
 Create the */etc/ssh/authorized_principals* directory
 ```sh
@@ -47,7 +47,7 @@ superheros
 ```
 It means that users with **hackers** and **superheros** principals can login as **root** to the server with ssh.
 
-# Restart
+#### Restart
 
 {{< warning title="Warning" >}}
 Be sure to be able to connect via a console to your server.
@@ -58,7 +58,7 @@ systemctl restart sshd.service
 ```
 
 
-## Windows
+### Windows
 
 {{< warning title="Warning" >}} Open SSH Server must be installed on the server. On Windows 2019 Server the service is present by default, just enable it. {{< /warning >}}
 Modify the file *C:\ProgramData\ssh\sshd_config* with the following parameters
@@ -87,7 +87,7 @@ Match Group administrators
 ...
 ```
 
-# Principals
+#### Principals
 
 Create the *C:\ProgramData\ssh\authorized_princpals* file
 Be sure to only grant RO on this file for SYSTEM user.
@@ -98,7 +98,7 @@ hackers, superheros
 ```
 It means that users with **hackers** and **superheros** principals can login to the server with ssh.
 
-# Restart
+#### Restart
 
 {{< warning title="Warning" >}}
 Be sure to be able to connect via a console/rdp to your server.
@@ -111,3 +111,28 @@ In cmd.exe
 net stop gsw_sshd && net start gsw_sshd
 ```
 
+### Additionnal infos
+
+#### Deprecated algorithm
+
+In recent OS (Ubuntu 22.04), not yet on Redhat family (9) you can no longer ssh to servers with that OS because the RSA algorithm is deprecated.
+Therefor you have two choices :
+
+##### Update signmykey and regenerate key
+
+Check signmykey page
+```
+[a relative link](../signmykey/index.md)
+```
+
+##### Authorize deprecated algorithm
+
+On the server add this to the ssh configuration file :
+```
+PubkeyAcceptedAlgorithms +ssh-rsa-cert-v01@openssh.com
+```
+
+Restart ssh service :
+```
+systemctl restart sshd
+```
