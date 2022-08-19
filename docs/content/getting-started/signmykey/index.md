@@ -217,5 +217,5 @@ signmykey -u johndoe
 
 Check sshserver page
 ```
-[a relative link](../sshserver/index.md)
+[sshserver](../sshserver/index.md)
 ```
