@@ -216,5 +216,5 @@ signmykey -u johndoe
 #### Authorize deprecated algorithm
 
 Check sshserver page
-[sshserver](/signmykey/docs/content/getting-started/sshserver/index.md)
+[sshserver](/docs/content/getting-started/sshserver/index.md)
 

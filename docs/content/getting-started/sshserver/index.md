@@ -121,7 +121,7 @@ Therefor you have two choices :
 ##### Update signmykey and regenerate key
 
 Check signmykey page
-[signmykey](/signmykey/docs/content/getting-started/signmykey/index.md)
+[signmykey](/docs/content/getting-started/signmykey/index.md)
 
 
 ##### Authorize deprecated algorithm
