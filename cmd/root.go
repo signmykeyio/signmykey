@@ -77,7 +77,7 @@ var rootCmd = &cobra.Command{
 			smkAddr = smkAddr + "/"
 		}
 
-		deprecatedAlgos := []string{}
+		var deprecatedKeys, buggyKeys, totalKeys int
 		for _, pubKeyFile := range pubKeysFiles {
 			pubKey, err := client.GetUserPubKey(pubKeyFile)
 			if err != nil {
@@ -96,26 +96,32 @@ var rootCmd = &cobra.Command{
 
 			color.Green("\nYour SSH Key %s is successfully signed !", pubKeyFile)
 
-			principals, before, algo, err := client.CertInfo(signedKey)
+			principals, before, keyType, err := client.CertInfo(signedKey)
 			if err != nil {
 				return fmt.Errorf("%v, public key: %v", err, pubKeyFile)
 			}
 			color.HiBlack("\n  - Valid until: %s", time.Unix(int64(before), 0))
 			color.HiBlack("  - Principals: %s", strings.Join(principals, ","))
-			if client.CertAlgoIsDeprecated(algo) {
-				color.HiYellow("  - Algorithm is deprecated: %s", algo)
-				deprecatedAlgos = append(deprecatedAlgos, algo)
+			if client.CertKeyTypeIsDeprecated(keyType) {
+				color.HiYellow("  - Key type is deprecated: %s", keyType)
+				deprecatedKeys++
 			}
+			if client.CertKeyTypeIsBuggy(keyType) {
+				buggyKeys++
+			}
+			totalKeys++
 		}
 
-		if len(deprecatedAlgos) != 0 {
+		// If all signed keys are deprecated or buggy, show a warning
+		if deprecatedKeys+buggyKeys == totalKeys {
 			color.HiYellow(`
-At least one of signed certificates has type that is deprecated by openssh.
-if you are experiencing connection errors, try to update signmykey signer backend.
-Also, you can temporary enable deprecated algorithm by adding to ~/.ssh/config :`)
-			for _, algo := range deprecatedAlgos {
-				color.HiYellow("\n  PubkeyAcceptedKeyTypes +%v", algo)
-			}
+All signed certificates use key types that are deprecated or buggy. If
+you are experiencing connection errors, try to generate a new key with
+an alternative algorithm :
+
+  ssh-keygen -f ~/.ssh/id_ed25519 -t ed25519
+
+`)
 		}
 
 		return nil

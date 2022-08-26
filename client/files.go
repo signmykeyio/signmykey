@@ -78,15 +78,15 @@ func CertStillValid(path string) bool {
 }
 
 // CertInfo extract principals and expiration from SSH certificate
-func CertInfo(cert string) (principals []string, before uint64, algo string, err error) {
-	algo = strings.Split(cert, " ")[0]
+func CertInfo(cert string) (principals []string, before uint64, keyType string, err error) {
+
 	parsedKey, _, _, _, err := ssh.ParseAuthorizedKey([]byte(cert))
 	if err != nil {
-		return principals, before, algo, err
+		return principals, before, keyType, err
 	}
 	parsedCert := parsedKey.(*ssh.Certificate)
 
-	return parsedCert.ValidPrincipals, parsedCert.ValidBefore, algo, nil
+	return parsedCert.ValidPrincipals, parsedCert.ValidBefore, parsedCert.Key.Type(), nil
 }
 
 // WriteUserSignedKey writes user certificate on disk.
@@ -174,12 +174,22 @@ func chooseSSHKeyType(key string) (string, bool) {
 	}
 }
 
-// CertAlgoIsDeprecated returns true if certificate algorithm is deprecated by openssh
-func CertAlgoIsDeprecated(s string) bool {
+// CertKeyTypeIsDeprecated returns true if certificate key type is deprecated by openssh
+func CertKeyTypeIsDeprecated(s string) bool {
 	switch {
-	case s == ssh.CertAlgoRSAv01:
-		return true
 	case s == ssh.CertAlgoDSAv01:
+		return true
+	default:
+		return false
+	}
+}
+
+// CertKeyTypeIsBuggy returns true if certificate key type is buggy with
+// some versions of openssh client/server combination, see discussion for
+// more details : https://github.com/signmykeyio/signmykey/pull/138
+func CertKeyTypeIsBuggy(s string) bool {
+	switch {
+	case s == ssh.KeyAlgoRSA:
 		return true
 	default:
 		return false
