@@ -12,11 +12,15 @@ authenticatorOpts:
   users:
     foouser: $2a$10$zsvMZ7nEYo4jJJxgb5FpH.izPH37LsuLBXPbuKH4MPF4sihFSG6bW
     baruser: $2a$10$srGqC9g46xaRXbueLk5kDuSuDM6h2EpC.MTRiVaij6s/jcsKQ6LHu
+    otpuser: $2a$10$/6T2iN8I7UTUTDuezVH41eDlSIeNr32wi9PtDfNF3Zxes3RO0LK/a,VHOUR7WH7N6ZXI5VEKZFZ4ESB4ZEYPGNUDAT6LKGNHLWUXMTEYKA====
 ```
 
 ### Options
 
   * **users** - Map of users and bcrypt hashed passwords (you can hash passwords via "signmykey hash" command) (required)
+
+Optionally, users may wish to utilize OTP in which case the "signmykey hash" command generates a longer string which contains the 
+hashed password and the OTP seed encrypted with the user's password. 
 
 ## LDAP
 
