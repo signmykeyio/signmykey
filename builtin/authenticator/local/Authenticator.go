@@ -60,7 +60,7 @@ func (a Authenticator) Login(ctx context.Context, payload []byte) (resultCtx con
 	}
 
 	passAndOtp := strings.Split(hashedPass, ",")
-	if len(passAndOtp[1]) !=0 && len(login.Otp) == 0  {
+	if len(passAndOtp) == 2 && len(login.Otp) == 0  {
 		return ctx, false, "", errors.New("otp required but not provided")
 	}
 
@@ -69,13 +69,13 @@ func (a Authenticator) Login(ctx context.Context, payload []byte) (resultCtx con
 		return ctx, false, "", errors.New("bad password")
 	}
 
-	if len(passAndOtp[1]) !=0 {
+	if len(passAndOtp) == 2 {
 		seed := util.DecryptSeed(passAndOtp[1], []byte(login.Password))
 		timeval := time.Now().Unix() / 30
 		generated := util.GenerateOTPCode(seed, timeval)
 		if login.Otp != generated {
 			// try again as industry standard is a 30 sec tolerance window
-			timeval = timeval - 30
+			timeval = (time.Now().Unix() - 30 ) / 30
 			if login.Otp != util.GenerateOTPCode(seed, timeval) {
 				return ctx, false, "", errors.New("otp does not match")
 			}
