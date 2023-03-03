@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/signmykeyio/signmykey/util"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
-	"github.com/signmykeyio/signmykey/util"
 )
 
 // Authenticator struct represents local Authenticator options
@@ -22,7 +22,7 @@ type Authenticator struct {
 type localLogin struct {
 	User     string `json:"user" binding:"required"`
 	Password string `json:"password" binding:"required"`
-	Otp string `json:"otp"`
+	Otp      string `json:"otp"`
 }
 
 // Init method is used to ingest config of Authenticator
@@ -60,7 +60,7 @@ func (a Authenticator) Login(ctx context.Context, payload []byte) (resultCtx con
 	}
 
 	passAndOtp := strings.Split(hashedPass, ",")
-	if len(passAndOtp) == 2 && len(login.Otp) == 0  {
+	if len(passAndOtp) == 2 && len(login.Otp) == 0 {
 		return ctx, false, "", errors.New("otp required but not provided")
 	}
 
@@ -75,7 +75,7 @@ func (a Authenticator) Login(ctx context.Context, payload []byte) (resultCtx con
 		generated := util.GenerateOTPCode(seed, timeval)
 		if login.Otp != generated {
 			// try again as industry standard is a 30 sec tolerance window
-			timeval = (time.Now().Unix() - 30 ) / 30
+			timeval = (time.Now().Unix() - 30) / 30
 			if login.Otp != util.GenerateOTPCode(seed, timeval) {
 				return ctx, false, "", errors.New("otp does not match")
 			}

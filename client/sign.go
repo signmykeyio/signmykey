@@ -10,7 +10,7 @@ type signLDAPRequest struct {
 	User      string `json:"user"`
 	Password  string `json:"password"`
 	PublicKey string `json:"public_key"`
-	Otp	string `json:"otp"`
+	Otp       string `json:"otp"`
 }
 
 type signLDAPResponse struct {
@@ -28,7 +28,7 @@ func Sign(addr, user, password, pubKey, otp string) (certificate string, err err
 		User:      user,
 		Password:  password,
 		PublicKey: pubKey,
-		Otp: 		otp,
+		Otp:       otp,
 	}
 
 	signResponse := &signLDAPResponse{}
