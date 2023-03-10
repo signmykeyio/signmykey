@@ -34,9 +34,8 @@ func GenerateSeed() string {
 func EncryptSeed(seed string, password []byte) string {
 	// Make a key that is 16 byte long, using as many repetitions
 	// of the password as needed
-	key := make([]byte, 16)
 	rep := 1 + 16/len(password)
-	key = bytes.Repeat(password, rep)
+	key := bytes.Repeat(password, rep)
 
 	plaintext := []byte(seed)
 
@@ -66,9 +65,8 @@ func EncryptSeed(seed string, password []byte) string {
 func DecryptSeed(encryptedSeed string, password []byte) string {
 	// Make a key that is 16 byte long, using as many repetitions
 	// of the password as needed
-	key := make([]byte, 16)
 	rep := 1 + 16/len(password)
-	key = bytes.Repeat(password, rep)
+	key := bytes.Repeat(password, rep)
 
 	ciphertext, _ := base32.StdEncoding.DecodeString(encryptedSeed)
 
@@ -86,7 +84,7 @@ func DecryptSeed(encryptedSeed string, password []byte) string {
 	stream := cipher.NewCFBDecrypter(block, iv)
 	stream.XORKeyStream(ciphertext, ciphertext)
 
-	return fmt.Sprintf("%s", ciphertext)
+	return string(ciphertext[:])
 }
 
 // ProvisionURI creates an otpauth URI commonly used by mobile phone
