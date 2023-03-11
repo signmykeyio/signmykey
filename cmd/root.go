@@ -77,6 +77,8 @@ var rootCmd = &cobra.Command{
 			smkAddr = smkAddr + "/"
 		}
 
+		otp := viper.GetString("otp")
+
 		var deprecatedKeys, buggyKeys, totalKeys int
 		for _, pubKeyFile := range pubKeysFiles {
 			pubKey, err := client.GetUserPubKey(pubKeyFile)
@@ -84,7 +86,7 @@ var rootCmd = &cobra.Command{
 				return fmt.Errorf("%v, public key: %v", err, pubKeyFile)
 			}
 
-			signedKey, err := client.Sign(smkAddr, username, password, pubKey)
+			signedKey, err := client.Sign(smkAddr, username, password, pubKey, otp)
 			if err != nil {
 				return fmt.Errorf("%v, public key: %v", err, pubKeyFile)
 			}
@@ -167,6 +169,12 @@ func init() {
 
 	rootCmd.Flags().BoolP("expired", "e", false, "Sign only if existing key already expired")
 	if err := viper.BindPFlag("expired", rootCmd.Flags().Lookup("expired")); err != nil {
+		color.Red(fmt.Sprintf("%s", err))
+		os.Exit(1)
+	}
+
+	rootCmd.Flags().StringP("otp", "o", "", "One time password")
+	if err := viper.BindPFlag("otp", rootCmd.Flags().Lookup("otp")); err != nil {
 		color.Red(fmt.Sprintf("%s", err))
 		os.Exit(1)
 	}

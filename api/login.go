@@ -7,6 +7,7 @@ type Login struct {
 	User     string `json:"user" binding:"required"`
 	Password string `json:"password" binding:"required"`
 	PubKey   string `json:"public_key" binding:"required"`
+	Otp      string `json:"otp"`
 }
 
 // Validate fields of login struct
