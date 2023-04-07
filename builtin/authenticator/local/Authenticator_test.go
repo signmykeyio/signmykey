@@ -3,6 +3,7 @@ package local
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -51,4 +52,58 @@ users:
 			assert.EqualError(t, err, c.err)
 		}
 	}
+}
+
+func FuzzAuthenticator(f *testing.F) {
+
+	configBytes := []byte(`
+users:
+  gooduser: "$2a$10$h8bTe02uZIkAa5j1NiuVVOXdUONmch.y151qyK004Hb8EF7rTRq0u"
+`)
+
+	testConfig := viper.New()
+	testConfig.SetConfigType("yaml")
+	err := testConfig.ReadConfig(bytes.NewBuffer(configBytes))
+	if err != nil {
+		panic(err)
+	}
+
+	local := &Authenticator{}
+	local.Init(testConfig)
+
+	f.Fuzz(func(t *testing.T, user, password string) {
+
+		_, _, _, err := local.Login(context.Background(), []byte(fmt.Sprintf("{\"user\":\"%s\",\"password\":\"%s\"}", user, password)))
+		if err == nil && user != "gooduser" && password != "goodpassword" {
+			t.Fail()
+		}
+
+	})
+}
+
+func FuzzAuthenticatorOTP(f *testing.F) {
+
+	configBytes := []byte(`
+users:
+  gooduser: "$2a$10$odlh6WXIuQGMoQq5/qfJI.Q/20MGQW.NyRQVBClKMzcUaX5SElzx2,75FPOXNOPVUAVC4TQUGFD6AOFUQTUZNJ3FURT4NUJOGM5HQZELQQ===="
+`)
+
+	testConfig := viper.New()
+	testConfig.SetConfigType("yaml")
+	err := testConfig.ReadConfig(bytes.NewBuffer(configBytes))
+	if err != nil {
+		panic(err)
+	}
+
+	local := &Authenticator{}
+	local.Init(testConfig)
+
+	f.Fuzz(func(t *testing.T, user, password, otp string) {
+
+		_, _, _, err := local.Login(context.Background(), []byte(fmt.Sprintf("{\"user\":\"%s\",\"password\":\"%s\",\"otp\": \"%s\"}", user, password, otp)))
+		if err == nil && user != "gooduser" && password != "goodpassword" {
+			t.Fail()
+		}
+
+	})
 }
