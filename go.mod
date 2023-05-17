@@ -8,7 +8,7 @@ require (
 	github.com/go-ldap/ldap/v3 v3.4.4
 	github.com/mdp/qrterminal/v3 v3.0.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/sirupsen/logrus v1.9.0
+	github.com/sirupsen/logrus v1.9.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.2
