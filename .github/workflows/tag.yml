@@ -37,12 +37,22 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
 
-      - name: Get the version
-        id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
+      - name: Checkout apt repository
+        uses: actions/checkout@v2
+        with:
+          repository: signmykeyio/apt
+          token: ${{ secrets.PUSH_TOKEN }}
+          path: apt-repo
 
-      - uses: jfrog/setup-jfrog-cli@v1
-      - run: |
-          jfrog rt upload --url https://signmykey.jfrog.io/artifactory/ --apikey=${{ secrets.JFROG_APIKEY }} --deb stable/main/amd64 bin/signmykey_${{ steps.get_version.outputs.VERSION }}_amd64.deb signmykey-deb/
-          jfrog rt upload --url https://signmykey.jfrog.io/artifactory/ --apikey=${{ secrets.JFROG_APIKEY }} --deb stable/main/arm64 bin/signmykey_${{ steps.get_version.outputs.VERSION }}_arm64.deb signmykey-deb/
-          jfrog rt upload --url https://signmykey.jfrog.io/artifactory/ --apikey=${{ secrets.JFROG_APIKEY }} bin/signmykey-${{ steps.get_version.outputs.VERSION }}-x86_64.rpm signmykey-rpm/
+      - name: Copy deb file to apt repository
+        run: |
+          cp bin/*.deb apt-repo
+
+      - name: Commit and push deb file
+        run: |
+          cd apt-repo
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Add new deb files"
+          git push
