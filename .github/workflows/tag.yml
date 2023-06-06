@@ -56,3 +56,23 @@ jobs:
           git add .
           git commit -m "Add new deb files"
           git push
+
+      - name: Checkout rpm repository
+        uses: actions/checkout@v2
+        with:
+          repository: signmykeyio/rpm
+          token: ${{ secrets.PUSH_TOKEN }}
+          path: rpm-repo
+
+      - name: Copy rpm file to rpm repository
+        run: |
+          cp bin/*.rpm rpm-repo
+
+      - name: Commit and push rpm file
+        run: |
+          cd rpm-repo
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Add new rpm files"
+          git push
