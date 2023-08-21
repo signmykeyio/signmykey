@@ -3,7 +3,7 @@ module github.com/signmykeyio/signmykey
 require (
 	github.com/dghubble/sling v1.4.1
 	github.com/fatih/color v1.15.0
-	github.com/go-chi/chi/v5 v5.0.8
+	github.com/go-chi/chi/v5 v5.0.10
 	github.com/go-chi/render v1.0.2
 	github.com/go-ldap/ldap/v3 v3.4.5
 	github.com/mdp/qrterminal/v3 v3.1.1
