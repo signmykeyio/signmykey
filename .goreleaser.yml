@@ -49,7 +49,5 @@ nfpms:
     overrides:
       rpm:
         file_name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Arch }}"
-        replacements:
-          amd64: x86_64
       deb:
         file_name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Arch }}"
