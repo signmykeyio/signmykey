@@ -9,7 +9,7 @@ require (
 	github.com/mdp/qrterminal/v3 v3.1.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/sirupsen/logrus v1.9.3
-	github.com/spf13/cobra v1.7.0
+	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/crypto v0.14.0
