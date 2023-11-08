@@ -13,7 +13,7 @@ require (
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/crypto v0.14.0
-	golang.org/x/term v0.13.0
+	golang.org/x/term v0.14.0
 )
 
 require (
