@@ -83,6 +83,7 @@ func (a *Authenticator) Login(ctx context.Context, payload []byte) (resultCtx co
 	v.Add("password", login.Password)
 	v.Add("client_id", a.OIDCClientID)
 	v.Add("client_secret", a.OIDCClientSecret)
+	v.Add("scope", "openid")
 
 	oidcPayload := strings.NewReader(v.Encode())
 
