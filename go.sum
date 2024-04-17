@@ -78,8 +78,8 @@ github.com/go-chi/render v1.0.3/go.mod h1:/gr3hVkmYR0YlEy3LxCuVRFzEu9Ruok+gFqbIo
 github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1/go.mod h1:vR7hzQXu2zJy9AVAgeJqvqgH9Q5CA+iKCZ2gyEVpxRU=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20191125211704-12ad95a8df72/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
 github.com/go-gl/glfw/v3.3/glfw v0.0.0-20200222043503-6f7a984d4dc4/go.mod h1:tQ2UAYgL5IevRw8kRxooKSPJfGvJ9fJQFa0TUsXzTg8=
-github.com/go-ldap/ldap/v3 v3.4.7 h1:3Hbd7mIB1qjd3Ra59fI3JYea/t5kykFu2CVHBca9koE=
-github.com/go-ldap/ldap/v3 v3.4.7/go.mod h1:qS3Sjlu76eHfHGpUdWkAXQTw4beih+cHsco2jXlIXrk=
+github.com/go-ldap/ldap/v3 v3.4.8 h1:loKJyspcRezt2Q3ZRMq2p/0v8iOurlmeXDPw6fikSvQ=
+github.com/go-ldap/ldap/v3 v3.4.8/go.mod h1:qS3Sjlu76eHfHGpUdWkAXQTw4beih+cHsco2jXlIXrk=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6/go.mod h1:cIg4eruTrX1D+g88fzRXU5OdNfaM+9IcxsU14FzY7Hc=
 github.com/golang/groupcache v0.0.0-20191227052852-215e87163ea7/go.mod h1:cIg4eruTrX1D+g88fzRXU5OdNfaM+9IcxsU14FzY7Hc=
