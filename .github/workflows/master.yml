@@ -25,7 +25,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
-          args: release --snapshot --skip-sign --clean
+          args: release --snapshot --skip=sign --clean
         env:
           GORELEASER_CURRENT_TAG: ${{ github.run_id }}
 

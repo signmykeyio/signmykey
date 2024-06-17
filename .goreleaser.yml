@@ -1,3 +1,5 @@
+version: 2
+
 before:
   hooks:
     - go mod download
@@ -33,7 +35,7 @@ signs:
       - "--detach-sign"
       - "${artifact}"
 changelog:
-  skip: true
+  disable: true
 nfpms:
   - maintainer: Pablo RUTH <contact@pablo-ruth.fr>
     homepage: https://github.com/signmykeyio/signmykey
