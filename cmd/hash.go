@@ -29,7 +29,10 @@ var hashCmd = &cobra.Command{
 
 		fmt.Printf("\nDo you want to use One Time Codes e.g. Google authenticator? (Y/N) ")
 		var useOtp string
-		fmt.Scanln(&useOtp)
+		_, err = fmt.Scanln(&useOtp)
+		if err != nil {
+			return err
+		}
 
 		if useOtp == "Y" || useOtp == "y" {
 			seed := util.GenerateSeed()

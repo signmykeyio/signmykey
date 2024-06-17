@@ -22,7 +22,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
-          args: release --snapshot --skip-sign --clean
+          args: release --snapshot --skip=sign --clean
 
       - uses: actions/upload-artifact@v2
         with:
