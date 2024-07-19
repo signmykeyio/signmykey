@@ -75,6 +75,12 @@ func (s *Signer) Init(config *viper.Viper) error {
 	s.CriticalOptions = config.GetStringMapString("criticalOptions")
 	s.Extensions = config.GetStringMapString("extensions")
 
+	// Little hack to handle permit-X11-forwarding case issue with viper https://github.com/signmykeyio/signmykey/issues/230
+	if _, ok := s.Extensions["permit-x11-forwarding"]; ok {
+		s.Extensions["permit-X11-forwarding"] = ""
+		delete(s.Extensions, "permit-x11-forwarding")
+	}
+
 	return nil
 }
 
