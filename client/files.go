@@ -1,6 +1,7 @@
 package client
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"reflect"
@@ -151,7 +152,7 @@ Please generate at least one with command like this :
 			}
 		}
 
-		return nil, fmt.Errorf(errStr)
+		return nil, errors.New(errStr)
 	}
 	return found, nil
 }
