@@ -12,7 +12,7 @@ require (
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/crypto v0.33.0
+	golang.org/x/crypto v0.34.0
 	golang.org/x/term v0.29.0
 )
 
@@ -44,4 +44,4 @@ require (
 	rsc.io/qr v0.2.0 // indirect
 )
 
-go 1.18
+go 1.23.0
