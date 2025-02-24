@@ -20,7 +20,7 @@ builds:
       - darwin_arm64
 dist: bin
 archives:
-  - format: binary
+  - formats: ['binary']
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
 checksum:
   name_template: "checksums.txt"
