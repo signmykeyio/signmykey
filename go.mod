@@ -5,7 +5,7 @@ require (
 	github.com/fatih/color v1.18.0
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/go-chi/render v1.0.3
-	github.com/go-ldap/ldap/v3 v3.4.10
+	github.com/go-ldap/ldap/v3 v3.4.11
 	github.com/mdp/qrterminal/v3 v3.2.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/sirupsen/logrus v1.9.3
@@ -21,7 +21,7 @@ require (
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
-	github.com/go-asn1-ber/asn1-ber v1.5.7 // indirect
+	github.com/go-asn1-ber/asn1-ber v1.5.8-0.20250403174932-29230038a667 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
