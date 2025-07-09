@@ -178,7 +178,7 @@ func chooseSSHKeyType(key string) (string, bool) {
 // CertKeyTypeIsDeprecated returns true if certificate key type is deprecated by openssh
 func CertKeyTypeIsDeprecated(s string) bool {
 	switch {
-	case s == ssh.CertAlgoDSAv01:
+	case s == ssh.CertAlgoDSAv01: //nolint:staticcheck
 		return true
 	default:
 		return false
