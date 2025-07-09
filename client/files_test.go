@@ -36,7 +36,7 @@ func TestCertKeyTypeIsBuggy(t *testing.T) {
 		isBuggy bool
 	}{
 		{ssh.KeyAlgoRSA, true},
-		{ssh.KeyAlgoDSA, false},
+		{ssh.KeyAlgoDSA, false}, //nolint:staticcheck
 		{ssh.KeyAlgoED25519, false},
 		{ssh.KeyAlgoECDSA256, false},
 	}
