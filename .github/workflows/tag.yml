@@ -19,7 +19,7 @@ jobs:
           go-version: 1.25
 
       - name: Run Golang CI Lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v8
 
       - name: Run Govulncheck
         uses: golang/govulncheck-action@v1
