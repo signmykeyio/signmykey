@@ -51,7 +51,7 @@ func EncryptSeed(seed string, password []byte) string {
 		panic(err)
 	}
 
-	stream := cipher.NewCFBEncrypter(block, iv)
+	stream := cipher.NewCFBEncrypter(block, iv) // nolint:staticcheck
 	stream.XORKeyStream(ciphertext[aes.BlockSize:], plaintext)
 
 	return base32.StdEncoding.EncodeToString(ciphertext)
@@ -81,7 +81,7 @@ func DecryptSeed(encryptedSeed string, password []byte) string {
 	iv := ciphertext[:aes.BlockSize]
 	ciphertext = ciphertext[aes.BlockSize:]
 
-	stream := cipher.NewCFBDecrypter(block, iv)
+	stream := cipher.NewCFBDecrypter(block, iv) // nolint:staticcheck
 	stream.XORKeyStream(ciphertext, ciphertext)
 
 	return string(ciphertext[:])

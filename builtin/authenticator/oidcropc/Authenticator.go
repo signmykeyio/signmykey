@@ -57,7 +57,7 @@ func (a *Authenticator) Init(config *viper.Viper) error {
 	}
 	if len(missingEntriesLst) > 0 {
 		missingEntries := strings.Join(missingEntriesLst, ", ")
-		return fmt.Errorf("Missing config entries (%s) for Authenticator", missingEntries)
+		return fmt.Errorf("missing config entries (%s) for Authenticator", missingEntries)
 	}
 
 	a.OIDCTokenEndpoint = config.GetString("oidcTokenEndpoint")
@@ -99,7 +99,7 @@ func (a *Authenticator) Login(ctx context.Context, payload []byte) (resultCtx co
 	if err != nil {
 		return ctx, false, "", err
 	}
-	defer resToken.Body.Close()
+	defer resToken.Body.Close() // nolint:errcheck
 
 	bodyToken, err := io.ReadAll(resToken.Body)
 	if err != nil {

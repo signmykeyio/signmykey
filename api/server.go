@@ -82,7 +82,7 @@ func Serve(startconfig Config) {
 
 	// Create standard logger from logrus for http.Server internal ErrorLog
 	lw := logger.WithField("ctx", "api").WriterLevel(logrus.ErrorLevel)
-	defer lw.Close()
+	defer lw.Close() // nolint:errcheck
 
 	srv := &http.Server{
 		Addr:         config.Addr,
@@ -112,8 +112,8 @@ func Router(logger *logrus.Logger) *chi.Mux {
 	)
 
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "<title>Signmykey</title>")
-		fmt.Fprintf(w, "Welcome to <a href=https://signmykey.io/>Signmykey</a> service !")
+		fmt.Fprintf(w, "<title>Signmykey</title>")                                         // nolint:errcheck
+		fmt.Fprintf(w, "Welcome to <a href=https://signmykey.io/>Signmykey</a> service !") // nolint:errcheck
 	})
 
 	router.Route("/v1", func(r chi.Router) {

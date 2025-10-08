@@ -71,7 +71,10 @@ users:
 		}
 
 		local := &Principals{}
-		local.Init(testConfig)
+		err = local.Init(testConfig)
+		if err != nil {
+			t.Error(err)
+		}
 
 		_, principals, err := local.Get(context.Background(), c.payload)
 		if c.expErr {
