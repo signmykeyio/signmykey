@@ -23,14 +23,6 @@ type Principals struct {
 	TransformCase        string
 }
 
-type oidcUserinfo struct {
-	Oidcgroups []string `json:"oidcgroups"`
-}
-
-type oidcUserinfoTest struct {
-	Oidcgroups map[string]interface{} `json:"-"`
-}
-
 // Init method is used to ingest config of Principals
 func (p *Principals) Init(config *viper.Viper) error {
 	neededEntries := []string{
@@ -47,7 +39,7 @@ func (p *Principals) Init(config *viper.Viper) error {
 	}
 	if len(missingEntriesLst) > 0 {
 		missingEntries := strings.Join(missingEntriesLst, ", ")
-		return fmt.Errorf("Missing config entries (%s) for Principals", missingEntries)
+		return fmt.Errorf("missing config entries (%s) for Principals", missingEntries)
 	}
 
 	config.SetDefault("transformCase", "none")
@@ -87,7 +79,7 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 		return ctx, []string{}, err
 	}
 
-	defer resInfo.Body.Close()
+	defer resInfo.Body.Close() // nolint:errcheck
 
 	bodyInfo, err := io.ReadAll(resInfo.Body)
 	if err != nil {

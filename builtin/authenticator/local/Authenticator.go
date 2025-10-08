@@ -29,7 +29,7 @@ type localLogin struct {
 func (a *Authenticator) Init(config *viper.Viper) error {
 
 	if !config.IsSet("users") {
-		return errors.New("Missing config entry \"users\" for Authenticator")
+		return errors.New("missing config entry \"users\" for Authenticator")
 	}
 
 	a.UserMap = config.Sub("users")

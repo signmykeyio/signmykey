@@ -52,7 +52,7 @@ func (a *Authenticator) Init(config *viper.Viper) error {
 	}
 	if len(missingEntriesLst) > 0 {
 		missingEntries := strings.Join(missingEntriesLst, ", ")
-		return fmt.Errorf("Missing config entries (%s) for Authenticator", missingEntries)
+		return fmt.Errorf("missing config entries (%s) for Authenticator", missingEntries)
 	}
 
 	a.Address = config.GetString("ldapAddr")
@@ -80,17 +80,15 @@ func (a *Authenticator) Login(ctx context.Context, payload []byte) (resultCtx co
 	l := &ldap.Conn{}
 	l.SetTimeout(time.Second * 10)
 
-	uri := fmt.Sprintf("%s:%d", a.Address, a.Port)
-
 	if a.UseTLS {
-		l, err = ldap.DialTLS("tcp", uri, &tls.Config{InsecureSkipVerify: !a.TLSVerify}) // nolint: gosec
+		l, err = ldap.DialURL(fmt.Sprintf("ldaps://%s:%d", a.Address, a.Port), ldap.DialWithTLSConfig(&tls.Config{InsecureSkipVerify: !a.TLSVerify}))
 	} else {
-		l, err = ldap.Dial("tcp", uri)
+		l, err = ldap.DialURL(fmt.Sprintf("ldap://%s:%d", a.Address, a.Port))
 	}
 	if err != nil {
 		return ctx, false, "", err
 	}
-	defer l.Close()
+	defer l.Close() // nolint:errcheck
 
 	err = l.Bind(a.BindUser, a.BindPassword)
 	if err != nil {

@@ -25,7 +25,7 @@ type localPrincipals struct {
 // Init method is used to ingest config of Principals
 func (p *Principals) Init(config *viper.Viper) error {
 	if !config.IsSet("users") {
-		return errors.New("Missing config entry \"users\" for Principals")
+		return errors.New("missing config entry \"users\" for Principals")
 	}
 
 	p.UserMap = config.Sub("users")

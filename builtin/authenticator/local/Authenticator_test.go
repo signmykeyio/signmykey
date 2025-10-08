@@ -24,7 +24,10 @@ users:
 	}
 
 	local := &Authenticator{}
-	local.Init(testConfig)
+	err = local.Init(testConfig)
+	if err != nil {
+		t.Error(err)
+	}
 
 	cases := []struct {
 		payload []byte
@@ -69,7 +72,10 @@ users:
 	}
 
 	local := &Authenticator{}
-	local.Init(testConfig)
+	err = local.Init(testConfig)
+	if err != nil {
+		panic(err)
+	}
 
 	f.Fuzz(func(t *testing.T, user, password string) {
 
@@ -96,7 +102,10 @@ users:
 	}
 
 	local := &Authenticator{}
-	local.Init(testConfig)
+	err = local.Init(testConfig)
+	if err != nil {
+		panic(err)
+	}
 
 	f.Fuzz(func(t *testing.T, user, password, otp string) {
 

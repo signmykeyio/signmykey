@@ -62,7 +62,7 @@ func (p *Principals) Init(config *viper.Viper) error {
 	}
 	if len(missingEntriesLst) > 0 {
 		missingEntries := strings.Join(missingEntriesLst, ", ")
-		return fmt.Errorf("Missing config entries (%s) for Principals", missingEntries)
+		return fmt.Errorf("missing config entries (%s) for Principals", missingEntries)
 	}
 
 	config.SetDefault("transformCase", "none")
@@ -101,7 +101,7 @@ func (p Principals) Get(ctx context.Context, payload []byte) (context.Context, [
 	if err != nil {
 		return ctx, []string{}, err
 	}
-	defer l.Close()
+	defer l.Close() // nolint:errcheck
 
 	userSearchReq := ldap.NewSearchRequest(
 		p.UserSearchBase, ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
@@ -179,12 +179,10 @@ func getLDAPConn(p Principals) (l *ldap.Conn, err error) {
 	l = &ldap.Conn{}
 	l.SetTimeout(time.Second * 10)
 
-	uri := fmt.Sprintf("%s:%d", p.Address, p.Port)
-
 	if p.UseTLS {
-		l, err = ldap.DialTLS("tcp", uri, &tls.Config{InsecureSkipVerify: !p.TLSVerify}) // nolint: gosec
+		l, err = ldap.DialURL(fmt.Sprintf("ldaps://%s:%d", p.Address, p.Port), ldap.DialWithTLSConfig(&tls.Config{InsecureSkipVerify: !p.TLSVerify}))
 	} else {
-		l, err = ldap.Dial("tcp", uri)
+		l, err = ldap.DialURL(fmt.Sprintf("ldap://%s:%d", p.Address, p.Port))
 	}
 	if err != nil {
 		return l, err

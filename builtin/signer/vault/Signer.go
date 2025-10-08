@@ -46,7 +46,7 @@ func (v *Signer) Init(config *viper.Viper) error {
 
 	for _, entry := range neededEntries {
 		if !config.IsSet(entry) {
-			return fmt.Errorf("Config entry %s missing for Signer", entry)
+			return fmt.Errorf("config entry %s missing for Signer", entry)
 		}
 	}
 
@@ -187,11 +187,11 @@ func extractSignedKey(resp *http.Response) (string, error) {
 	}
 	val, ok := signResp["data"].(map[string]interface{})
 	if !ok {
-		return "", fmt.Errorf("Signed key not found in Vault response")
+		return "", fmt.Errorf("signed key not found in Vault response")
 	}
 	signedKey, ok := val["signed_key"].(string)
 	if !ok {
-		return "", fmt.Errorf("Signed key not found in Vault response")
+		return "", fmt.Errorf("signed key not found in Vault response")
 	}
 
 	return signedKey, nil
@@ -223,7 +223,7 @@ func (v Signer) getToken(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("invalid role_id or secret_id")
 	}
 	if resp.StatusCode == 500 {
-		return "", fmt.Errorf("Vault internal server error")
+		return "", fmt.Errorf("vault internal server error")
 	}
 	if resp.StatusCode != 200 {
 		return "", fmt.Errorf("unknown error during authentication with status code %d", resp.StatusCode)

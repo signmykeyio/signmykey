@@ -177,22 +177,12 @@ func chooseSSHKeyType(key string) (string, bool) {
 
 // CertKeyTypeIsDeprecated returns true if certificate key type is deprecated by openssh
 func CertKeyTypeIsDeprecated(s string) bool {
-	switch {
-	case s == ssh.CertAlgoDSAv01: //nolint:staticcheck
-		return true
-	default:
-		return false
-	}
+	return s == ssh.CertAlgoDSAv01 //nolint:staticcheck
 }
 
 // CertKeyTypeIsBuggy returns true if certificate key type is buggy with
 // some versions of openssh client/server combination, see discussion for
 // more details : https://github.com/signmykeyio/signmykey/pull/138
 func CertKeyTypeIsBuggy(s string) bool {
-	switch {
-	case s == ssh.KeyAlgoRSA:
-		return true
-	default:
-		return false
-	}
+	return s == ssh.KeyAlgoRSA
 }
