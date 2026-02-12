@@ -4,13 +4,13 @@ title: Signmykey
 
 ## Installation
 
-On Ubuntu 16.04+, add signmykey repository and key:
+On Ubuntu 20.04+, add signmykey repository and key:
 ```
 echo "deb https://apt.signmykey.io/ stable main" > /etc/apt/sources.list.d/signmykey.list
 curl https://gpg.signmykey.io/signmykey.pub | apt-key add -
-``` 
+```
 
-Then 
+Then
 
 ```sh
 useradd --no-create-home -s /bin/false signmykey
@@ -184,3 +184,37 @@ Look at Principals in the output:
         Extensions: 
                 permit-pty
 ```
+
+## Additionnal infos
+
+### Deprecated algorithm
+
+In recent OS (Ubuntu 22.04), not yet on Redhat family (9) you can no longer ssh to servers with that OS because the RSA algorithm is deprecated.
+Therefor you have two choices :
+
+#### Update signmykey and regenerate key
+Download the new version of signmykey that support every ssh keygen algorithm (>= 0.7.0)
+```
+smkVersion='0.7.0'
+wget https://github.com/signmykeyio/signmykey/releases/download/v$smkVersion/signmykey_linux_amd64 -O /tmp/signmykey
+chmod +x /tmp/signmykey
+smkPath=`which signmykey | sed 's|\(.*\)/.*|\1|'`
+mv /tmp/signmykey $smkPath
+signmykey version
+```
+
+Generate a new sshkey with a supported algorithm
+```
+ssh-keygen -t ed25519
+```
+
+Sign you key
+```
+signmykey -u johndoe
+```
+
+#### Authorize deprecated algorithm
+
+Check sshserver page
+[sshserver](/docs/content/getting-started/sshserver/index.md)
+
