@@ -105,7 +105,7 @@ func Router(logger *logrus.Logger) *chi.Mux {
 	router := chi.NewRouter()
 	router.Use(
 		middleware.RequestID,
-		middleware.RealIP,
+		middleware.ClientIPFromRemoteAddr,
 		Logger(logger),
 		middleware.Recoverer,
 		middleware.Timeout(15*time.Second),
