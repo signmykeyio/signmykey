@@ -36,12 +36,16 @@ func Logger(logger *logrus.Logger) func(next http.Handler) http.Handler {
 			}
 
 			reqID := middleware.GetReqID(r.Context())
+			clientIP := middleware.GetClientIP(r.Context())
+			if clientIP == "" {
+				clientIP = r.RemoteAddr
+			}
 
 			reqLogger := logger.WithFields(logrus.Fields{
 				"ctx":    "http",
 				"host":   r.Host,
 				"path":   r.URL.Path,
-				"ip":     r.RemoteAddr,
+				"ip":     clientIP,
 				"proto":  r.Proto,
 				"method": r.Method,
 				"req_id": reqID,
@@ -58,7 +62,7 @@ func Logger(logger *logrus.Logger) func(next http.Handler) http.Handler {
 					"ctx":      "http",
 					"host":     r.Host,
 					"path":     r.URL.Path,
-					"ip":       r.RemoteAddr,
+					"ip":       clientIP,
 					"proto":    r.Proto,
 					"method":   r.Method,
 					"duration": time.Since(t1).String(),
